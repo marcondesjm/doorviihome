@@ -14,9 +14,10 @@ interface JitsiCallProps {
   displayName: string;
   propertyName: string;
   onCallEnd: (duration: number) => void;
+  onJoined?: () => void;
 }
 
-export const JitsiCall = ({ roomName, displayName, propertyName, onCallEnd }: JitsiCallProps) => {
+export const JitsiCall = ({ roomName, displayName, propertyName, onCallEnd, onJoined }: JitsiCallProps) => {
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<any>(null);
   const startTimeRef = useRef<number>(Date.now());
@@ -124,6 +125,8 @@ export const JitsiCall = ({ roomName, displayName, propertyName, onCallEnd }: Ji
         clearTimeout(connectionTimeout);
         setIsLoading(false);
         startTimeRef.current = Date.now();
+        // Notify parent that owner has joined the Jitsi room
+        onJoined?.();
       });
 
       apiRef.current.addListener('videoConferenceLeft', () => {
