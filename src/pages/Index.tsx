@@ -82,6 +82,48 @@ const Index = () => {
     formatDuration,
   } = useCallSimulation();
 
+  // Notify when visitor joins the call
+  useEffect(() => {
+    if (visitorJoinedCall) {
+      // Play notification sound
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+        
+        // Second beep
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.frequency.value = 1100;
+          osc2.type = 'sine';
+          gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc2.start(ctx.currentTime);
+          osc2.stop(ctx.currentTime + 0.3);
+        }, 150);
+      } catch (e) {
+        console.log('Audio not supported');
+      }
+
+      toast({
+        title: "🔔 Visitante entrou na chamada!",
+        description: "Aprove o visitante no Google Meet agora",
+        duration: 10000,
+      });
+    }
+  }, [visitorJoinedCall, toast]);
+
   const proceedWithAnswer = async () => {
     answerCall();
     
