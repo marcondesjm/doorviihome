@@ -23,6 +23,8 @@ import { useActivities, useAddActivity } from "@/hooks/useActivities";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
 import { useCallSimulation } from "@/hooks/useCallSimulation";
 import { useVideoCalls } from "@/hooks/useVideoCalls";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 import property1 from "@/assets/property-1.jpg";
 import property2 from "@/assets/property-2.jpg";
@@ -36,12 +38,20 @@ const Index = () => {
   const [showGoogleMeet, setShowGoogleMeet] = useState(false);
   const [showVideoCallQR, setShowVideoCallQR] = useState(false);
   const [meetLink, setMeetLink] = useState<string | null>(null);
+  const [isCreatingMeet, setIsCreatingMeet] = useState(false);
 
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading } = useActivities();
   const { data: accessCodes } = useAccessCodes();
   const addActivity = useAddActivity();
   const generateCode = useGenerateAccessCode();
+  
+  const { accessToken, isAuthenticated, checkExistingToken } = useGoogleAuth();
+  
+  // Check for existing Google token on mount
+  useEffect(() => {
+    checkExistingToken();
+  }, [checkExistingToken]);
 
   const {
     activeCall,
@@ -77,7 +87,41 @@ const Index = () => {
       return;
     }
     
-    // Show QR code for visitor to scan
+    // If we have Google auth, create the Meet link FIRST before showing QR
+    if (accessToken) {
+      setIsCreatingMeet(true);
+      toast({
+        title: "Criando Google Meet...",
+        description: "Aguarde enquanto preparamos a chamada",
+      });
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('create-google-meet', {
+          body: { accessToken, propertyName: callState.propertyName || 'Propriedade' },
+        });
+
+        if (error) throw error;
+
+        if (data.meetLink) {
+          setMeetLink(data.meetLink);
+          toast({
+            title: "Google Meet criado!",
+            description: "QR Code pronto para o visitante",
+          });
+        }
+      } catch (error) {
+        console.error('Error creating Google Meet:', error);
+        toast({
+          title: "Erro ao criar Meet",
+          description: "O QR code será gerado sem o link do Meet",
+          variant: "destructive",
+        });
+      } finally {
+        setIsCreatingMeet(false);
+      }
+    }
+    
+    // Show QR code for visitor to scan (now with meetLink if available)
     setShowVideoCallQR(true);
     
     if (callState.propertyId && properties) {
@@ -100,6 +144,13 @@ const Index = () => {
   };
 
   const handleStartGoogleMeet = async () => {
+    // If we already have a meet link, just open it
+    if (meetLink) {
+      window.open(meetLink, '_blank');
+      ownerJoinCall();
+      return;
+    }
+    
     setShowVideoCallQR(false);
     setShowGoogleMeet(true);
     
