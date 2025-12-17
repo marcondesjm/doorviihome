@@ -60,10 +60,16 @@ const VisitorCall = () => {
     return () => clearInterval(timer);
   }, [isConnected]);
 
-  // Auto-connect when owner joins
+  // Auto-connect when owner joins (with delay to ensure owner is fully in room as moderator)
   useEffect(() => {
     if (ownerJoined && !hasJoined && !isLoading && window.JitsiMeetExternalAPI) {
-      joinCall();
+      // Wait 3 seconds to ensure owner is fully connected as moderator
+      const timer = setTimeout(() => {
+        if (!hasJoined) {
+          joinCall();
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [ownerJoined, hasJoined, isLoading]);
 
