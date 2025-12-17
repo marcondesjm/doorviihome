@@ -41,7 +41,7 @@ const Index = () => {
   const [meetLink, setMeetLink] = useState<string | null>(null);
   const [isCreatingMeet, setIsCreatingMeet] = useState(false);
   const [waitingForApproval, setWaitingForApproval] = useState(false);
-
+  const [doorbellRinging, setDoorbellRinging] = useState(false);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -123,6 +123,79 @@ const Index = () => {
       });
     }
   }, [visitorJoinedCall, toast]);
+
+  // Listen for doorbell rings
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('doorbell-rings')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'video_calls',
+          filter: `owner_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new.status === 'doorbell_ringing') {
+            setDoorbellRinging(true);
+            
+            // Play doorbell alarm sound
+            try {
+              const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+              
+              // Play a series of doorbell-like tones
+              const playDingDong = () => {
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.frequency.value = 659; // E5 - ding
+                osc1.type = 'sine';
+                gain1.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc1.start(ctx.currentTime);
+                osc1.stop(ctx.currentTime + 0.5);
+
+                setTimeout(() => {
+                  const osc2 = ctx.createOscillator();
+                  const gain2 = ctx.createGain();
+                  osc2.connect(gain2);
+                  gain2.connect(ctx.destination);
+                  osc2.frequency.value = 523; // C5 - dong
+                  osc2.type = 'sine';
+                  gain2.gain.setValueAtTime(0.5, ctx.currentTime);
+                  gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.7);
+                  osc2.start(ctx.currentTime);
+                  osc2.stop(ctx.currentTime + 0.7);
+                }, 300);
+              };
+
+              playDingDong();
+              setTimeout(playDingDong, 1000);
+            } catch (e) {
+              console.log('Audio not supported');
+            }
+
+            toast({
+              title: "🔔 Campainha tocando!",
+              description: `Visitante na porta - ${payload.new.property_name}`,
+              duration: 10000,
+            });
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => setDoorbellRinging(false), 5000);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, toast]);
 
   const proceedWithAnswer = async () => {
     answerCall();
@@ -620,6 +693,31 @@ const Index = () => {
         onDismiss={handleApprovalConfirmed}
         propertyName={callState.propertyName || "Sua Propriedade"}
       />
+
+      {/* Doorbell Ringing Alert */}
+      <AnimatePresence>
+        {doorbellRinging && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
+          >
+            <div className="bg-amber-500 text-white px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3">
+              <Bell className="w-6 h-6 animate-bounce" />
+              <span className="font-semibold">Campainha tocando!</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-amber-600"
+                onClick={() => setDoorbellRinging(false)}
+              >
+                OK
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
