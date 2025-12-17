@@ -1,0 +1,77 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
+
+export interface Property {
+  id: string;
+  user_id: string;
+  name: string;
+  address: string;
+  image_url: string | null;
+  is_online: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useProperties() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['properties', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Property[];
+    },
+    enabled: !!user
+  });
+}
+
+export function useAddProperty() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (property: { name: string; address: string; image_url?: string }) => {
+      const { data, error } = await supabase
+        .from('properties')
+        .insert({
+          user_id: user!.id,
+          name: property.name,
+          address: property.address,
+          image_url: property.image_url || null,
+          is_online: false
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+    }
+  });
+}
+
+export function useDeleteProperty() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (propertyId: string) => {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+    }
+  });
+}
