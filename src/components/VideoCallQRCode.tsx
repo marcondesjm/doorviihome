@@ -10,6 +10,7 @@ interface VideoCallQRCodeProps {
   onClose: () => void;
   onStartCall?: () => void;
   visitorJoined?: boolean;
+  meetLink?: string | null;
 }
 
 export const VideoCallQRCode = ({
@@ -18,11 +19,12 @@ export const VideoCallQRCode = ({
   onClose,
   onStartCall,
   visitorJoined = false,
+  meetLink,
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
 
-  // Generate the full URL for the visitor call page
-  const callUrl = `${window.location.origin}/call/${encodeURIComponent(roomName)}?property=${encodeURIComponent(propertyName)}`;
+  // Use Google Meet link if available, otherwise generate visitor call URL
+  const callUrl = meetLink || `${window.location.origin}/call/${encodeURIComponent(roomName)}?property=${encodeURIComponent(propertyName)}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(callUrl);

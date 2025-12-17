@@ -10,7 +10,7 @@ import { ActivityItem } from "@/components/ActivityItem";
 import { StatsCard } from "@/components/StatsCard";
 import { QRCodeAccess } from "@/components/QRCodeAccess";
 import { IncomingCall } from "@/components/IncomingCall";
-import { JitsiCall } from "@/components/JitsiCall";
+import GoogleMeetCall from "@/components/GoogleMeetCall";
 import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
 import { Button } from "@/components/ui/button";
@@ -33,8 +33,9 @@ const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showQRCode, setShowQRCode] = useState(false);
-  const [showJitsiCall, setShowJitsiCall] = useState(false);
+  const [showGoogleMeet, setShowGoogleMeet] = useState(false);
   const [showVideoCallQR, setShowVideoCallQR] = useState(false);
+  const [meetLink, setMeetLink] = useState<string | null>(null);
 
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading } = useActivities();
@@ -98,23 +99,26 @@ const Index = () => {
     });
   };
 
-  const handleStartJitsiCall = async () => {
+  const handleStartGoogleMeet = async () => {
     setShowVideoCallQR(false);
-    setShowJitsiCall(true);
-    
-    // Note: ownerJoinCall is now called via onJoined callback
-    // when Jitsi confirms the owner is actually in the room
+    setShowGoogleMeet(true);
     
     toast({
-      title: "Iniciando videochamada",
-      description: "Conectando ao visitante...",
+      title: "Iniciando Google Meet",
+      description: "Criando reunião...",
     });
+  };
+
+  const handleMeetLinkCreated = (link: string) => {
+    setMeetLink(link);
+    ownerJoinCall();
   };
 
   const handleDecline = async () => {
     const duration = endCall();
-    setShowJitsiCall(false);
+    setShowGoogleMeet(false);
     setShowVideoCallQR(false);
+    setMeetLink(null);
     await endVideoCall();
     
     if (callState.isActive && callState.propertyId && properties) {
@@ -138,9 +142,11 @@ const Index = () => {
     });
   };
 
-  const handleJitsiCallEnd = (duration: number) => {
-    setShowJitsiCall(false);
+  const handleMeetCallEnd = () => {
+    setShowGoogleMeet(false);
+    setMeetLink(null);
     endCall();
+    endVideoCall();
     
     if (callState.propertyId && properties) {
       const property = properties.find(p => p.id === callState.propertyId);
@@ -148,16 +154,15 @@ const Index = () => {
         addActivity.mutate({
           property_id: property.id,
           type: 'answered',
-          title: 'Videochamada encerrada',
+          title: 'Google Meet encerrado',
           property_name: property.name,
-          duration: formatDuration(duration)
         });
       }
     }
     
     toast({
-      title: "Videochamada encerrada",
-      description: `Duração: ${formatDuration(duration)}`,
+      title: "Chamada encerrada",
+      description: "O Google Meet foi finalizado.",
     });
   };
 
@@ -429,7 +434,7 @@ const Index = () => {
 
       {/* Incoming Call Modal - Only when ringing */}
       <AnimatePresence>
-        {callState.isRinging && !showJitsiCall && !showVideoCallQR && (
+        {callState.isRinging && !showGoogleMeet && !showVideoCallQR && (
           <IncomingCall
             callerName={callState.callerName}
             propertyName={callState.propertyName || "Sua Propriedade"}
@@ -453,22 +458,28 @@ const Index = () => {
               endCall();
               endVideoCall();
             }}
-            onStartCall={handleStartJitsiCall}
+            onStartCall={handleStartGoogleMeet}
             visitorJoined={visitorJoinedCall}
+            meetLink={meetLink}
           />
         )}
       </AnimatePresence>
 
-      {/* Jitsi Video Call - When call is active */}
+      {/* Google Meet Call - When call is active */}
       <AnimatePresence>
-        {showJitsiCall && activeCall && (
-          <JitsiCall
-            roomName={activeCall.room_name}
-            displayName={user?.email?.split('@')[0] || 'Morador'}
-            propertyName={callState.propertyName || "Sua Propriedade"}
-            onCallEnd={handleJitsiCallEnd}
-            onJoined={ownerJoinCall}
-          />
+        {showGoogleMeet && activeCall && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <GoogleMeetCall
+              propertyName={callState.propertyName || "Sua Propriedade"}
+              onEnd={handleMeetCallEnd}
+              onMeetLinkCreated={handleMeetLinkCreated}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
