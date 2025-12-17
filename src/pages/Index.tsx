@@ -102,8 +102,8 @@ const Index = () => {
     setShowVideoCallQR(false);
     setShowJitsiCall(true);
     
-    // Mark owner as joined
-    await ownerJoinCall();
+    // Note: ownerJoinCall is now called via onJoined callback
+    // when Jitsi confirms the owner is actually in the room
     
     toast({
       title: "Iniciando videochamada",
@@ -467,6 +467,7 @@ const Index = () => {
             displayName={user?.email?.split('@')[0] || 'Morador'}
             propertyName={callState.propertyName || "Sua Propriedade"}
             onCallEnd={handleJitsiCallEnd}
+            onJoined={ownerJoinCall}
           />
         )}
       </AnimatePresence>
