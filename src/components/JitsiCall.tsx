@@ -30,7 +30,7 @@ export const JitsiCall = ({ roomName, displayName, propertyName, onCallEnd, onJo
   // Load Jitsi script
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://8x8.vc/external_api.js';
+    script.src = 'https://meet.jit.si/external_api.js';
     script.async = true;
     script.onload = () => initJitsi();
     document.body.appendChild(script);
@@ -58,7 +58,7 @@ export const JitsiCall = ({ roomName, displayName, propertyName, onCallEnd, onJo
       return;
     }
 
-    const domain = '8x8.vc';
+    const domain = 'meet.jit.si';
     const jitsiRoomName = `DoorV_${roomName.replace(/[^a-zA-Z0-9_]/g, '_')}`;
     console.log('Owner joining Jitsi room:', jitsiRoomName);
     
