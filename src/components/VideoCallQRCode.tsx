@@ -23,8 +23,9 @@ export const VideoCallQRCode = ({
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
 
-  // Use Google Meet link if available, otherwise generate visitor call URL
-  const callUrl = meetLink || `${window.location.origin}/call/${encodeURIComponent(roomName)}?property=${encodeURIComponent(propertyName)}`;
+  // Always use our app URL, but include meet link as parameter if available
+  const baseUrl = `${window.location.origin}/call/${encodeURIComponent(roomName)}?property=${encodeURIComponent(propertyName)}`;
+  const callUrl = meetLink ? `${baseUrl}&meet=${encodeURIComponent(meetLink)}` : baseUrl;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(callUrl);
