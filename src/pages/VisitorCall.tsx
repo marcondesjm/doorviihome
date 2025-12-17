@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Video, ExternalLink, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
@@ -12,6 +13,36 @@ const VisitorCall = () => {
   const meetLink = searchParams.get('meet');
   
   const [copied, setCopied] = useState(false);
+  const [notified, setNotified] = useState(false);
+
+  // Notify owner when visitor scans QR code (page loads)
+  useEffect(() => {
+    if (!roomName || !meetLink || notified) return;
+
+    const notifyOwner = async () => {
+      try {
+        // Update the call to indicate visitor has scanned the QR code
+        const { error } = await supabase
+          .from('video_calls')
+          .update({
+            visitor_joined: true,
+            status: 'pending',
+          })
+          .eq('room_name', roomName);
+
+        if (error) {
+          console.log('Could not notify owner:', error);
+        } else {
+          console.log('Owner notified - visitor scanned QR code');
+          setNotified(true);
+        }
+      } catch (err) {
+        console.error('Error notifying owner:', err);
+      }
+    };
+
+    notifyOwner();
+  }, [roomName, meetLink, notified]);
 
   const handleJoinCall = () => {
     if (meetLink) {
