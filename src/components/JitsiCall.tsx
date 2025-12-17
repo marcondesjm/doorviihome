@@ -82,6 +82,12 @@ export const JitsiCall = ({ roomName, displayName, propertyName, onCallEnd }: Ji
         hideConferenceTimer: true,
         disableProfile: true,
         disableRemoteMute: true,
+        // Disable lobby mode
+        lobbyModeEnabled: false,
+        enableLobbyChat: false,
+        membersOnly: false,
+        requireDisplayName: false,
+        disableLobbyPassword: true,
         remoteVideoMenu: {
           disableKick: true,
           disableGrantModerator: true,

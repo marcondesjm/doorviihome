@@ -60,6 +60,13 @@ const VisitorCall = () => {
     return () => clearInterval(timer);
   }, [isConnected]);
 
+  // Auto-connect when owner joins
+  useEffect(() => {
+    if (ownerJoined && !hasJoined && !isLoading && window.JitsiMeetExternalAPI) {
+      joinCall();
+    }
+  }, [ownerJoined, hasJoined, isLoading]);
+
   const joinCall = async () => {
     if (!jitsiContainerRef.current || !roomName) {
       console.error('Missing container or room name');
@@ -104,6 +111,12 @@ const VisitorCall = () => {
         hideConferenceTimer: true,
         disableProfile: true,
         disableRemoteMute: true,
+        // Disable lobby mode
+        lobbyModeEnabled: false,
+        enableLobbyChat: false,
+        membersOnly: false,
+        requireDisplayName: false,
+        disableLobbyPassword: true,
         remoteVideoMenu: {
           disableKick: true,
           disableGrantModerator: true,
@@ -265,13 +278,17 @@ const VisitorCall = () => {
             )}
             
             <p className="text-sm text-muted-foreground mb-8">
-              {ownerJoined ? 'O morador está na chamada. Entre agora!' : 'O morador será notificado quando você entrar'}
+              {ownerJoined 
+                ? 'Conectando automaticamente...' 
+                : 'Aguardando o morador entrar na chamada...'}
             </p>
 
-            {isLoading || callLoading ? (
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>Carregando...</span>
+            {isLoading || callLoading || !ownerJoined ? (
+              <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm">
+                  {ownerJoined ? 'Conectando...' : 'Aguardando morador...'}
+                </span>
               </div>
             ) : (
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -288,7 +305,9 @@ const VisitorCall = () => {
             )}
 
             <p className="text-xs text-muted-foreground mt-6">
-              Permita o acesso à câmera e microfone quando solicitado
+              {ownerJoined 
+                ? 'Permita o acesso à câmera e microfone quando solicitado'
+                : 'Você entrará automaticamente quando o morador estiver online'}
             </p>
           </div>
         </motion.div>
