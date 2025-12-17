@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +14,7 @@ const VisitorCall = () => {
   
   const [copied, setCopied] = useState(false);
   const [notified, setNotified] = useState(false);
+  const [ringingDoorbell, setRingingDoorbell] = useState(false);
 
   // Notify owner when visitor scans QR code (page loads)
   useEffect(() => {
@@ -68,6 +69,32 @@ const VisitorCall = () => {
     }
   };
 
+  const handleRingDoorbell = async () => {
+    if (!roomName || ringingDoorbell) return;
+    
+    setRingingDoorbell(true);
+    
+    try {
+      const { error } = await supabase
+        .from('video_calls')
+        .update({
+          status: 'doorbell_ringing',
+        })
+        .eq('room_name', roomName);
+
+      if (error) {
+        console.error('Error ringing doorbell:', error);
+        toast.error('Erro ao tocar campainha');
+        setRingingDoorbell(false);
+      } else {
+        toast.success('Campainha tocando! Aguarde o morador atender...');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error('Erro ao tocar campainha');
+      setRingingDoorbell(false);
+    }
+  };
 
   // If there's a meet link, show the Google Meet page
   if (meetLink) {
@@ -117,6 +144,18 @@ const VisitorCall = () => {
                 </Button>
               </motion.div>
 
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
+                  onClick={handleRingDoorbell}
+                  disabled={ringingDoorbell}
+                >
+                  <Bell className={`w-5 h-5 ${ringingDoorbell ? 'animate-bounce' : ''}`} />
+                  {ringingDoorbell ? 'Campainha tocando...' : 'Tocar Campainha'}
+                </Button>
+              </motion.div>
 
               <Button
                 variant="outline"

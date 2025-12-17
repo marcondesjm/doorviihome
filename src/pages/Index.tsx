@@ -42,6 +42,8 @@ const Index = () => {
   const [isCreatingMeet, setIsCreatingMeet] = useState(false);
   const [waitingForApproval, setWaitingForApproval] = useState(false);
   const [doorbellRinging, setDoorbellRinging] = useState(false);
+  const [doorbellInterval, setDoorbellInterval] = useState<NodeJS.Timeout | null>(null);
+  const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -124,6 +126,47 @@ const Index = () => {
     }
   }, [visitorJoinedCall, toast]);
 
+  // Play doorbell sound function
+  const playDoorbellSound = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.frequency.value = 659; // E5 - ding
+      osc1.type = 'sine';
+      gain1.gain.setValueAtTime(0.5, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.5);
+
+      setTimeout(() => {
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.frequency.value = 523; // C5 - dong
+        osc2.type = 'sine';
+        gain2.gain.setValueAtTime(0.5, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.7);
+        osc2.start(ctx.currentTime);
+        osc2.stop(ctx.currentTime + 0.7);
+      }, 300);
+    } catch (e) {
+      console.log('Audio not supported');
+    }
+  };
+
+  // Clear doorbell interval when stopped
+  useEffect(() => {
+    if (!doorbellRinging && doorbellInterval) {
+      clearInterval(doorbellInterval);
+      setDoorbellInterval(null);
+    }
+  }, [doorbellRinging, doorbellInterval]);
+
   // Listen for doorbell rings
   useEffect(() => {
     if (!user) return;
@@ -141,52 +184,22 @@ const Index = () => {
         (payload) => {
           if (payload.new.status === 'doorbell_ringing') {
             setDoorbellRinging(true);
+            setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
             
-            // Play doorbell alarm sound
-            try {
-              const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-              
-              // Play a series of doorbell-like tones
-              const playDingDong = () => {
-                const osc1 = ctx.createOscillator();
-                const gain1 = ctx.createGain();
-                osc1.connect(gain1);
-                gain1.connect(ctx.destination);
-                osc1.frequency.value = 659; // E5 - ding
-                osc1.type = 'sine';
-                gain1.gain.setValueAtTime(0.5, ctx.currentTime);
-                gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-                osc1.start(ctx.currentTime);
-                osc1.stop(ctx.currentTime + 0.5);
-
-                setTimeout(() => {
-                  const osc2 = ctx.createOscillator();
-                  const gain2 = ctx.createGain();
-                  osc2.connect(gain2);
-                  gain2.connect(ctx.destination);
-                  osc2.frequency.value = 523; // C5 - dong
-                  osc2.type = 'sine';
-                  gain2.gain.setValueAtTime(0.5, ctx.currentTime);
-                  gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.7);
-                  osc2.start(ctx.currentTime);
-                  osc2.stop(ctx.currentTime + 0.7);
-                }, 300);
-              };
-
-              playDingDong();
-              setTimeout(playDingDong, 1000);
-            } catch (e) {
-              console.log('Audio not supported');
-            }
+            // Play sound immediately
+            playDoorbellSound();
+            
+            // Keep playing sound every 2 seconds until dismissed
+            const interval = setInterval(() => {
+              playDoorbellSound();
+            }, 2000);
+            setDoorbellInterval(interval);
 
             toast({
               title: "🔔 Campainha tocando!",
               description: `Visitante na porta - ${payload.new.property_name}`,
               duration: 10000,
             });
-
-            // Auto dismiss after 5 seconds
-            setTimeout(() => setDoorbellRinging(false), 5000);
           }
         }
       )
@@ -705,14 +718,17 @@ const Index = () => {
           >
             <div className="bg-amber-500 text-white px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3">
               <Bell className="w-6 h-6 animate-bounce" />
-              <span className="font-semibold">Campainha tocando!</span>
+              <div className="flex flex-col">
+                <span className="font-semibold">Campainha tocando!</span>
+                <span className="text-sm text-white/80">{doorbellPropertyName}</span>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-amber-600"
+                className="text-white hover:bg-amber-600 ml-2"
                 onClick={() => setDoorbellRinging(false)}
               >
-                OK
+                Atender
               </Button>
             </div>
           </motion.div>
