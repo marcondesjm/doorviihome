@@ -1,13 +1,34 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
 export const useGoogleAuth = () => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+
+  // Fetch Google Client ID from edge function
+  useEffect(() => {
+    const fetchClientId = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-google-client-id');
+        if (error) {
+          console.error('Error fetching Google Client ID:', error);
+          return;
+        }
+        if (data?.clientId) {
+          console.log('Google Client ID loaded successfully');
+          setGoogleClientId(data.clientId);
+        }
+      } catch (error) {
+        console.error('Error fetching Google Client ID:', error);
+      }
+    };
+    fetchClientId();
+  }, []);
 
   const initGoogleAuth = useCallback(() => {
     return new Promise<void>((resolve, reject) => {
@@ -36,11 +57,11 @@ export const useGoogleAuth = () => {
 
   const signIn = useCallback(async () => {
     console.log('Starting Google sign in...');
-    console.log('Google Client ID:', GOOGLE_CLIENT_ID ? 'Set (length: ' + GOOGLE_CLIENT_ID.length + ')' : 'NOT SET');
+    console.log('Google Client ID:', googleClientId ? 'Set (length: ' + googleClientId.length + ')' : 'NOT SET');
     
-    if (!GOOGLE_CLIENT_ID) {
-      toast.error('Google Client ID não configurado');
-      console.error('VITE_GOOGLE_CLIENT_ID is not set');
+    if (!googleClientId) {
+      toast.error('Google Client ID não configurado. Aguarde o carregamento.');
+      console.error('Google Client ID is not loaded yet');
       return;
     }
     
@@ -56,7 +77,7 @@ export const useGoogleAuth = () => {
       }
 
       const tokenClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
+        client_id: googleClientId,
         scope: SCOPES,
         callback: (response: any) => {
           console.log('OAuth callback received:', response.error ? 'Error' : 'Success');
@@ -89,7 +110,7 @@ export const useGoogleAuth = () => {
       toast.error('Erro ao inicializar autenticação Google');
       setIsLoading(false);
     }
-  }, [initGoogleAuth]);
+  }, [initGoogleAuth, googleClientId]);
 
   const signOut = useCallback(() => {
     setAccessToken(null);
