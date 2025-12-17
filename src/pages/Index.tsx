@@ -13,6 +13,7 @@ import { IncomingCall } from "@/components/IncomingCall";
 import GoogleMeetCall from "@/components/GoogleMeetCall";
 import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
+import { ApprovalReminderAlert } from "@/components/ApprovalReminderAlert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,7 @@ const Index = () => {
   const [showVideoCallQR, setShowVideoCallQR] = useState(false);
   const [meetLink, setMeetLink] = useState<string | null>(null);
   const [isCreatingMeet, setIsCreatingMeet] = useState(false);
+  const [waitingForApproval, setWaitingForApproval] = useState(false);
 
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading } = useActivities();
@@ -173,6 +175,7 @@ const Index = () => {
     if (meetLink) {
       window.open(meetLink, '_blank');
       ownerJoinCall();
+      setWaitingForApproval(true); // Start the approval reminder
       return;
     }
     
@@ -182,6 +185,14 @@ const Index = () => {
     toast({
       title: "Iniciando Google Meet",
       description: "Criando reunião...",
+    });
+  };
+
+  const handleApprovalConfirmed = () => {
+    setWaitingForApproval(false);
+    toast({
+      title: "Ótimo!",
+      description: "Visitante aprovado com sucesso",
     });
   };
 
@@ -195,6 +206,7 @@ const Index = () => {
     setShowGoogleMeet(false);
     setShowVideoCallQR(false);
     setMeetLink(null);
+    setWaitingForApproval(false);
     await endVideoCall();
     
     if (callState.isActive && callState.propertyId && properties) {
@@ -221,6 +233,7 @@ const Index = () => {
   const handleMeetCallEnd = () => {
     setShowGoogleMeet(false);
     setMeetLink(null);
+    setWaitingForApproval(false);
     endCall();
     endVideoCall();
     
@@ -558,6 +571,13 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Approval Reminder Alert - Shows after owner joins Meet */}
+      <ApprovalReminderAlert
+        isVisible={waitingForApproval}
+        onDismiss={handleApprovalConfirmed}
+        propertyName={callState.propertyName || "Sua Propriedade"}
+      />
     </div>
   );
 };
