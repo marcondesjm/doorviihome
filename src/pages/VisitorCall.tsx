@@ -15,8 +15,10 @@ const VisitorCall = () => {
 
   const handleJoinCall = () => {
     if (meetLink) {
-      console.log('Opening Google Meet link:', meetLink);
-      window.open(decodeURIComponent(meetLink), '_blank');
+      const decodedLink = decodeURIComponent(meetLink);
+      console.log('Redirecting to Google Meet:', decodedLink);
+      // Use location.href instead of window.open to avoid popup blockers on mobile
+      window.location.href = decodedLink;
     } else {
       toast.error('Link da reunião não disponível');
     }
