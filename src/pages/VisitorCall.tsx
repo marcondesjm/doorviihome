@@ -126,36 +126,60 @@ const VisitorCall = () => {
 
             <h1 className="text-2xl font-bold mb-2">Chamada de vídeo</h1>
             <p className="text-primary font-medium mb-4">{decodeURIComponent(propertyName)}</p>
-            
-            <p className="text-sm text-muted-foreground mb-6">
-              Clique para entrar na reunião do Google Meet
-            </p>
+
+            {/* Instrução destacada */}
+            <div className="bg-amber-500/20 border border-amber-500/50 rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Bell className="w-5 h-5 text-amber-500" />
+                <span className="font-semibold text-amber-500">Primeiro passo</span>
+              </div>
+              <p className="text-sm text-foreground">
+                Toque a campainha para avisar o morador que você chegou!
+              </p>
+            </div>
 
             <div className="space-y-3">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              {/* Botão de campainha em destaque */}
+              <motion.div 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }}
+                animate={!ringingDoorbell ? { scale: [1, 1.03, 1] } : {}}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
                 <Button
-                  variant="call"
                   size="lg"
-                  className="w-full"
-                  onClick={handleJoinCall}
-                >
-                  <ExternalLink className="w-5 h-5" />
-                  Entrar na chamada
-                </Button>
-              </motion.div>
-
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-lg py-6"
                   onClick={handleRingDoorbell}
                   disabled={ringingDoorbell}
                 >
-                  <Bell className={`w-5 h-5 ${ringingDoorbell ? 'animate-bounce' : ''}`} />
-                  {ringingDoorbell ? 'Campainha tocando...' : 'Tocar Campainha'}
+                  <Bell className={`w-6 h-6 ${ringingDoorbell ? 'animate-bounce' : ''}`} />
+                  {ringingDoorbell ? '🔔 Campainha tocando...' : '🔔 Tocar Campainha'}
                 </Button>
               </motion.div>
+
+              {ringingDoorbell && (
+                <p className="text-sm text-amber-500 font-medium">
+                  ✓ Aguarde o morador atender...
+                </p>
+              )}
+
+              <div className="border-t border-border my-4 pt-4">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Após o morador atender, entre na chamada:
+                </p>
+                
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="call"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleJoinCall}
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    Entrar na chamada
+                  </Button>
+                </motion.div>
+              </div>
 
               <Button
                 variant="outline"
