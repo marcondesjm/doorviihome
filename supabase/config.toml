@@ -1,7 +1,7 @@
 project_id = "waehzhneropydndrxxdi"
 
 [functions.create-google-meet]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-google-client-id]
-verify_jwt = false
+verify_jwt = true
