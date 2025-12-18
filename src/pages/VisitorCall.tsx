@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +15,65 @@ const VisitorCall = () => {
   const [copied, setCopied] = useState(false);
   const [notified, setNotified] = useState(false);
   const [ringingDoorbell, setRingingDoorbell] = useState(false);
+  const [ownerJoined, setOwnerJoined] = useState(false);
+
+  // Subscribe to real-time updates for owner join status
+  useEffect(() => {
+    if (!roomName) return;
+
+    console.log('Setting up real-time subscription for visitor call:', roomName);
+
+    // Fetch initial call status
+    const fetchCallStatus = async () => {
+      const { data, error } = await supabase
+        .from('video_calls')
+        .select('owner_joined, status')
+        .eq('room_name', roomName)
+        .maybeSingle();
+
+      if (!error && data) {
+        console.log('Initial call status:', data);
+        setOwnerJoined(data.owner_joined || false);
+        if (data.status === 'doorbell_ringing') {
+          setRingingDoorbell(true);
+        }
+      }
+    };
+
+    fetchCallStatus();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel(`visitor_realtime_${roomName}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'video_calls',
+          filter: `room_name=eq.${roomName}`,
+        },
+        (payload) => {
+          console.log('Call updated (visitor):', payload.new);
+          const updatedCall = payload.new as any;
+          
+          if (updatedCall.owner_joined && !ownerJoined) {
+            setOwnerJoined(true);
+            toast.success('Morador atendeu! Você já pode entrar na chamada.');
+          }
+          
+          if (updatedCall.status === 'ended') {
+            toast.info('A chamada foi encerrada.');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Removing visitor real-time subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [roomName, ownerJoined]);
 
   // Notify owner when visitor scans QR code (page loads)
   useEffect(() => {
@@ -22,7 +81,6 @@ const VisitorCall = () => {
 
     const notifyOwner = async () => {
       try {
-        // Update the call to indicate visitor has scanned the QR code
         const { error } = await supabase
           .from('video_calls')
           .update({
@@ -49,7 +107,6 @@ const VisitorCall = () => {
     if (meetLink) {
       const decodedLink = decodeURIComponent(meetLink);
       console.log('Redirecting to Google Meet:', decodedLink);
-      // Use location.href instead of window.open to avoid popup blockers on mobile
       window.location.href = decodedLink;
     } else {
       toast.error('Link da reunião não disponível');
@@ -157,22 +214,43 @@ const VisitorCall = () => {
                 </Button>
               </motion.div>
 
-              {ringingDoorbell && (
+              {ringingDoorbell && !ownerJoined && (
                 <p className="text-sm text-amber-500 font-medium">
                   ✓ Aguarde o morador atender...
                 </p>
               )}
 
+              {ownerJoined && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-green-500/20 border border-green-500/50 rounded-xl p-4"
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="font-semibold text-green-500">Morador atendeu!</span>
+                  </div>
+                  <p className="text-sm text-foreground">
+                    Agora você pode entrar na chamada abaixo.
+                  </p>
+                </motion.div>
+              )}
+
               <div className="border-t border-border my-4 pt-4">
                 <p className="text-xs text-muted-foreground mb-3">
-                  Após o morador atender, entre na chamada:
+                  {ownerJoined ? 'O morador está aguardando você:' : 'Após o morador atender, entre na chamada:'}
                 </p>
                 
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <motion.div 
+                  whileHover={{ scale: 1.02 }} 
+                  whileTap={{ scale: 0.98 }}
+                  animate={ownerJoined ? { scale: [1, 1.03, 1] } : {}}
+                  transition={ownerJoined ? { duration: 1.5, repeat: Infinity } : {}}
+                >
                   <Button
                     variant="call"
                     size="lg"
-                    className="w-full"
+                    className={`w-full ${ownerJoined ? 'animate-pulse' : ''}`}
                     onClick={handleJoinCall}
                   >
                     <ExternalLink className="w-5 h-5" />
