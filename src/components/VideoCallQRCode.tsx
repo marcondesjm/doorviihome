@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
-import { Copy, Share2, Video, X, Phone, Users, CheckCircle2 } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, Users, CheckCircle2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,6 +11,7 @@ interface VideoCallQRCodeProps {
   onStartCall?: () => void;
   visitorJoined?: boolean;
   meetLink?: string | null;
+  doorbellRinging?: boolean;
 }
 
 export const VideoCallQRCode = ({
@@ -20,6 +21,7 @@ export const VideoCallQRCode = ({
   onStartCall,
   visitorJoined = false,
   meetLink,
+  doorbellRinging = false,
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
 
@@ -137,6 +139,29 @@ export const VideoCallQRCode = ({
             </>
           )}
         </div>
+
+        {/* Alerta de campainha tocando */}
+        <AnimatePresence>
+          {doorbellRinging && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              className="bg-amber-500 text-amber-950 rounded-xl p-4 mb-4 flex items-center gap-3"
+            >
+              <motion.div
+                animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+              >
+                <Bell className="w-6 h-6" />
+              </motion.div>
+              <div className="flex-1 text-left">
+                <p className="font-bold">🔔 Campainha tocando!</p>
+                <p className="text-sm opacity-90">Visitante aguardando na porta</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
