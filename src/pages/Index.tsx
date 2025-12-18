@@ -631,20 +631,57 @@ const Index = () => {
             <p className="text-muted-foreground mb-4">
               Experimente a interface de chamada
             </p>
-            <Button
-              variant="accent"
-              size="lg"
-              onClick={() => {
-                if (properties && properties.length > 0) {
-                  handleViewLive(properties[0].id, properties[0].name);
-                } else {
-                  startIncomingCall(null, "Propriedade Demo", "Visitante");
-                }
-              }}
-            >
-              <Bell className="w-5 h-5" />
-              Simular Chamada
-            </Button>
+            <div className="flex flex-row gap-3 justify-center items-center flex-wrap">
+              <Button
+                variant="accent"
+                size="lg"
+                onClick={() => {
+                  if (properties && properties.length > 0) {
+                    handleViewLive(properties[0].id, properties[0].name);
+                  } else {
+                    startIncomingCall(null, "Propriedade Demo", "Visitante");
+                  }
+                }}
+              >
+                <Bell className="w-5 h-5" />
+                Simular Chamada
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={async () => {
+                  const demoRoomName = 'demo-' + Date.now();
+                  const propertyName = properties?.[0]?.name || 'Propriedade Demo';
+                  const demoMeetLink = 'https://meet.google.com/demo-test';
+                  
+                  const { error } = await supabase
+                    .from('video_calls')
+                    .insert({
+                      room_name: demoRoomName,
+                      property_name: propertyName,
+                      owner_id: user?.id,
+                      status: 'pending',
+                    });
+                  
+                  if (error) {
+                    toast({ title: "Erro ao criar chamada de teste", variant: "destructive" });
+                    return;
+                  }
+                  
+                  const url = `/call/${demoRoomName}?property=${encodeURIComponent(propertyName)}&meet=${encodeURIComponent(demoMeetLink)}`;
+                  window.open(url, '_blank');
+                  
+                  toast({
+                    title: "Teste iniciado",
+                    description: "Clique em 'Tocar Campainha' na nova aba para testar",
+                  });
+                }}
+              >
+                <Phone className="w-5 h-5" />
+                Testar Campainha Visitante
+              </Button>
+            </div>
           </motion.section>
         </motion.div>
       </main>
@@ -678,6 +715,7 @@ const Index = () => {
             onStartCall={handleStartGoogleMeet}
             visitorJoined={visitorJoinedCall}
             meetLink={meetLink}
+            doorbellRinging={doorbellRinging}
           />
         )}
       </AnimatePresence>
