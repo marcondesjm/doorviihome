@@ -231,6 +231,7 @@ export const VideoCallQRCode = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-xl p-4 overflow-y-auto"
+      onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -238,6 +239,7 @@ export const VideoCallQRCode = ({
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="glass rounded-3xl p-4 sm:p-6 text-center max-w-md w-full relative my-4"
         style={{ boxShadow: "var(--shadow-card)" }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <Button
