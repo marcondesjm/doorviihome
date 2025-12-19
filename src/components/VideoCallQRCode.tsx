@@ -69,12 +69,12 @@ export const VideoCallQRCode = ({
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
-      // Fixed proportional dimensions
-      const canvasWidth = 450;
+      // Fixed proportional dimensions - wider for text
+      const canvasWidth = 520;
       const qrSize = 220;
-      const padding = 40;
+      const padding = 30;
       const headerHeight = 130;
-      const warningHeight = 70;
+      const warningHeight = 80;
       const deliveryHeight = defaultDeliveryIcons.length > 0 ? 110 : 0;
       const footerHeight = 40;
       
@@ -118,12 +118,12 @@ export const VideoCallQRCode = ({
         ctx.strokeRect(padding, warningY, boxWidth, warningHeight - 10);
         
         ctx.fillStyle = '#92400e';
-        ctx.font = 'bold 11px system-ui';
-        ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 22);
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText('Por favor, nao bata ou soe a campainha fisica.', canvas.width / 2, warningY + 20);
         ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 38);
         ctx.fillStyle = '#b45309';
-        ctx.font = '11px system-ui';
-        ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 54);
+        ctx.font = '12px system-ui';
+        ctx.fillText('Escaneie o QR Code Usando a Camera ou um App', canvas.width / 2, warningY + 56);
         
         // Delivery icons section
         if (defaultDeliveryIcons.length > 0) {
