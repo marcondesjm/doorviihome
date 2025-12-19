@@ -58,6 +58,24 @@ export function useAddProperty() {
   });
 }
 
+export function useUpdateProperty() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ propertyId, data }: { propertyId: string; data: { name?: string; image_url?: string } }) => {
+      const { error } = await supabase
+        .from('properties')
+        .update(data)
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+    }
+  });
+}
+
 export function useDeleteProperty() {
   const queryClient = useQueryClient();
 
