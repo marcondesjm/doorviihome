@@ -14,7 +14,8 @@ import {
   HelpCircle, 
   Instagram, 
   CreditCard, 
-  Trash2 
+  Trash2,
+  UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { AddPropertyDialog } from "./AddPropertyDialog";
+import { JoinAsMemberDialog } from "./JoinAsMemberDialog";
+import { InviteMemberDialog } from "./InviteMemberDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +50,8 @@ export const Header = () => {
   const navigate = useNavigate();
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showJoinMember, setShowJoinMember] = useState(false);
+  const [showInviteMember, setShowInviteMember] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSignOut = async () => {
@@ -143,10 +148,7 @@ export const Header = () => {
   };
 
   const handleJoinAsMember = () => {
-    toast({
-      title: "Juntar-se como Membro",
-      description: "Funcionalidade em desenvolvimento. Em breve!",
-    });
+    setShowJoinMember(true);
   };
 
   return (
@@ -219,6 +221,10 @@ export const Header = () => {
                   <Users className="w-4 h-4 mr-3" />
                   Juntar-se como Membro
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowInviteMember(true)}>
+                  <UserPlus className="w-4 h-4 mr-3" />
+                  Convidar Membro
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-3" />
@@ -290,6 +296,16 @@ export const Header = () => {
         open={showAddProperty} 
         onOpenChange={setShowAddProperty}
         showTrigger={false}
+      />
+
+      <JoinAsMemberDialog 
+        open={showJoinMember} 
+        onOpenChange={setShowJoinMember} 
+      />
+
+      <InviteMemberDialog 
+        open={showInviteMember} 
+        onOpenChange={setShowInviteMember} 
       />
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
