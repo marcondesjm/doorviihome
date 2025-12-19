@@ -181,10 +181,18 @@ const Index = () => {
           table: 'video_calls',
           filter: `owner_id=eq.${user.id}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.new.status === 'doorbell_ringing') {
             setDoorbellRinging(true);
             setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
+            
+            // Update property status to online when doorbell rings
+            if (payload.new.property_id) {
+              await supabase
+                .from('properties')
+                .update({ is_online: true })
+                .eq('id', payload.new.property_id);
+            }
             
             // Play sound immediately
             playDoorbellSound();
