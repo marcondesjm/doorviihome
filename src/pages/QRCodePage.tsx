@@ -16,7 +16,8 @@ import {
   Package,
   Plus,
   X,
-  Trash2
+  Trash2,
+  Upload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -109,6 +110,27 @@ const QRCodePage = () => {
   const [newIconName, setNewIconName] = useState("");
   const [newIconUrl, setNewIconUrl] = useState("");
   const [showAddIcon, setShowAddIcon] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione uma imagem (PNG, JPG, etc)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewIconUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddDeliveryIcon = () => {
     if (!newIconName.trim() || !newIconUrl.trim()) {
@@ -795,41 +817,66 @@ const QRCodePage = () => {
                         placeholder="Ex: Jadlog"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="iconUrl">URL da imagem (logo)</Label>
-                      <Input
-                        id="iconUrl"
-                        value={newIconUrl}
-                        onChange={(e) => setNewIconUrl(e.target.value)}
-                        placeholder="https://exemplo.com/logo.png"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Cole o link de uma imagem PNG ou JPG
-                      </p>
+                      <div className="space-y-2">
+                        <Label htmlFor="iconUrl">URL da imagem (logo)</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="iconUrl"
+                            value={newIconUrl}
+                            onChange={(e) => setNewIconUrl(e.target.value)}
+                            placeholder="https://exemplo.com/logo.png"
+                            className="flex-1"
+                          />
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileUpload}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => fileInputRef.current?.click()}
+                            title="Anexar arquivo"
+                          >
+                            <Upload className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Cole o link ou anexe uma imagem PNG/JPG
+                        </p>
+                        {newIconUrl && newIconUrl.startsWith('data:') && (
+                          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                            <img src={newIconUrl} alt="Preview" className="h-8 w-auto object-contain" />
+                            <span className="text-xs text-muted-foreground">Imagem anexada</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={handleAddDeliveryIcon} 
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <Check className="w-4 h-4" />
+                          Adicionar
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setShowAddIcon(false);
+                            setNewIconName("");
+                            setNewIconUrl("");
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                          Cancelar
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={handleAddDeliveryIcon} 
-                        className="flex-1"
-                        size="sm"
-                      >
-                        <Check className="w-4 h-4" />
-                        Adicionar
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          setShowAddIcon(false);
-                          setNewIconName("");
-                          setNewIconUrl("");
-                        }}
-                      >
-                        <X className="w-4 h-4" />
-                        Cancelar
-                      </Button>
-                    </div>
-                  </div>
                 ) : (
                   <Button 
                     variant="outline" 
