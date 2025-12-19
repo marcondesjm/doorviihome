@@ -510,16 +510,20 @@ const QRCodePage = () => {
                   
                   {/* Delivery Icons */}
                   {deliveryIcons.length > 0 && (
-                    <div className="mt-4 p-4 rounded-lg bg-muted/50">
-                      <p className="text-sm text-muted-foreground mb-3">📦 Entregas:</p>
-                      <div className="flex items-center justify-center gap-6 flex-wrap">
+                    <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 shadow-lg">
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <Package className="w-5 h-5 text-blue-600" />
+                        <p className="text-base font-semibold text-blue-800">Entregas:</p>
+                      </div>
+                      <div className="flex items-center justify-center gap-8 flex-wrap">
                         {deliveryIcons.map((icon) => (
-                          <img 
-                            key={icon.id}
-                            src={icon.url} 
-                            alt={icon.name} 
-                            className="h-12 w-auto object-contain" 
-                          />
+                          <div key={icon.id} className="bg-white rounded-xl p-3 shadow-md border border-slate-200 hover:shadow-lg transition-shadow">
+                            <img 
+                              src={icon.url} 
+                              alt={icon.name} 
+                              className="h-14 w-auto object-contain" 
+                            />
+                          </div>
                         ))}
                       </div>
                     </div>
