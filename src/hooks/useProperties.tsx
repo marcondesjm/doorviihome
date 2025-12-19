@@ -82,6 +82,39 @@ export function useDeleteProperty() {
   return useMutation({
     mutationFn: async (propertyId: string) => {
       console.log('Deleting property:', propertyId);
+      
+      // First, delete related records to avoid foreign key constraint errors
+      // Delete access_codes
+      const { error: accessCodesError } = await supabase
+        .from('access_codes')
+        .delete()
+        .eq('property_id', propertyId);
+      
+      if (accessCodesError) {
+        console.error('Error deleting access_codes:', accessCodesError);
+      }
+
+      // Delete activity_logs
+      const { error: activityLogsError } = await supabase
+        .from('activity_logs')
+        .delete()
+        .eq('property_id', propertyId);
+      
+      if (activityLogsError) {
+        console.error('Error deleting activity_logs:', activityLogsError);
+      }
+
+      // Delete video_calls
+      const { error: videoCallsError } = await supabase
+        .from('video_calls')
+        .delete()
+        .eq('property_id', propertyId);
+      
+      if (videoCallsError) {
+        console.error('Error deleting video_calls:', videoCallsError);
+      }
+
+      // Now delete the property
       const { error } = await supabase
         .from('properties')
         .delete()
@@ -95,6 +128,8 @@ export function useDeleteProperty() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['accessCodes'] });
     },
     onError: (error) => {
       console.error('Delete mutation error:', error);
