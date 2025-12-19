@@ -11,7 +11,9 @@ import {
   QrCode, 
   Users,
   ArrowRight,
-  Home as HomeIcon
+  Home as HomeIcon,
+  Star,
+  Quote
 } from "lucide-react";
 
 const Home = () => {
@@ -48,6 +50,27 @@ const Home = () => {
       icon: Smartphone,
       title: "Mobile First",
       description: "Interface otimizada para uso em qualquer dispositivo"
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Maria Silva",
+      role: "Moradora - São Paulo",
+      content: "O DoorVii Home mudou completamente a forma como gerencio a segurança da minha casa. Agora consigo ver quem está na porta mesmo quando estou no trabalho!",
+      rating: 5
+    },
+    {
+      name: "João Santos",
+      role: "Empresário - Rio de Janeiro",
+      content: "Excelente solução! A videochamada é muito fluida e o sistema de códigos temporários é perfeito para receber entregas quando não estou em casa.",
+      rating: 5
+    },
+    {
+      name: "Ana Oliveira",
+      role: "Síndica - Florianópolis",
+      content: "Implementamos em todo o condomínio. Os moradores adoraram a praticidade e a segurança que o sistema oferece. Recomendo muito!",
+      rating: 5
     }
   ];
 
@@ -228,6 +251,53 @@ const Home = () => {
                   <p className="text-muted-foreground">
                     {feature.description}
                   </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="container mx-auto px-4 py-20 bg-muted/30">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            O que nossos usuários dizem
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Milhares de famílias já confiam no DoorVii Home
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <Card className="h-full hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6 flex flex-col h-full">
+                  <Quote className="w-8 h-8 text-primary/30 mb-4" />
+                  <p className="text-muted-foreground flex-grow mb-4">
+                    {testimonial.content}
+                  </p>
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                    ))}
+                  </div>
+                  <div className="border-t pt-4">
+                    <p className="font-semibold text-foreground">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
