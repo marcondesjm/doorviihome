@@ -69,78 +69,96 @@ export const VideoCallQRCode = ({
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
-      const padding = 60;
-      const qrSize = customization.size;
-      const deliveryHeight = defaultDeliveryIcons.length > 0 ? 120 : 0;
-      canvas.width = Math.max(qrSize + padding * 2, 400);
-      canvas.height = qrSize + 280 + deliveryHeight;
+      // Fixed proportional dimensions
+      const canvasWidth = 450;
+      const qrSize = 220;
+      const padding = 40;
+      const headerHeight = 130;
+      const warningHeight = 70;
+      const deliveryHeight = defaultDeliveryIcons.length > 0 ? 110 : 0;
+      const footerHeight = 40;
+      
+      canvas.width = canvasWidth;
+      canvas.height = headerHeight + qrSize + 30 + warningHeight + deliveryHeight + footerHeight;
       
       img.onload = async () => {
         if (!ctx) return;
         
+        // Background
         ctx.fillStyle = customization.bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.font = '48px system-ui';
+        // Logo emoji
+        ctx.font = '40px system-ui';
         ctx.textAlign = 'center';
-        ctx.fillText(customization.logoText, canvas.width / 2, 55);
+        ctx.fillText(customization.logoText, canvas.width / 2, 50);
         
+        // Title
         ctx.fillStyle = customization.fgColor;
-        ctx.font = 'bold 18px system-ui';
-        ctx.fillText(customization.title, canvas.width / 2, 95);
+        ctx.font = 'bold 16px system-ui';
+        ctx.fillText(customization.title, canvas.width / 2, 85);
         
-        ctx.font = '16px system-ui';
+        // Subtitle
+        ctx.font = '14px system-ui';
         ctx.fillStyle = '#666';
-        ctx.fillText(customization.subtitle, canvas.width / 2, 120);
+        ctx.fillText(customization.subtitle, canvas.width / 2, 110);
         
+        // QR Code centered
         const qrX = (canvas.width - qrSize) / 2;
-        const qrY = 145;
+        const qrY = headerHeight;
         ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
         
+        // Warning box
         const warningY = qrY + qrSize + 20;
         ctx.fillStyle = '#fef3c7';
-        ctx.fillRect(padding / 2, warningY, canvas.width - padding, 55);
+        const boxWidth = canvas.width - padding * 2;
+        ctx.fillRect(padding, warningY, boxWidth, warningHeight - 10);
         ctx.strokeStyle = '#fbbf24';
         ctx.lineWidth = 2;
-        ctx.strokeRect(padding / 2, warningY, canvas.width - padding, 55);
+        ctx.strokeRect(padding, warningY, boxWidth, warningHeight - 10);
         
         ctx.fillStyle = '#92400e';
-        ctx.font = 'bold 12px system-ui';
-        ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 22);
+        ctx.font = 'bold 11px system-ui';
+        ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física.', canvas.width / 2, warningY + 22);
+        ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 38);
         ctx.fillStyle = '#b45309';
-        ctx.font = '12px system-ui';
-        ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 42);
+        ctx.font = '11px system-ui';
+        ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 54);
         
+        // Delivery icons section
         if (defaultDeliveryIcons.length > 0) {
-          const deliveryY = warningY + 75;
+          const deliveryY = warningY + warningHeight + 5;
           
           ctx.fillStyle = '#eff6ff';
-          ctx.fillRect(padding / 2, deliveryY, canvas.width - padding, 90);
+          ctx.fillRect(padding, deliveryY, boxWidth, 90);
           ctx.strokeStyle = '#bfdbfe';
           ctx.lineWidth = 2;
-          ctx.strokeRect(padding / 2, deliveryY, canvas.width - padding, 90);
+          ctx.strokeRect(padding, deliveryY, boxWidth, 90);
           
           ctx.fillStyle = '#1e40af';
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+          ctx.font = 'bold 13px system-ui';
+          ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 22);
           
           const iconPromises = defaultDeliveryIcons.map((icon, index) => {
             return new Promise<void>((resolve) => {
               const iconImg = new Image();
               iconImg.crossOrigin = 'anonymous';
               iconImg.onload = () => {
-                const iconWidth = 50;
-                const iconHeight = 40;
-                const totalWidth = defaultDeliveryIcons.length * (iconWidth + 20) - 20;
+                const iconWidth = 45;
+                const iconHeight = 35;
+                const gap = 15;
+                const totalWidth = defaultDeliveryIcons.length * iconWidth + (defaultDeliveryIcons.length - 1) * gap;
                 const startX = (canvas.width - totalWidth) / 2;
-                const iconX = startX + index * (iconWidth + 20);
+                const iconX = startX + index * (iconWidth + gap);
                 
+                // Icon background
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                ctx.fillRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
                 ctx.strokeStyle = '#e2e8f0';
-                ctx.strokeRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                ctx.lineWidth = 1;
+                ctx.strokeRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
                 
-                ctx.drawImage(iconImg, iconX, deliveryY + 45, iconWidth, iconHeight);
+                ctx.drawImage(iconImg, iconX, deliveryY + 39, iconWidth, iconHeight);
                 resolve();
               };
               iconImg.onerror = () => resolve();
@@ -151,11 +169,13 @@ export const VideoCallQRCode = ({
           await Promise.all(iconPromises);
         }
         
-        const codeY = defaultDeliveryIcons.length > 0 ? warningY + 180 : warningY + 75;
+        // Permanent code text
+        const codeY = canvas.height - 15;
         ctx.fillStyle = '#888';
-        ctx.font = '12px system-ui';
+        ctx.font = '11px system-ui';
         ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
         
+        // Download
         const link = document.createElement('a');
         link.download = `qrcode-${propertyName.replace(/\s+/g, '-').toLowerCase()}.png`;
         link.href = canvas.toDataURL('image/png');
