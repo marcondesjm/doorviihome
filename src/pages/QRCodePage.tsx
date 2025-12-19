@@ -12,7 +12,11 @@ import {
   ArrowLeft,
   RefreshCw,
   Home,
-  Eye
+  Eye,
+  Package,
+  Plus,
+  X,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -59,6 +63,18 @@ const sizePresets = [
   { name: "Extra Grande", value: 350 },
 ];
 
+interface DeliveryIcon {
+  id: string;
+  name: string;
+  url: string;
+}
+
+const defaultDeliveryIcons: DeliveryIcon[] = [
+  { id: "correios", name: "Correios", url: "/correios-logo.png" },
+  { id: "aliexpress", name: "AliExpress", url: "/aliexpress-logo.jpg" },
+  { id: "mercadolivre", name: "Mercado Livre", url: "/mercadolivre-logo.png" },
+];
+
 const QRCodePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -88,6 +104,44 @@ const QRCodePage = () => {
     logoText: "🔔",
     size: 200,
   });
+
+  const [deliveryIcons, setDeliveryIcons] = useState<DeliveryIcon[]>(defaultDeliveryIcons);
+  const [newIconName, setNewIconName] = useState("");
+  const [newIconUrl, setNewIconUrl] = useState("");
+  const [showAddIcon, setShowAddIcon] = useState(false);
+
+  const handleAddDeliveryIcon = () => {
+    if (!newIconName.trim() || !newIconUrl.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        description: "Nome e URL da imagem são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newIcon: DeliveryIcon = {
+      id: `custom-${Date.now()}`,
+      name: newIconName.trim(),
+      url: newIconUrl.trim(),
+    };
+    
+    setDeliveryIcons([...deliveryIcons, newIcon]);
+    setNewIconName("");
+    setNewIconUrl("");
+    setShowAddIcon(false);
+    toast({
+      title: "Ícone adicionado!",
+      description: `${newIcon.name} foi adicionado à lista`,
+    });
+  };
+
+  const handleRemoveDeliveryIcon = (id: string) => {
+    setDeliveryIcons(deliveryIcons.filter(icon => icon.id !== id));
+    toast({
+      title: "Ícone removido",
+    });
+  };
 
   // Update subtitle when property changes
   useEffect(() => {
@@ -321,14 +375,14 @@ const QRCodePage = () => {
             <div class="camera-icon">📱</div>
             <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
           </div>
+          ${deliveryIcons.length > 0 ? `
           <div class="delivery-icons">
             <p class="delivery-label" style="width: 100%; text-align: center; margin-bottom: 12px;">📦 Entregas:</p>
           </div>
-          <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 8px;">
-            <img src="${window.location.origin}/correios-logo.png" alt="Correios" style="height: 35px; width: auto;" />
-            <img src="${window.location.origin}/aliexpress-logo.jpg" alt="AliExpress" style="height: 35px; width: auto;" />
-            <img src="${window.location.origin}/mercadolivre-logo.png" alt="Mercado Livre" style="height: 35px; width: auto;" />
+          <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 8px; flex-wrap: wrap;">
+            ${deliveryIcons.map(icon => `<img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" style="height: 35px; width: auto;" />`).join('')}
           </div>
+          ` : ''}
           <p class="expires">Código permanente</p>
         </div>
         <script>
@@ -433,14 +487,21 @@ const QRCodePage = () => {
                   </div>
                   
                   {/* Delivery Icons */}
-                  <div className="mt-4 p-3 rounded-lg bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-2">📦 Entregas:</p>
-                    <div className="flex items-center justify-center gap-4">
-                      <img src="/correios-logo.png" alt="Correios" className="h-6 w-auto object-contain" />
-                      <img src="/aliexpress-logo.jpg" alt="AliExpress" className="h-6 w-auto object-contain" />
-                      <img src="/mercadolivre-logo.png" alt="Mercado Livre" className="h-6 w-auto object-contain" />
+                  {deliveryIcons.length > 0 && (
+                    <div className="mt-4 p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-2">📦 Entregas:</p>
+                      <div className="flex items-center justify-center gap-4 flex-wrap">
+                        {deliveryIcons.map((icon) => (
+                          <img 
+                            key={icon.id}
+                            src={icon.url} 
+                            alt={icon.name} 
+                            className="h-6 w-auto object-contain" 
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   
                   <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
                     ✓ Código permanente
@@ -673,6 +734,112 @@ const QRCodePage = () => {
                     </div>
                   </TabsContent>
                 </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Delivery Icons Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Ícones de Entregas
+                </CardTitle>
+                <CardDescription>
+                  Adicione logos de transportadoras para exibir no QR Code
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Current Icons */}
+                <div className="space-y-2">
+                  {deliveryIcons.map((icon) => (
+                    <div 
+                      key={icon.id} 
+                      className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 group"
+                    >
+                      <img 
+                        src={icon.url} 
+                        alt={icon.name} 
+                        className="h-8 w-auto object-contain" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect fill="%23ccc" width="32" height="32"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="10">?</text></svg>';
+                        }}
+                      />
+                      <span className="flex-1 text-sm font-medium">{icon.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  {deliveryIcons.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Nenhum ícone adicionado
+                    </p>
+                  )}
+                </div>
+
+                {/* Add New Icon */}
+                {showAddIcon ? (
+                  <div className="space-y-3 p-3 border rounded-lg bg-card">
+                    <div className="space-y-2">
+                      <Label htmlFor="iconName">Nome da transportadora</Label>
+                      <Input
+                        id="iconName"
+                        value={newIconName}
+                        onChange={(e) => setNewIconName(e.target.value)}
+                        placeholder="Ex: Jadlog"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="iconUrl">URL da imagem (logo)</Label>
+                      <Input
+                        id="iconUrl"
+                        value={newIconUrl}
+                        onChange={(e) => setNewIconUrl(e.target.value)}
+                        placeholder="https://exemplo.com/logo.png"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Cole o link de uma imagem PNG ou JPG
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleAddDeliveryIcon} 
+                        className="flex-1"
+                        size="sm"
+                      >
+                        <Check className="w-4 h-4" />
+                        Adicionar
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setShowAddIcon(false);
+                          setNewIconName("");
+                          setNewIconUrl("");
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setShowAddIcon(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Adicionar transportadora
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
