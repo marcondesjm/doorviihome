@@ -549,10 +549,21 @@ const Index = () => {
                         });
                       }}
                       onDelete={(id) => {
-                        deleteProperty.mutate(id);
-                        toast({
-                          title: "Propriedade excluída",
-                          description: "A propriedade foi removida com sucesso.",
+                        deleteProperty.mutate(id, {
+                          onSuccess: () => {
+                            toast({
+                              title: "Propriedade excluída",
+                              description: "A propriedade foi removida com sucesso.",
+                            });
+                          },
+                          onError: (error) => {
+                            console.error('Failed to delete property:', error);
+                            toast({
+                              title: "Erro ao excluir",
+                              description: "Não foi possível excluir a propriedade.",
+                              variant: "destructive",
+                            });
+                          }
                         });
                       }}
                     />
