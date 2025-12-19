@@ -4,4 +4,4 @@ project_id = "waehzhneropydndrxxdi"
 verify_jwt = true
 
 [functions.get-google-client-id]
-verify_jwt = true
+verify_jwt = false
