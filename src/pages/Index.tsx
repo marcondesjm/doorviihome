@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useProperties, useUpdateProperty } from "@/hooks/useProperties";
+import { useProperties, useUpdateProperty, useDeleteProperty } from "@/hooks/useProperties";
 import { useActivities, useAddActivity } from "@/hooks/useActivities";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
 import { useCallSimulation } from "@/hooks/useCallSimulation";
@@ -50,6 +50,7 @@ const Index = () => {
   const addActivity = useAddActivity();
   const generateCode = useGenerateAccessCode();
   const updateProperty = useUpdateProperty();
+  const deleteProperty = useDeleteProperty();
   
   const { accessToken, isAuthenticated, checkExistingToken, signIn: signInGoogle, isLoading: googleAuthLoading } = useGoogleAuth();
   const [pendingAnswer, setPendingAnswer] = useState(false);
@@ -545,6 +546,13 @@ const Index = () => {
                         toast({
                           title: "Propriedade atualizada",
                           description: "As alterações foram salvas com sucesso.",
+                        });
+                      }}
+                      onDelete={(id) => {
+                        deleteProperty.mutate(id);
+                        toast({
+                          title: "Propriedade excluída",
+                          description: "A propriedade foi removida com sucesso.",
                         });
                       }}
                     />
