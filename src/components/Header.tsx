@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import pixLogo from "@/assets/pix-logo.png";
+import doorviiLogo from "@/assets/doorvii-logo.png";
 import { 
   Bell, 
   Settings, 
@@ -172,25 +173,12 @@ export const Header = () => {
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="w-6 h-6 text-primary-foreground"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <rect x="9" y="14" width="6" height="8" rx="1" />
-                <circle cx="12" cy="10" r="2" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold">
-              Door<span className="text-primary">Vii</span> Home
-            </span>
+          <div className="flex items-center gap-2">
+            <img 
+              src={doorviiLogo} 
+              alt="DoorVii Home" 
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Actions */}
