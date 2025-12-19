@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import pixLogo from "@/assets/pix-logo.png";
 import { 
   Bell, 
   Settings, 
@@ -366,7 +367,7 @@ export const Header = () => {
                 
                 <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <Heart className="w-4 h-4 text-primary" />
+                    <img src={pixLogo} alt="PIX" className="w-5 h-5" />
                     <span className="font-medium text-foreground">Apoie o Projeto</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
@@ -374,7 +375,7 @@ export const Header = () => {
                   </p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 px-3 py-2 bg-background rounded border text-sm font-mono">
-                      48 996029392
+                      48996029392
                     </code>
                     <Button size="sm" variant="secondary" onClick={handleCopyPix}>
                       Copiar
