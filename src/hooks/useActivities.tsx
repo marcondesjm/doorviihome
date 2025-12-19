@@ -58,6 +58,49 @@ export function useActivities() {
   });
 }
 
+export function useAllActivities() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Real-time subscription for new activities
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('all-activity-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activity_logs'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['all-activities'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
+
+  return useQuery({
+    queryKey: ['all-activities', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as ActivityLog[];
+    },
+    enabled: !!user
+  });
+}
+
 export function useAddActivity() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -88,6 +131,26 @@ export function useAddActivity() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['all-activities'] });
+    }
+  });
+}
+
+export function useDeleteActivity() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (activityId: string) => {
+      const { error } = await supabase
+        .from('activity_logs')
+        .delete()
+        .eq('id', activityId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['all-activities'] });
     }
   });
 }

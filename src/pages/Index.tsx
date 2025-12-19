@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { Header } from "@/components/Header";
 import { PropertyCard } from "@/components/PropertyCard";
 import { ActivityItem } from "@/components/ActivityItem";
+import { AllActivitiesDialog } from "@/components/AllActivitiesDialog";
 import { StatsCard } from "@/components/StatsCard";
 import { QRCodeAccess } from "@/components/QRCodeAccess";
 import { IncomingCall } from "@/components/IncomingCall";
@@ -585,9 +586,7 @@ const Index = () => {
             <motion.section variants={itemVariants}>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold">Atividade Recente</h2>
-                <Button variant="ghost" size="sm">
-                  Ver tudo
-                </Button>
+                <AllActivitiesDialog />
               </div>
 
               <div className="glass rounded-2xl p-4" style={{ boxShadow: "var(--shadow-card)" }}>
