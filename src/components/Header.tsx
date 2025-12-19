@@ -134,7 +134,7 @@ export const Header = () => {
   };
 
   const handleSocialMedia = () => {
-    window.open('https://instagram.com/doorvihome', '_blank');
+    window.open('https://www.instagram.com/doorviiHome', '_blank');
   };
 
   const handleRestorePayment = () => {
@@ -363,6 +363,15 @@ export const Header = () => {
                   <p className="text-sm text-primary font-medium mt-2">
                     CEO da DoorVI Home
                   </p>
+                  <a 
+                    href="https://www.instagram.com/doorviiHome" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-3 text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Instagram className="w-4 h-4" />
+                    @doorviiHome
+                  </a>
                 </div>
                 
                 <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
