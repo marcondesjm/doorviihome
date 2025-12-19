@@ -15,7 +15,9 @@ import {
   Instagram, 
   CreditCard, 
   Trash2,
-  UserPlus
+  UserPlus,
+  Info,
+  Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +55,7 @@ export const Header = () => {
   const [showJoinMember, setShowJoinMember] = useState(false);
   const [showInviteMember, setShowInviteMember] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showAboutCreator, setShowAboutCreator] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -149,6 +152,14 @@ export const Header = () => {
 
   const handleJoinAsMember = () => {
     setShowJoinMember(true);
+  };
+
+  const handleCopyPix = () => {
+    navigator.clipboard.writeText("48996029392");
+    toast({
+      title: "PIX copiado!",
+      description: "A chave PIX foi copiada para a área de transferência.",
+    });
   };
 
   return (
@@ -251,6 +262,10 @@ export const Header = () => {
                   <Instagram className="w-4 h-4 mr-3" />
                   Siga-nos nas Redes Sociais
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowAboutCreator(true)}>
+                  <Info className="w-4 h-4 mr-3" />
+                  Sobre o Criador
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleRestorePayment}>
                   <CreditCard className="w-4 h-4 mr-3" />
@@ -326,6 +341,51 @@ export const Header = () => {
             >
               {isDeleting ? "Excluindo..." : "Excluir conta"}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showAboutCreator} onOpenChange={setShowAboutCreator}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Info className="w-5 h-5 text-primary" />
+              Sobre o Criador
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4 text-left">
+                <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                  <h4 className="font-semibold text-foreground text-lg">Marcondes Jorge Machado</h4>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Tecnólogo em Análise e Desenvolvimento de Sistemas desde 2017
+                  </p>
+                  <p className="text-sm text-primary font-medium mt-2">
+                    CEO da DoorVI Home
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-foreground">Apoie o Projeto</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Faça uma doação via PIX para ajudar no desenvolvimento:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 px-3 py-2 bg-background rounded border text-sm font-mono">
+                      48 996029392
+                    </code>
+                    <Button size="sm" variant="secondary" onClick={handleCopyPix}>
+                      Copiar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Fechar</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
