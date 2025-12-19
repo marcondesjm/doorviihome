@@ -377,10 +377,10 @@ const QRCodePage = () => {
           </div>
           ${deliveryIcons.length > 0 ? `
           <div class="delivery-icons">
-            <p class="delivery-label" style="width: 100%; text-align: center; margin-bottom: 12px;">📦 Entregas:</p>
+            <p class="delivery-label" style="width: 100%; text-align: center; margin-bottom: 16px; font-size: 16px;">📦 Entregas:</p>
           </div>
-          <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 8px; flex-wrap: wrap;">
-            ${deliveryIcons.map(icon => `<img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" style="height: 35px; width: auto;" />`).join('')}
+          <div style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 12px; flex-wrap: wrap;">
+            ${deliveryIcons.map(icon => `<img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" style="height: 50px; width: auto;" />`).join('')}
           </div>
           ` : ''}
           <p class="expires">Código permanente</p>
@@ -488,15 +488,15 @@ const QRCodePage = () => {
                   
                   {/* Delivery Icons */}
                   {deliveryIcons.length > 0 && (
-                    <div className="mt-4 p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground mb-2">📦 Entregas:</p>
-                      <div className="flex items-center justify-center gap-4 flex-wrap">
+                    <div className="mt-4 p-4 rounded-lg bg-muted/50">
+                      <p className="text-sm text-muted-foreground mb-3">📦 Entregas:</p>
+                      <div className="flex items-center justify-center gap-6 flex-wrap">
                         {deliveryIcons.map((icon) => (
                           <img 
                             key={icon.id}
                             src={icon.url} 
                             alt={icon.name} 
-                            className="h-6 w-auto object-contain" 
+                            className="h-12 w-auto object-contain" 
                           />
                         ))}
                       </div>
