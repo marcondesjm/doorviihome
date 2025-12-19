@@ -1,9 +1,28 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Printer } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
-import { StyledQRCode, defaultCustomization, defaultDeliveryIcons } from "./StyledQRCode";
+import { useRef, useState } from "react";
+import { StyledQRCode, defaultCustomization, defaultDeliveryIcons, QRCustomization } from "./StyledQRCode";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const colorPresets = [
+  { name: 'Clássico', bgColor: '#ffffff', fgColor: '#1a1a2e' },
+  { name: 'Azul', bgColor: '#e0f2fe', fgColor: '#0c4a6e' },
+  { name: 'Verde', bgColor: '#dcfce7', fgColor: '#14532d' },
+  { name: 'Roxo', bgColor: '#f3e8ff', fgColor: '#581c87' },
+  { name: 'Laranja', bgColor: '#ffedd5', fgColor: '#9a3412' },
+  { name: 'Rosa', bgColor: '#fce7f3', fgColor: '#9d174d' },
+];
+
+const emojiOptions = ['🔔', '📦', '🏠', '🚪', '📱', '🔑', '⭐', '🎯'];
 
 interface VideoCallQRCodeProps {
   roomName: string;
@@ -26,16 +45,16 @@ export const VideoCallQRCode = ({
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
   const qrRef = useRef<HTMLDivElement>(null);
+  const [showCustomize, setShowCustomize] = useState(false);
+  const [customization, setCustomization] = useState<QRCustomization>({
+    ...defaultCustomization,
+    title: "ESCANEIE O QR CODE",
+    subtitle: "PARA ENTRAR EM CONTATO",
+  });
 
   // Always use our app URL, but include meet link as parameter if available
   const baseUrl = `${window.location.origin}/call/${encodeURIComponent(roomName)}?property=${encodeURIComponent(propertyName)}`;
   const callUrl = meetLink ? `${baseUrl}&meet=${encodeURIComponent(meetLink)}` : baseUrl;
-
-  const customization = {
-    ...defaultCustomization,
-    title: "ESCANEIE O QR CODE",
-    subtitle: "PARA ENTRAR EM CONTATO",
-  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(callUrl);
@@ -315,6 +334,10 @@ export const VideoCallQRCode = ({
               <Share2 className="w-4 h-4" />
               Compartilhar
             </Button>
+            <Button variant="secondary" size="sm" onClick={() => setShowCustomize(true)}>
+              <Settings2 className="w-4 h-4" />
+              Personalizar
+            </Button>
           </div>
           
           <Button 
@@ -330,6 +353,88 @@ export const VideoCallQRCode = ({
         <p className="text-xs text-muted-foreground mt-3">
           Clique em "Entrar na chamada" para iniciar a videochamada do seu lado
         </p>
+
+        {/* Customization Dialog */}
+        <Dialog open={showCustomize} onOpenChange={setShowCustomize}>
+          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Personalizar QR Code</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {/* Text */}
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>Título</Label>
+                  <Input
+                    value={customization.title}
+                    onChange={(e) => setCustomization({ ...customization, title: e.target.value })}
+                    placeholder="ESCANEIE O QR CODE"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Subtítulo</Label>
+                  <Input
+                    value={customization.subtitle}
+                    onChange={(e) => setCustomization({ ...customization, subtitle: e.target.value })}
+                    placeholder="PARA ENTRAR EM CONTATO"
+                  />
+                </div>
+              </div>
+
+              {/* Emoji */}
+              <div className="space-y-2">
+                <Label>Ícone</Label>
+                <div className="flex flex-wrap gap-2">
+                  {emojiOptions.map((emoji) => (
+                    <button
+                      key={emoji}
+                      onClick={() => setCustomization({ ...customization, logoText: emoji })}
+                      className={`w-10 h-10 text-xl rounded-lg border-2 transition-all ${
+                        customization.logoText === emoji
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div className="space-y-2">
+                <Label>Cores</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {colorPresets.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => setCustomization({ 
+                        ...customization, 
+                        bgColor: preset.bgColor, 
+                        fgColor: preset.fgColor 
+                      })}
+                      className={`p-2 rounded-lg border-2 transition-all ${
+                        customization.bgColor === preset.bgColor && customization.fgColor === preset.fgColor
+                          ? 'border-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      style={{ backgroundColor: preset.bgColor }}
+                    >
+                      <span className="text-xs font-medium" style={{ color: preset.fgColor }}>
+                        {preset.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <Button onClick={() => setShowCustomize(false)} className="w-full">
+                Aplicar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </motion.div>
   );
