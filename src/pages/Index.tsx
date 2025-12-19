@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useProperties } from "@/hooks/useProperties";
+import { useProperties, useUpdateProperty } from "@/hooks/useProperties";
 import { useActivities, useAddActivity } from "@/hooks/useActivities";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
 import { useCallSimulation } from "@/hooks/useCallSimulation";
@@ -49,6 +49,7 @@ const Index = () => {
   const { data: accessCodes } = useAccessCodes();
   const addActivity = useAddActivity();
   const generateCode = useGenerateAccessCode();
+  const updateProperty = useUpdateProperty();
   
   const { accessToken, isAuthenticated, checkExistingToken, signIn: signInGoogle, isLoading: googleAuthLoading } = useGoogleAuth();
   const [pendingAnswer, setPendingAnswer] = useState(false);
@@ -532,12 +533,20 @@ const Index = () => {
                   {properties.map((property, index) => (
                     <PropertyCard
                       key={property.id}
+                      id={property.id}
                       name={property.name}
                       address={property.address}
                       isOnline={property.is_online}
                       lastActivity={`Adicionada ${formatDistanceToNow(new Date(property.created_at), { locale: ptBR, addSuffix: true })}`}
                       imageUrl={property.image_url || defaultImages[index % defaultImages.length]}
                       onViewLive={() => handleViewLive(property.id, property.name)}
+                      onUpdate={(id, data) => {
+                        updateProperty.mutate({ propertyId: id, data });
+                        toast({
+                          title: "Propriedade atualizada",
+                          description: "As alterações foram salvas com sucesso.",
+                        });
+                      }}
                     />
                   ))}
                 </div>
