@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import VisitorCall from "./pages/VisitorCall";
+import QRCodePage from "./pages/QRCodePage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,11 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/call/:roomName" element={<VisitorCall />} />
+            <Route path="/qrcode" element={
+              <ProtectedRoute>
+                <QRCodePage />
+              </ProtectedRoute>
+            } />
             <Route path="/" element={
               <ProtectedRoute>
                 <Index />
