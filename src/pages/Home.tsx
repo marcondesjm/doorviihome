@@ -13,7 +13,10 @@ import {
   ArrowRight,
   Home as HomeIcon,
   Star,
-  Quote
+  Quote,
+  Play,
+  User,
+  Building
 } from "lucide-react";
 
 const Home = () => {
@@ -255,6 +258,99 @@ const Home = () => {
               </Card>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* How to Use Section - Videos */}
+      <section className="container mx-auto px-4 py-20">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Como usar o DoorVii Home
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Aprenda a usar todas as funcionalidades em poucos minutos
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Video for Property Owners */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="overflow-hidden h-full">
+              <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 relative">
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                  title="Tutorial para Proprietários - DoorVii Home"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Building className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground">
+                      Para Proprietários
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Tutorial completo</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  Aprenda a cadastrar propriedades, gerenciar acessos, criar códigos temporários, 
+                  convidar familiares e atender visitantes através de videochamadas.
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Video for Visitors */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="overflow-hidden h-full">
+              <div className="aspect-video bg-gradient-to-br from-secondary/20 to-secondary/5 relative">
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                  title="Tutorial para Visitantes - DoorVii Home"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-secondary/50 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-secondary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground">
+                      Para Visitantes
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Guia rápido</p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  Veja como é fácil usar o QR Code para iniciar uma videochamada com o proprietário 
+                  e solicitar acesso à propriedade de forma simples e segura.
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </section>
 
