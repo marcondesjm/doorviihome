@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2 } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useRef, useState } from "react";
-import { StyledQRCode, defaultCustomization, defaultDeliveryIcons, QRCustomization } from "./StyledQRCode";
+import { StyledQRCode, defaultCustomization, defaultDeliveryIcons, QRCustomization, DeliveryIcon } from "./StyledQRCode";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const colorPresets = [
   { name: 'Clássico', bgColor: '#ffffff', fgColor: '#1a1a2e' },
@@ -45,12 +46,70 @@ export const VideoCallQRCode = ({
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
   const qrRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showCustomize, setShowCustomize] = useState(false);
   const [customization, setCustomization] = useState<QRCustomization>({
     ...defaultCustomization,
     title: "ESCANEIE O QR CODE",
     subtitle: "PARA ENTRAR EM CONTATO",
   });
+  const [deliveryIcons, setDeliveryIcons] = useState<DeliveryIcon[]>(defaultDeliveryIcons);
+  const [newIconName, setNewIconName] = useState("");
+  const [newIconUrl, setNewIconUrl] = useState("");
+  const [showAddIcon, setShowAddIcon] = useState(false);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione uma imagem (PNG, JPG, etc)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewIconUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddDeliveryIcon = () => {
+    if (!newIconName.trim() || !newIconUrl.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        description: "Nome e URL da imagem são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newIcon: DeliveryIcon = {
+      id: `custom-${Date.now()}`,
+      name: newIconName.trim(),
+      url: newIconUrl.trim(),
+    };
+    
+    setDeliveryIcons([...deliveryIcons, newIcon]);
+    setNewIconName("");
+    setNewIconUrl("");
+    setShowAddIcon(false);
+    toast({
+      title: "Ícone adicionado!",
+      description: `${newIcon.name} foi adicionado à lista`,
+    });
+  };
+
+  const handleRemoveDeliveryIcon = (id: string) => {
+    setDeliveryIcons(deliveryIcons.filter(icon => icon.id !== id));
+    toast({
+      title: "Ícone removido",
+    });
+  };
 
   // Always use our app URL, but include meet link as parameter if available
   const baseUrl = `${window.location.origin}/call/${encodeURIComponent(roomName)}?property=${encodeURIComponent(propertyName)}`;
@@ -94,7 +153,7 @@ export const VideoCallQRCode = ({
       const padding = 30;
       const headerHeight = 130;
       const warningHeight = 80;
-      const deliveryHeight = defaultDeliveryIcons.length > 0 ? 110 : 0;
+      const deliveryHeight = deliveryIcons.length > 0 ? 110 : 0;
       const footerHeight = 40;
       
       canvas.width = canvasWidth;
@@ -145,7 +204,7 @@ export const VideoCallQRCode = ({
         ctx.fillText('Escaneie o QR Code Usando a Camera ou um App', canvas.width / 2, warningY + 56);
         
         // Delivery icons section
-        if (defaultDeliveryIcons.length > 0) {
+        if (deliveryIcons.length > 0) {
           const deliveryY = warningY + warningHeight + 5;
           
           ctx.fillStyle = '#eff6ff';
@@ -158,7 +217,7 @@ export const VideoCallQRCode = ({
           ctx.font = 'bold 13px system-ui';
           ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 22);
           
-          const iconPromises = defaultDeliveryIcons.map((icon, index) => {
+          const iconPromises = deliveryIcons.map((icon, index) => {
             return new Promise<void>((resolve) => {
               const iconImg = new Image();
               iconImg.crossOrigin = 'anonymous';
@@ -166,7 +225,7 @@ export const VideoCallQRCode = ({
                 const iconWidth = 45;
                 const iconHeight = 35;
                 const gap = 15;
-                const totalWidth = defaultDeliveryIcons.length * iconWidth + (defaultDeliveryIcons.length - 1) * gap;
+                const totalWidth = deliveryIcons.length * iconWidth + (deliveryIcons.length - 1) * gap;
                 const startX = (canvas.width - totalWidth) / 2;
                 const iconX = startX + index * (iconWidth + gap);
                 
@@ -265,7 +324,7 @@ export const VideoCallQRCode = ({
           <StyledQRCode
             url={callUrl}
             customization={customization}
-            deliveryIcons={defaultDeliveryIcons}
+            deliveryIcons={deliveryIcons}
             showDeliveryIcons={true}
             showWarning={true}
             showPermanentCode={true}
@@ -363,78 +422,209 @@ export const VideoCallQRCode = ({
               <DialogTitle>Personalizar QR Code</DialogTitle>
             </DialogHeader>
             
-            <div className="space-y-4">
-              {/* Text */}
-              <div className="space-y-3">
+            <Tabs defaultValue="appearance" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="appearance">Aparência</TabsTrigger>
+                <TabsTrigger value="delivery">Entregadores</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="appearance" className="space-y-4 mt-4">
+                {/* Text */}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Título</Label>
+                    <Input
+                      value={customization.title}
+                      onChange={(e) => setCustomization({ ...customization, title: e.target.value })}
+                      placeholder="ESCANEIE O QR CODE"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Subtítulo</Label>
+                    <Input
+                      value={customization.subtitle}
+                      onChange={(e) => setCustomization({ ...customization, subtitle: e.target.value })}
+                      placeholder="PARA ENTRAR EM CONTATO"
+                    />
+                  </div>
+                </div>
+
+                {/* Emoji */}
                 <div className="space-y-2">
-                  <Label>Título</Label>
-                  <Input
-                    value={customization.title}
-                    onChange={(e) => setCustomization({ ...customization, title: e.target.value })}
-                    placeholder="ESCANEIE O QR CODE"
-                  />
+                  <Label>Ícone</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {emojiOptions.map((emoji) => (
+                      <button
+                        key={emoji}
+                        onClick={() => setCustomization({ ...customization, logoText: emoji })}
+                        className={`w-10 h-10 text-xl rounded-lg border-2 transition-all ${
+                          customization.logoText === emoji
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Colors */}
                 <div className="space-y-2">
-                  <Label>Subtítulo</Label>
-                  <Input
-                    value={customization.subtitle}
-                    onChange={(e) => setCustomization({ ...customization, subtitle: e.target.value })}
-                    placeholder="PARA ENTRAR EM CONTATO"
-                  />
+                  <Label>Cores</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {colorPresets.map((preset) => (
+                      <button
+                        key={preset.name}
+                        onClick={() => setCustomization({ 
+                          ...customization, 
+                          bgColor: preset.bgColor, 
+                          fgColor: preset.fgColor 
+                        })}
+                        className={`p-2 rounded-lg border-2 transition-all ${
+                          customization.bgColor === preset.bgColor && customization.fgColor === preset.fgColor
+                            ? 'border-primary'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        style={{ backgroundColor: preset.bgColor }}
+                      >
+                        <span className="text-xs font-medium" style={{ color: preset.fgColor }}>
+                          {preset.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </TabsContent>
 
-              {/* Emoji */}
-              <div className="space-y-2">
-                <Label>Ícone</Label>
-                <div className="flex flex-wrap gap-2">
-                  {emojiOptions.map((emoji) => (
-                    <button
-                      key={emoji}
-                      onClick={() => setCustomization({ ...customization, logoText: emoji })}
-                      className={`w-10 h-10 text-xl rounded-lg border-2 transition-all ${
-                        customization.logoText === emoji
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+              <TabsContent value="delivery" className="space-y-4 mt-4">
+                {/* Current Icons */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    Transportadoras cadastradas
+                  </Label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {deliveryIcons.map((icon) => (
+                      <div 
+                        key={icon.id} 
+                        className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 group"
+                      >
+                        <img 
+                          src={icon.url} 
+                          alt={icon.name} 
+                          className="h-6 w-auto object-contain" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect fill="%23ccc" width="24" height="24"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="8">?</text></svg>';
+                          }}
+                        />
+                        <span className="flex-1 text-sm">{icon.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
+                          onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    {deliveryIcons.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Nenhuma transportadora cadastrada
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+                
+                {/* Add Icon Form */}
+                {showAddIcon ? (
+                  <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+                    <div className="space-y-2">
+                      <Label>Nome da transportadora</Label>
+                      <Input
+                        value={newIconName}
+                        onChange={(e) => setNewIconName(e.target.value)}
+                        placeholder="Ex: Jadlog"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Logo</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={newIconUrl}
+                          onChange={(e) => setNewIconUrl(e.target.value)}
+                          placeholder="URL ou selecione arquivo"
+                          className="flex-1"
+                        />
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      {newIconUrl && (
+                        <div className="flex items-center gap-2 p-2 bg-background rounded border">
+                          <img 
+                            src={newIconUrl} 
+                            alt="Preview" 
+                            className="h-8 w-auto object-contain" 
+                          />
+                          <span className="text-xs text-muted-foreground">Preview</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => {
+                          setShowAddIcon(false);
+                          setNewIconName("");
+                          setNewIconUrl("");
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={handleAddDeliveryIcon}
+                      >
+                        Adicionar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => setShowAddIcon(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar transportadora
+                  </Button>
+                )}
+              </TabsContent>
+            </Tabs>
 
-              {/* Colors */}
-              <div className="space-y-2">
-                <Label>Cores</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {colorPresets.map((preset) => (
-                    <button
-                      key={preset.name}
-                      onClick={() => setCustomization({ 
-                        ...customization, 
-                        bgColor: preset.bgColor, 
-                        fgColor: preset.fgColor 
-                      })}
-                      className={`p-2 rounded-lg border-2 transition-all ${
-                        customization.bgColor === preset.bgColor && customization.fgColor === preset.fgColor
-                          ? 'border-primary'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                      style={{ backgroundColor: preset.bgColor }}
-                    >
-                      <span className="text-xs font-medium" style={{ color: preset.fgColor }}>
-                        {preset.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <Button onClick={() => setShowCustomize(false)} className="w-full">
-                Aplicar
-              </Button>
-            </div>
+            <Button onClick={() => setShowCustomize(false)} className="w-full mt-4">
+              Concluir
+            </Button>
           </DialogContent>
         </Dialog>
       </motion.div>
