@@ -226,12 +226,14 @@ const QRCodePage = () => {
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
-      // Create a larger canvas for better quality
+      // Calculate canvas size based on customization.size
       const padding = 60;
-      canvas.width = customization.size + padding * 2;
-      canvas.height = customization.size + padding * 2 + 120;
+      const qrSize = customization.size;
+      const deliveryHeight = deliveryIcons.length > 0 ? 120 : 0;
+      canvas.width = Math.max(qrSize + padding * 2, 400);
+      canvas.height = qrSize + 280 + deliveryHeight;
       
-      img.onload = () => {
+      img.onload = async () => {
         if (!ctx) return;
         
         // Fill background
@@ -239,32 +241,100 @@ const QRCodePage = () => {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Draw logo
-        ctx.font = '40px system-ui';
+        ctx.font = '48px system-ui';
         ctx.textAlign = 'center';
-        ctx.fillText(customization.logoText, canvas.width / 2, 50);
+        ctx.fillText(customization.logoText, canvas.width / 2, 55);
         
         // Draw title
         ctx.fillStyle = customization.fgColor;
-        ctx.font = 'bold 20px system-ui';
-        ctx.fillText(customization.title, canvas.width / 2, 85);
+        ctx.font = 'bold 18px system-ui';
+        const titleLines = customization.title.split(' ');
+        let titleY = 95;
+        if (customization.title.length > 30) {
+          const midPoint = Math.ceil(titleLines.length / 2);
+          const line1 = titleLines.slice(0, midPoint).join(' ');
+          const line2 = titleLines.slice(midPoint).join(' ');
+          ctx.fillText(line1, canvas.width / 2, titleY);
+          ctx.fillText(line2, canvas.width / 2, titleY + 22);
+          titleY += 22;
+        } else {
+          ctx.fillText(customization.title, canvas.width / 2, titleY);
+        }
         
         // Draw subtitle
         ctx.font = '16px system-ui';
         ctx.fillStyle = '#666';
-        ctx.fillText(customization.subtitle, canvas.width / 2, 110);
+        ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 25);
         
-        // Draw QR code
-        ctx.drawImage(img, padding, 130, customization.size, customization.size);
+        // Draw QR code centered
+        const qrX = (canvas.width - qrSize) / 2;
+        const qrY = titleY + 50;
+        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
         
-        // Draw instruction
+        // Draw warning box
+        const warningY = qrY + qrSize + 20;
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(padding / 2, warningY, canvas.width - padding, 55);
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(padding / 2, warningY, canvas.width - padding, 55);
+        
+        ctx.fillStyle = '#92400e';
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 22);
+        ctx.fillStyle = '#b45309';
         ctx.font = '12px system-ui';
+        ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 42);
+        
+        // Draw delivery icons section if exists
+        if (deliveryIcons.length > 0) {
+          const deliveryY = warningY + 75;
+          
+          // Draw delivery section background
+          ctx.fillStyle = '#eff6ff';
+          ctx.fillRect(padding / 2, deliveryY, canvas.width - padding, 90);
+          ctx.strokeStyle = '#bfdbfe';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(padding / 2, deliveryY, canvas.width - padding, 90);
+          
+          ctx.fillStyle = '#1e40af';
+          ctx.font = 'bold 14px system-ui';
+          ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+          
+          // Load and draw delivery icons
+          const iconPromises = deliveryIcons.map((icon, index) => {
+            return new Promise<void>((resolve) => {
+              const iconImg = new Image();
+              iconImg.crossOrigin = 'anonymous';
+              iconImg.onload = () => {
+                const iconWidth = 50;
+                const iconHeight = 40;
+                const totalWidth = deliveryIcons.length * (iconWidth + 20) - 20;
+                const startX = (canvas.width - totalWidth) / 2;
+                const iconX = startX + index * (iconWidth + 20);
+                
+                // Draw white background for icon
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.strokeRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                
+                ctx.drawImage(iconImg, iconX, deliveryY + 45, iconWidth, iconHeight);
+                resolve();
+              };
+              iconImg.onerror = () => resolve();
+              iconImg.src = icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url;
+            });
+          });
+          
+          await Promise.all(iconPromises);
+        }
+        
+        // Draw permanent code text
+        const codeY = deliveryIcons.length > 0 ? warningY + 180 : warningY + 75;
         ctx.fillStyle = '#888';
-        const bottomY = 130 + customization.size + 25;
-            ctx.fillStyle = '#b45309';
-            ctx.font = 'bold 11px system-ui';
-            ctx.fillText('⚠️ Não bata ou soe a campainha física. Use a do App.', canvas.width / 2, bottomY);
-            ctx.font = '12px system-ui';
-            ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, bottomY + 18);
+        ctx.font = '12px system-ui';
+        ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
         
         // Download
         const link = document.createElement('a');
@@ -333,49 +403,66 @@ const QRCodePage = () => {
             box-shadow: 0 4px 30px rgba(0,0,0,0.1);
           }
           .logo { font-size: 64px; margin-bottom: 20px; }
-          h1 { font-size: 32px; margin-bottom: 10px; }
-          .subtitle { font-size: 22px; color: #666; margin-bottom: 30px; }
+          h1 { font-size: 24px; margin-bottom: 10px; line-height: 1.3; }
+          .subtitle { font-size: 20px; color: #666; margin-bottom: 20px; }
           .qr-container { 
             background: ${customization.bgColor}; 
-            padding: 30px; 
-            border-radius: 20px; 
+            padding: 20px; 
+            border-radius: 16px; 
             display: inline-block;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
           }
           .qr-container svg {
             width: ${customization.size}px;
             height: ${customization.size}px;
           }
           .instruction { 
-            font-size: 16px; 
+            font-size: 14px; 
             color: #666; 
-            margin-top: 20px;
+            margin-top: 16px;
             padding: 16px;
-            background: #f5f5f5;
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
             border-radius: 12px;
           }
-          .camera-icon { font-size: 28px; margin-bottom: 10px; }
-          .expires { font-size: 14px; color: #999; margin-top: 16px; }
+          .camera-icon { font-size: 24px; margin-bottom: 8px; }
+          .expires { font-size: 12px; color: #999; margin-top: 16px; }
           .address { font-size: 14px; color: #888; margin-top: 8px; }
-          .delivery-icons {
+          .delivery-section {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(to bottom right, #eff6ff, #f1f5f9);
+            border: 2px solid #bfdbfe;
+            border-radius: 16px;
+          }
+          .delivery-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 16px;
+          }
+          .delivery-icons-grid {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            margin-top: 20px;
-            padding: 16px;
-            background: #f8fafc;
-            border-radius: 12px;
+            gap: 24px;
+            flex-wrap: wrap;
           }
-          .delivery-icons img {
-            height: 40px;
+          .delivery-icon-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+          }
+          .delivery-icon-card img {
+            height: 50px;
             width: auto;
             object-fit: contain;
-          }
-          .delivery-label {
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 8px;
           }
           @media print {
             body { padding: 0; background: white; }
@@ -392,20 +479,27 @@ const QRCodePage = () => {
           <div class="qr-container">
             ${svgData}
           </div>
-          <div class="instruction" style="background: #fef3c7; border: 1px solid #fbbf24;">
+          <div class="instruction">
             <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
             <div class="camera-icon">📱</div>
             <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
           </div>
           ${deliveryIcons.length > 0 ? `
-          <div class="delivery-icons">
-            <p class="delivery-label" style="width: 100%; text-align: center; margin-bottom: 16px; font-size: 16px;">📦 Entregas:</p>
-          </div>
-          <div style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 12px; flex-wrap: wrap;">
-            ${deliveryIcons.map(icon => `<img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" style="height: 50px; width: auto;" />`).join('')}
+          <div class="delivery-section">
+            <div class="delivery-header">
+              <span>📦</span>
+              <span>Entregas:</span>
+            </div>
+            <div class="delivery-icons-grid">
+              ${deliveryIcons.map(icon => `
+                <div class="delivery-icon-card">
+                  <img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" />
+                </div>
+              `).join('')}
+            </div>
           </div>
           ` : ''}
-          <p class="expires">Código permanente</p>
+          <p class="expires">✓ Código permanente</p>
         </div>
         <script>
           window.onload = () => {
@@ -413,7 +507,7 @@ const QRCodePage = () => {
               window.print();
             }, 500);
           };
-        </script>
+        <\/script>
       </body>
       </html>
     `);
