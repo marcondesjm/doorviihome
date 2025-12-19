@@ -136,7 +136,7 @@ export const QRCodeAccess = ({
         ctx.font = '14px system-ui';
         ctx.fillStyle = '#666';
         ctx.fillText('📱 Escaneie com a câmera do celular', canvas.width / 2, 430);
-        ctx.fillText(`Expira em ${expiresIn}`, canvas.width / 2, 455);
+        ctx.fillText('✓ Código permanente', canvas.width / 2, 455);
         
         // Download
         const link = document.createElement('a');
@@ -241,7 +241,7 @@ export const QRCodeAccess = ({
             <div class="camera-icon">📱</div>
             <p>Abra a câmera do celular e aponte para o QR Code</p>
           </div>
-          <p class="expires">Expira em ${expiresIn}</p>
+          <p class="expires">✓ Código permanente</p>
         </div>
         <script>
           window.onload = () => {
@@ -311,9 +311,9 @@ export const QRCodeAccess = ({
           <p className="font-medium text-primary">{propertyName}</p>
         </div>
 
-        {/* Expiration */}
+        {/* Permanent code indicator */}
         <p className="text-xs text-muted-foreground mb-4">
-          Expira em <span className="text-accent font-medium">{expiresIn}</span>
+          <span className="text-accent font-medium">✓ Código permanente</span>
         </p>
 
         {/* Primary Actions */}

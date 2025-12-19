@@ -397,8 +397,7 @@ const Index = () => {
     if (!showQRCode) {
       const firstProperty = properties?.[0];
       await generateCode.mutateAsync({ 
-        propertyId: firstProperty?.id,
-        hoursValid: 24 
+        propertyId: firstProperty?.id
       });
     }
     setShowQRCode(!showQRCode);
@@ -622,8 +621,7 @@ const Index = () => {
                       onRefresh={() => {
                         const firstProperty = properties?.[0];
                         generateCode.mutateAsync({ 
-                          propertyId: firstProperty?.id,
-                          hoursValid: 24 
+                          propertyId: firstProperty?.id
                         });
                       }}
                     />
