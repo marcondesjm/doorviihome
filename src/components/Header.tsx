@@ -86,8 +86,8 @@ export const Header = () => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'DoorVi - Portaria Inteligente',
-        text: 'Confira o DoorVi, o melhor app de portaria inteligente!',
+        title: 'DoorVI Home - Portaria Inteligente',
+        text: 'Confira o DoorVI Home, o melhor app de portaria inteligente!',
         url: window.location.origin,
       });
     } else {
@@ -102,12 +102,12 @@ export const Header = () => {
   const handleRefer = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Conheça o DoorVi!',
-        text: 'Estou usando o DoorVi para gerenciar minha portaria. Experimente você também!',
+        title: 'Conheça o DoorVI Home!',
+        text: 'Estou usando o DoorVI Home para gerenciar minha portaria. Experimente você também!',
         url: window.location.origin,
       });
     } else {
-      navigator.clipboard.writeText(`Estou usando o DoorVi para gerenciar minha portaria. Experimente você também! ${window.location.origin}`);
+      navigator.clipboard.writeText(`Estou usando o DoorVI Home para gerenciar minha portaria. Experimente você também! ${window.location.origin}`);
       toast({
         title: "Link copiado!",
         description: "O convite foi copiado para a área de transferência.",
@@ -130,7 +130,7 @@ export const Header = () => {
   };
 
   const handleSocialMedia = () => {
-    window.open('https://instagram.com/doorvi', '_blank');
+    window.open('https://instagram.com/doorvihome', '_blank');
   };
 
   const handleRestorePayment = () => {
@@ -177,7 +177,7 @@ export const Header = () => {
               </svg>
             </div>
             <span className="text-xl font-bold">
-              Door<span className="text-primary">Vi</span>
+              Door<span className="text-primary">VI</span> Home
             </span>
           </div>
 
@@ -232,7 +232,7 @@ export const Header = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleRefer}>
                   <Gift className="w-4 h-4 mr-3" />
-                  Indique o DoorVi aos amigos
+                  Indique o DoorVI Home aos amigos
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleRingtone}>
