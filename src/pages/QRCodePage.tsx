@@ -85,11 +85,11 @@ const QRCodePage = () => {
   }, [properties, selectedPropertyId]);
   
   const [customization, setCustomization] = useState<QRCustomization>({
-    title: "Acesse pelo QR Code",
+    title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
     subtitle: selectedProperty?.name || "Minha Propriedade",
     fgColor: "#1a1a2e",
     bgColor: "#f8fafc",
-    logoText: "🏠",
+    logoText: "🔔",
     size: 200,
   });
 
@@ -189,7 +189,11 @@ const QRCodePage = () => {
         ctx.font = '12px system-ui';
         ctx.fillStyle = '#888';
         const bottomY = 130 + customization.size + 25;
-        ctx.fillText('📱 Escaneie com a câmera do celular', canvas.width / 2, bottomY);
+            ctx.fillStyle = '#b45309';
+            ctx.font = 'bold 11px system-ui';
+            ctx.fillText('⚠️ Não bata ou soe a campainha física. Use a do App.', canvas.width / 2, bottomY);
+            ctx.font = '12px system-ui';
+            ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, bottomY + 18);
         
         if (latestAccessCode) {
           ctx.fillText(`Expira em ${formatDistanceToNow(new Date(latestAccessCode.expires_at), { locale: ptBR })}`, canvas.width / 2, bottomY + 20);
@@ -304,9 +308,10 @@ const QRCodePage = () => {
           <div class="qr-container">
             ${svgData}
           </div>
-          <div class="instruction">
+          <div class="instruction" style="background: #fef3c7; border: 1px solid #fbbf24;">
+            <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
             <div class="camera-icon">📱</div>
-            <p>Abra a câmera do celular e aponte para o QR Code</p>
+            <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
           </div>
           <p class="expires">Expira em ${expiresIn}</p>
         </div>
@@ -401,9 +406,14 @@ const QRCodePage = () => {
                     />
                   </div>
                   
-                  <div className="mt-4 flex items-center justify-center gap-2 text-sm opacity-60" style={{ color: customization.fgColor }}>
-                    <Camera className="w-4 h-4" />
-                    <span>Escaneie com a câmera do celular</span>
+                  <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <p className="text-xs text-amber-800 font-medium mb-2">
+                      ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-sm text-amber-700">
+                      <Camera className="w-4 h-4" />
+                      <span>Escaneie o QR Code Usando a Câmera ou um App</span>
+                    </div>
                   </div>
                   
                   {latestAccessCode && (
