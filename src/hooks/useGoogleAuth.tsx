@@ -10,9 +10,16 @@ export const useGoogleAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
 
-  // Fetch Google Client ID from edge function
+  // Fetch Google Client ID from edge function (only when authenticated)
   useEffect(() => {
     const fetchClientId = async () => {
+      // First check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log('User not authenticated, skipping Google Client ID fetch');
+        return;
+      }
+
       try {
         const { data, error } = await supabase.functions.invoke('get-google-client-id');
         if (error) {
@@ -28,6 +35,15 @@ export const useGoogleAuth = () => {
       }
     };
     fetchClientId();
+
+    // Re-fetch when auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        fetchClientId();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const initGoogleAuth = useCallback(() => {
