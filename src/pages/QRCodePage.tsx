@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   RefreshCw,
   Home,
-  Clock,
   Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 import { useProperties } from "@/hooks/useProperties";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
@@ -72,7 +69,6 @@ const QRCodePage = () => {
   const generateCode = useGenerateAccessCode();
   
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
-  const [hoursValid, setHoursValid] = useState<number>(24);
   
   const latestAccessCode = accessCodes?.[0];
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
@@ -110,12 +106,11 @@ const QRCodePage = () => {
 
   const handleGenerateCode = async () => {
     await generateCode.mutateAsync({ 
-      propertyId: selectedPropertyId || undefined,
-      hoursValid 
+      propertyId: selectedPropertyId || undefined
     });
     toast({
       title: "QR Code gerado!",
-      description: `Válido por ${hoursValid} horas`,
+      description: "Código permanente criado com sucesso",
     });
   };
 
@@ -195,10 +190,6 @@ const QRCodePage = () => {
             ctx.font = '12px system-ui';
             ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, bottomY + 18);
         
-        if (latestAccessCode) {
-          ctx.fillText(`Expira em ${formatDistanceToNow(new Date(latestAccessCode.expires_at), { locale: ptBR })}`, canvas.width / 2, bottomY + 20);
-        }
-        
         // Download
         const link = document.createElement('a');
         link.download = `qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
@@ -237,9 +228,6 @@ const QRCodePage = () => {
     if (!svg) return;
 
     const svgData = new XMLSerializer().serializeToString(svg);
-    const expiresIn = latestAccessCode 
-      ? formatDistanceToNow(new Date(latestAccessCode.expires_at), { locale: ptBR })
-      : "24 horas";
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -313,7 +301,7 @@ const QRCodePage = () => {
             <div class="camera-icon">📱</div>
             <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
           </div>
-          <p class="expires">Expira em ${expiresIn}</p>
+          <p class="expires">Código permanente</p>
         </div>
         <script>
           window.onload = () => {
@@ -416,12 +404,10 @@ const QRCodePage = () => {
                     </div>
                   </div>
                   
-                  {latestAccessCode && (
-                    <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
-                      <Clock className="w-3 h-3" />
-                      Expira em {formatDistanceToNow(new Date(latestAccessCode.expires_at), { locale: ptBR })}
-                    </p>
-                  )}
+                  
+                  <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
+                    ✓ Código permanente
+                  </p>
                 </div>
 
                 {/* Action Buttons */}
@@ -474,22 +460,6 @@ const QRCodePage = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Validade do código</Label>
-                  <Select value={hoursValid.toString()} onValueChange={(v) => setHoursValid(Number(v))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 hora</SelectItem>
-                      <SelectItem value="6">6 horas</SelectItem>
-                      <SelectItem value="12">12 horas</SelectItem>
-                      <SelectItem value="24">24 horas</SelectItem>
-                      <SelectItem value="48">48 horas</SelectItem>
-                      <SelectItem value="168">1 semana</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 <Button 
                   onClick={handleGenerateCode} 

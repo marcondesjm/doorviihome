@@ -47,10 +47,11 @@ export function useGenerateAccessCode() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ propertyId, hoursValid = 24 }: { propertyId?: string; hoursValid?: number }) => {
+    mutationFn: async ({ propertyId }: { propertyId?: string }) => {
       const code = generateAccessCode();
+      // Set expiration to 100 years in the future (effectively permanent)
       const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + hoursValid);
+      expiresAt.setFullYear(expiresAt.getFullYear() + 100);
 
       const { data, error } = await supabase
         .from('access_codes')
