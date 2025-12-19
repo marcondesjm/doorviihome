@@ -281,6 +281,26 @@ const QRCodePage = () => {
           .camera-icon { font-size: 28px; margin-bottom: 10px; }
           .expires { font-size: 14px; color: #999; margin-top: 16px; }
           .address { font-size: 14px; color: #888; margin-top: 8px; }
+          .delivery-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+          }
+          .delivery-icons img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+          }
+          .delivery-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+          }
           @media print {
             body { padding: 0; background: white; }
             .container { box-shadow: none; max-width: 100%; }
@@ -300,6 +320,14 @@ const QRCodePage = () => {
             <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
             <div class="camera-icon">📱</div>
             <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
+          </div>
+          <div class="delivery-icons">
+            <p class="delivery-label" style="width: 100%; text-align: center; margin-bottom: 12px;">📦 Entregas:</p>
+          </div>
+          <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 8px;">
+            <img src="${window.location.origin}/correios-logo.png" alt="Correios" style="height: 35px; width: auto;" />
+            <img src="${window.location.origin}/aliexpress-logo.jpg" alt="AliExpress" style="height: 35px; width: auto;" />
+            <img src="${window.location.origin}/mercadolivre-logo.png" alt="Mercado Livre" style="height: 35px; width: auto;" />
           </div>
           <p class="expires">Código permanente</p>
         </div>
@@ -404,6 +432,15 @@ const QRCodePage = () => {
                     </div>
                   </div>
                   
+                  {/* Delivery Icons */}
+                  <div className="mt-4 p-3 rounded-lg bg-muted/50">
+                    <p className="text-xs text-muted-foreground mb-2">📦 Entregas:</p>
+                    <div className="flex items-center justify-center gap-4">
+                      <img src="/correios-logo.png" alt="Correios" className="h-6 w-auto object-contain" />
+                      <img src="/aliexpress-logo.jpg" alt="AliExpress" className="h-6 w-auto object-contain" />
+                      <img src="/mercadolivre-logo.png" alt="Mercado Livre" className="h-6 w-auto object-contain" />
+                    </div>
+                  </div>
                   
                   <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
                     ✓ Código permanente
