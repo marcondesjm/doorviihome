@@ -81,15 +81,23 @@ export function useDeleteProperty() {
 
   return useMutation({
     mutationFn: async (propertyId: string) => {
+      console.log('Deleting property:', propertyId);
       const { error } = await supabase
         .from('properties')
         .delete()
         .eq('id', propertyId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting property:', error);
+        throw error;
+      }
+      console.log('Property deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+    },
+    onError: (error) => {
+      console.error('Delete mutation error:', error);
     }
   });
 }
