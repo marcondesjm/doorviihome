@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import VisitorCall from "./pages/VisitorCall";
 import QRCodePage from "./pages/QRCodePage";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <WhatsAppButton />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
