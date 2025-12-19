@@ -122,28 +122,40 @@ export const PropertyCard = ({
           </div>
 
           {/* Quick Actions - Dropdown Menu */}
-          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-3 right-3 z-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="glass" size="icon" className="h-8 w-8">
+                <Button 
+                  variant="glass" 
+                  size="icon" 
+                  className="h-8 w-8 bg-background/80 hover:bg-background/90"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => {
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
                   setEditName(name);
                   setShowEditDialog(true);
                 }}>
                   <Pencil className="w-4 h-4 mr-2" />
                   Editar nome
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}>
                   <Camera className="w-4 h-4 mr-2" />
                   Alterar foto
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
-                  onClick={() => setShowDeleteDialog(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
