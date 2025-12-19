@@ -619,6 +619,13 @@ const Index = () => {
                       accessCode={latestAccessCode.code}
                       expiresIn={formatDistanceToNow(new Date(latestAccessCode.expires_at), { locale: ptBR })}
                       propertyName={properties?.[0]?.name || "Sua Propriedade"}
+                      onRefresh={() => {
+                        const firstProperty = properties?.[0];
+                        generateCode.mutateAsync({ 
+                          propertyId: firstProperty?.id,
+                          hoursValid: 24 
+                        });
+                      }}
                     />
                   </div>
                 </motion.div>
