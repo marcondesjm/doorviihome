@@ -14,12 +14,26 @@ import {
 import { useAddProperty } from '@/hooks/useProperties';
 import { useToast } from '@/hooks/use-toast';
 
-export function AddPropertyDialog() {
-  const [open, setOpen] = useState(false);
+interface AddPropertyDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}
+
+export function AddPropertyDialog({ 
+  open: controlledOpen, 
+  onOpenChange: controlledOnOpenChange,
+  showTrigger = true 
+}: AddPropertyDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const addProperty = useAddProperty();
   const { toast } = useToast();
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange || (() => {})) : setInternalOpen;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +67,14 @@ export function AddPropertyDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Plus className="w-4 h-4" />
-          Adicionar
-        </Button>
-      </DialogTrigger>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Plus className="w-4 h-4" />
+            Adicionar
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="glass">
         <DialogHeader>
           <DialogTitle>Nova Propriedade</DialogTitle>
