@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDeliveryIcons } from "@/hooks/useDeliveryIcons";
 
 const colorPresets = [
   { name: 'Clássico', bgColor: '#ffffff', fgColor: '#1a1a2e' },
@@ -53,10 +54,11 @@ export const VideoCallQRCode = ({
     title: "ESCANEIE O QR CODE",
     subtitle: "PARA ENTRAR EM CONTATO",
   });
-  const [deliveryIcons, setDeliveryIcons] = useState<DeliveryIcon[]>(defaultDeliveryIcons);
   const [newIconName, setNewIconName] = useState("");
   const [newIconUrl, setNewIconUrl] = useState("");
   const [showAddIcon, setShowAddIcon] = useState(false);
+
+  const { deliveryIcons, dbIcons, addIcon, removeIcon } = useDeliveryIcons();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -78,7 +80,7 @@ export const VideoCallQRCode = ({
     }
   };
 
-  const handleAddDeliveryIcon = () => {
+  const handleAddDeliveryIcon = async () => {
     if (!newIconName.trim() || !newIconUrl.trim()) {
       toast({
         title: "Preencha todos os campos",
@@ -88,27 +90,52 @@ export const VideoCallQRCode = ({
       return;
     }
     
-    const newIcon: DeliveryIcon = {
-      id: `custom-${Date.now()}`,
-      name: newIconName.trim(),
-      url: newIconUrl.trim(),
-    };
-    
-    setDeliveryIcons([...deliveryIcons, newIcon]);
-    setNewIconName("");
-    setNewIconUrl("");
-    setShowAddIcon(false);
-    toast({
-      title: "Ícone adicionado!",
-      description: `${newIcon.name} foi adicionado à lista`,
-    });
+    try {
+      await addIcon.mutateAsync({
+        name: newIconName.trim(),
+        url: newIconUrl.trim(),
+      });
+      
+      setNewIconName("");
+      setNewIconUrl("");
+      setShowAddIcon(false);
+      toast({
+        title: "Ícone adicionado!",
+        description: `${newIconName.trim()} foi adicionado à lista`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao adicionar",
+        description: "Não foi possível salvar o ícone",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRemoveDeliveryIcon = (id: string) => {
-    setDeliveryIcons(deliveryIcons.filter(icon => icon.id !== id));
-    toast({
-      title: "Ícone removido",
-    });
+  const handleRemoveDeliveryIcon = async (id: string) => {
+    // Check if it's a default icon (cannot be removed)
+    const isDefaultIcon = defaultDeliveryIcons.some(icon => icon.id === id);
+    if (isDefaultIcon) {
+      toast({
+        title: "Não é possível remover",
+        description: "Este é um ícone padrão do sistema",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await removeIcon.mutateAsync(id);
+      toast({
+        title: "Ícone removido",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao remover",
+        description: "Não foi possível remover o ícone",
+        variant: "destructive",
+      });
+    }
   };
 
   // Always use our app URL, but include meet link as parameter if available
@@ -505,30 +532,38 @@ export const VideoCallQRCode = ({
                     Transportadoras cadastradas
                   </Label>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {deliveryIcons.map((icon) => (
-                      <div 
-                        key={icon.id} 
-                        className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 group"
-                      >
-                        <img 
-                          src={icon.url} 
-                          alt={icon.name} 
-                          className="h-6 w-auto object-contain" 
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect fill="%23ccc" width="24" height="24"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="8">?</text></svg>';
-                          }}
-                        />
-                        <span className="flex-1 text-sm">{icon.name}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                    {deliveryIcons.map((icon) => {
+                      const isDefaultIcon = defaultDeliveryIcons.some(d => d.id === icon.id);
+                      return (
+                        <div 
+                          key={icon.id} 
+                          className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 group"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    ))}
+                          <img 
+                            src={icon.url} 
+                            alt={icon.name} 
+                            className="h-6 w-auto object-contain" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect fill="%23ccc" width="24" height="24"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="8">?</text></svg>';
+                            }}
+                          />
+                          <span className="flex-1 text-sm">{icon.name}</span>
+                          {isDefaultIcon ? (
+                            <span className="text-xs text-muted-foreground">Padrão</span>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                              disabled={removeIcon.isPending}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
                     
                     {deliveryIcons.length === 0 && (
                       <p className="text-sm text-muted-foreground text-center py-4">
@@ -604,8 +639,9 @@ export const VideoCallQRCode = ({
                         size="sm" 
                         className="flex-1"
                         onClick={handleAddDeliveryIcon}
+                        disabled={addIcon.isPending}
                       >
-                        Adicionar
+                        {addIcon.isPending ? "Salvando..." : "Adicionar"}
                       </Button>
                     </div>
                   </div>
