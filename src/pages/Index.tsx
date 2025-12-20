@@ -792,11 +792,11 @@ const Index = () => {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="fixed top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 z-50"
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[calc(100%-2rem)] sm:w-auto max-w-md"
           >
-            <div className="bg-amber-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="bg-amber-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 sm:gap-3">
               <Bell className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce flex-shrink-0" />
-              <div className="flex flex-col flex-1 min-w-0">
+              <div className="flex flex-col min-w-0">
                 <span className="font-semibold text-sm sm:text-base">Campainha tocando!</span>
                 <span className="text-xs sm:text-sm text-white/80 truncate">{doorbellPropertyName}</span>
               </div>
