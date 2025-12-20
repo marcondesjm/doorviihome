@@ -874,15 +874,33 @@ const Index = () => {
                 </>
               ) : (
                 <div className="w-full">
-                  <h3 className="font-bold text-lg mb-3">Gravar mensagem de áudio</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-lg">Gravar mensagem de áudio</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/70 hover:text-white hover:bg-white/20 -mr-2"
+                      onClick={() => setShowAudioRecorder(false)}
+                    >
+                      Voltar
+                    </Button>
+                  </div>
                   <AudioRecorder
                     roomName={currentDoorbellRoomName || ''}
                     onAudioSent={() => {
-                      setShowAudioRecorder(false);
-                      handleAnswerDoorbell();
+                      // Keep the recorder open to allow sending more messages
                     }}
-                    onCancel={() => setShowAudioRecorder(false)}
+                    compact
                   />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-white text-amber-600 hover:bg-white/90 w-full mt-3"
+                    onClick={handleAnswerDoorbell}
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    Ir atender
+                  </Button>
                 </div>
               )}
             </motion.div>
