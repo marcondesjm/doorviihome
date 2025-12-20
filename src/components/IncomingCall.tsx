@@ -42,10 +42,10 @@ export const IncomingCall = ({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-xl p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-xl p-4 overflow-y-auto"
       onClick={() => isActive && setShowControls(true)}
     >
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm my-auto min-h-fit">
         {/* Pulse Rings - Only when ringing */}
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -70,30 +70,30 @@ export const IncomingCall = ({
         <motion.div
           initial={{ y: 20 }}
           animate={{ y: 0 }}
-          className="relative glass rounded-3xl p-8 text-center"
+          className="relative glass rounded-3xl p-6 sm:p-8 text-center"
           style={{ boxShadow: "var(--shadow-card)" }}
         >
           {/* Video Preview / Avatar */}
           <motion.div
             animate={!isActive ? { scale: [1, 1.05, 1] } : {}}
             transition={{ repeat: isActive ? 0 : Infinity, duration: 2 }}
-            className="relative w-32 h-32 mx-auto mb-6"
+            className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6"
           >
             <div className={`absolute inset-0 rounded-full blur-2xl transition-colors ${isActive ? 'bg-success/30' : 'bg-primary/30'}`} />
             
             {isVideoOff && isActive ? (
-              <div className="relative w-32 h-32 rounded-full bg-secondary flex items-center justify-center border-4 border-muted">
-                <VideoOff className="w-12 h-12 text-muted-foreground" />
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-secondary flex items-center justify-center border-4 border-muted">
+                <VideoOff className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
               </div>
             ) : imageUrl ? (
               <img
                 src={imageUrl}
                 alt={callerName}
-                className={`relative w-32 h-32 rounded-full object-cover border-4 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}
+                className={`relative w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}
               />
             ) : (
-              <div className={`relative w-32 h-32 rounded-full bg-secondary flex items-center justify-center border-4 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}>
-                <Video className="w-12 h-12 text-primary" />
+              <div className={`relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-secondary flex items-center justify-center border-4 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}>
+                <Video className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
               </div>
             )}
             
@@ -114,7 +114,7 @@ export const IncomingCall = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
               >
-                <h2 className="text-2xl font-bold mb-1 text-success">Chamada em andamento</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-1 text-success">Chamada em andamento</h2>
                 <motion.p 
                   className="text-3xl font-mono font-bold text-foreground mb-1"
                   key={callDuration}
@@ -129,7 +129,7 @@ export const IncomingCall = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
               >
-                <h2 className="text-2xl font-bold mb-1">Chamada recebida</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-1">Chamada recebida</h2>
                 <motion.p 
                   className="text-sm text-muted-foreground mb-1"
                   animate={{ opacity: [1, 0.5, 1] }}
@@ -141,8 +141,8 @@ export const IncomingCall = ({
             )}
           </AnimatePresence>
           
-          <p className="text-muted-foreground mb-1">{callerName}</p>
-          <p className="text-sm text-primary font-medium mb-8">{propertyName}</p>
+          <p className="text-muted-foreground mb-1 text-sm sm:text-base">{callerName}</p>
+          <p className="text-xs sm:text-sm text-primary font-medium mb-6 sm:mb-8">{propertyName}</p>
 
           {/* Call Controls */}
           <AnimatePresence mode="wait">
@@ -154,7 +154,7 @@ export const IncomingCall = ({
                 className="space-y-4"
               >
                 {/* Main controls */}
-                <div className="flex justify-center gap-3">
+                <div className="flex justify-center gap-2 sm:gap-3">
                   <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                     <Button
                       variant="glass"
@@ -218,7 +218,7 @@ export const IncomingCall = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="flex justify-center gap-6"
+                className="flex justify-center gap-4 sm:gap-6"
               >
                 <motion.div 
                   whileHover={{ scale: 1.1 }} 
@@ -246,7 +246,7 @@ export const IncomingCall = ({
 
           {!isActive && (
             <motion.p 
-              className="text-sm text-muted-foreground mt-6"
+              className="text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-6"
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
