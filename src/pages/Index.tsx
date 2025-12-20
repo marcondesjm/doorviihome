@@ -584,8 +584,8 @@ const Index = () => {
 
             {/* Activity Section */}
             <motion.section variants={itemVariants}>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold">Atividade Recente</h2>
+              <div className="flex items-center justify-between gap-2 mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold">Atividade Recente</h2>
                 <AllActivitiesDialog />
               </div>
 
