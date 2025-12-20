@@ -7,11 +7,12 @@ import { toast } from 'sonner';
 
 interface AudioRecorderProps {
   roomName: string;
-  onAudioSent: () => void;
-  onCancel: () => void;
+  onAudioSent?: () => void;
+  onCancel?: () => void;
+  compact?: boolean;
 }
 
-export const AudioRecorder = ({ roomName, onAudioSent, onCancel }: AudioRecorderProps) => {
+export const AudioRecorder = ({ roomName, onAudioSent, onCancel, compact = false }: AudioRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -77,7 +78,12 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel }: AudioRecorder
     }
     setAudioBlob(null);
     setRecordingTime(0);
-    onCancel();
+    onCancel?.();
+  };
+
+  const resetRecorder = () => {
+    setAudioBlob(null);
+    setRecordingTime(0);
   };
 
   const sendAudio = async () => {
@@ -122,7 +128,8 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel }: AudioRecorder
       }
 
       toast.success('Áudio enviado ao visitante!');
-      onAudioSent();
+      resetRecorder();
+      onAudioSent?.();
 
     } catch (error) {
       console.error('Error sending audio:', error);
@@ -143,7 +150,7 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel }: AudioRecorder
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className="flex flex-col items-center gap-4 p-4 bg-secondary/50 rounded-xl"
+      className={`flex flex-col items-center gap-4 ${compact ? 'p-3' : 'p-4'} bg-secondary/50 rounded-xl`}
     >
       <AnimatePresence mode="wait">
         {!isRecording && !audioBlob && (

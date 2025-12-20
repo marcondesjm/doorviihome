@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 type CallStatus = 'waiting' | 'ringing' | 'answered' | 'video_call' | 'audio_message' | 'ended';
+
+interface AudioMessage {
+  url: string;
+  timestamp: number;
+}
 
 const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
@@ -17,8 +22,8 @@ const VisitorCall = () => {
   const [copied, setCopied] = useState(false);
   const [notified, setNotified] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>('waiting');
-  const [audioMessageUrl, setAudioMessageUrl] = useState<string | null>(null);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioMessages, setAudioMessages] = useState<AudioMessage[]>([]);
+  const [currentPlayingIndex, setCurrentPlayingIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Subscribe to real-time updates for owner join status
@@ -41,7 +46,14 @@ const VisitorCall = () => {
           setCallStatus('video_call');
         } else if (data.status === 'audio_message' && data.audio_message_url) {
           setCallStatus('audio_message');
-          setAudioMessageUrl(data.audio_message_url);
+          // Add initial audio message
+          setAudioMessages(prev => {
+            const exists = prev.some(m => m.url === data.audio_message_url);
+            if (!exists) {
+              return [...prev, { url: data.audio_message_url, timestamp: Date.now() }];
+            }
+            return prev;
+          });
         } else if (data.status === 'doorbell_ringing') {
           setCallStatus('ringing');
         } else if (data.status === 'answered') {
@@ -77,8 +89,15 @@ const VisitorCall = () => {
             }
           } else if (updatedCall.status === 'audio_message' && updatedCall.audio_message_url) {
             setCallStatus('audio_message');
-            setAudioMessageUrl(updatedCall.audio_message_url);
-            toast.success('O morador enviou uma mensagem de áudio!');
+            // Add new audio message to the list
+            setAudioMessages(prev => {
+              const exists = prev.some(m => m.url === updatedCall.audio_message_url);
+              if (!exists) {
+                return [...prev, { url: updatedCall.audio_message_url, timestamp: Date.now() }];
+              }
+              return prev;
+            });
+            toast.success('Nova mensagem de áudio do morador!');
             if ('vibrate' in navigator) {
               navigator.vibrate([200, 100, 200, 100, 200]);
             }
@@ -297,48 +316,70 @@ const VisitorCall = () => {
             >
               <Volume2 className="w-8 h-8 text-primary" />
             </motion.div>
-            <h3 className="font-bold text-lg text-primary mb-3">Mensagem do morador</h3>
+            <h3 className="font-bold text-lg text-primary mb-3">
+              {audioMessages.length > 1 ? `${audioMessages.length} mensagens do morador` : 'Mensagem do morador'}
+            </h3>
             
-            {audioMessageUrl && (
-              <div className="space-y-3">
-                <audio 
-                  ref={audioRef}
-                  src={audioMessageUrl}
-                  onPlay={() => setIsPlayingAudio(true)}
-                  onPause={() => setIsPlayingAudio(false)}
-                  onEnded={() => setIsPlayingAudio(false)}
-                  className="hidden"
-                />
-                <motion.div whileTap={{ scale: 0.95 }}>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {audioMessages.map((message, index) => (
+                <motion.div
+                  key={message.url}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`flex items-center gap-2 p-2 rounded-lg ${
+                    currentPlayingIndex === index ? 'bg-primary/30' : 'bg-secondary/50'
+                  }`}
+                >
                   <Button
-                    variant="default"
-                    size="lg"
-                    className="w-full"
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 w-10 rounded-full flex-shrink-0"
                     onClick={() => {
                       if (audioRef.current) {
-                        if (isPlayingAudio) {
+                        if (currentPlayingIndex === index) {
                           audioRef.current.pause();
+                          setCurrentPlayingIndex(null);
                         } else {
+                          audioRef.current.src = message.url;
                           audioRef.current.play();
+                          setCurrentPlayingIndex(index);
                         }
                       }
                     }}
                   >
-                    {isPlayingAudio ? (
-                      <>
-                        <Pause className="w-5 h-5 mr-2" />
-                        Pausar
-                      </>
+                    {currentPlayingIndex === index ? (
+                      <Pause className="w-5 h-5" />
                     ) : (
-                      <>
-                        <Play className="w-5 h-5 mr-2" />
-                        Ouvir mensagem
-                      </>
+                      <Play className="w-5 h-5" />
                     )}
                   </Button>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">Mensagem {index + 1}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(message.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  {currentPlayingIndex === index && (
+                    <motion.div
+                      className="flex gap-0.5"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ repeat: Infinity, duration: 0.8 }}
+                    >
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="w-1 h-3 bg-primary rounded-full" style={{ height: `${8 + i * 4}px` }} />
+                      ))}
+                    </motion.div>
+                  )}
                 </motion.div>
-              </div>
-            )}
+              ))}
+            </div>
+            
+            <audio 
+              ref={audioRef}
+              onEnded={() => setCurrentPlayingIndex(null)}
+              className="hidden"
+            />
           </motion.div>
         );
       
@@ -390,11 +431,16 @@ const VisitorCall = () => {
                     className="relative w-28 h-28 rounded-full bg-primary/20 border-4 border-primary flex items-center justify-center"
                   >
                     <motion.div
-                      animate={isPlayingAudio ? { scale: [1, 1.1, 1] } : {}}
+                      animate={currentPlayingIndex !== null ? { scale: [1, 1.1, 1] } : {}}
                       transition={{ repeat: Infinity, duration: 0.5 }}
                     >
                       <Volume2 className="w-10 h-10 text-primary" />
                     </motion.div>
+                    {audioMessages.length > 1 && (
+                      <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                        {audioMessages.length}
+                      </div>
+                    )}
                   </motion.div>
                 ) : callStatus === 'answered' ? (
                   <motion.div
