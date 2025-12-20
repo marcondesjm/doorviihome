@@ -5,6 +5,7 @@ import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volum
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { VisitorAudioRecorder } from '@/components/VisitorAudioRecorder';
 
 type CallStatus = 'waiting' | 'ringing' | 'answered' | 'video_call' | 'audio_message' | 'ended';
 
@@ -380,6 +381,15 @@ const VisitorCall = () => {
               onEnded={() => setCurrentPlayingIndex(null)}
               className="hidden"
             />
+
+            {/* Visitor Audio Response */}
+            <div className="mt-4 pt-4 border-t border-primary/30">
+              <p className="text-xs text-muted-foreground mb-2 text-center">Responder com áudio</p>
+              <VisitorAudioRecorder 
+                roomName={roomName || ''} 
+                onAudioSent={() => toast.success('Resposta enviada!')}
+              />
+            </div>
           </motion.div>
         );
       

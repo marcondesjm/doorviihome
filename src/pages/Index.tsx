@@ -49,6 +49,7 @@ const Index = () => {
   const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
   const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
+  const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -228,6 +229,34 @@ const Index = () => {
               title: "🔔 Campainha tocando!",
               description: `Visitante na porta - ${payload.new.property_name}`,
               duration: 10000,
+            });
+          }
+          
+          // Handle visitor audio response
+          if (payload.new.status === 'visitor_audio_response' && payload.new.visitor_audio_url) {
+            setVisitorAudioResponse(payload.new.visitor_audio_url);
+            
+            // Play notification sound
+            try {
+              const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.frequency.value = 587; // D5
+              osc.type = 'sine';
+              gain.gain.setValueAtTime(0.3, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+              osc.start(ctx.currentTime);
+              osc.stop(ctx.currentTime + 0.2);
+            } catch (e) {
+              console.log('Audio not supported');
+            }
+            
+            toast({
+              title: "🎤 Resposta do visitante!",
+              description: "O visitante enviou uma mensagem de áudio",
+              duration: 8000,
             });
           }
         }
@@ -791,6 +820,7 @@ const Index = () => {
               setShowVideoCallQR(false);
               endCall();
               endVideoCall();
+              setVisitorAudioResponse(null);
             }}
             onStartCall={handleStartGoogleMeet}
             visitorJoined={visitorJoinedCall}
@@ -798,6 +828,7 @@ const Index = () => {
             doorbellRinging={doorbellRinging}
             waitingForApproval={waitingForApproval}
             onApprovalDismiss={handleApprovalConfirmed}
+            visitorAudioResponse={visitorAudioResponse}
           />
         )}
       </AnimatePresence>

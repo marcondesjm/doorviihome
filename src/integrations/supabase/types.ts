@@ -298,6 +298,7 @@ export type Database = {
           property_name: string
           room_name: string
           status: string
+          visitor_audio_url: string | null
           visitor_joined: boolean | null
         }
         Insert: {
@@ -311,6 +312,7 @@ export type Database = {
           property_name: string
           room_name: string
           status?: string
+          visitor_audio_url?: string | null
           visitor_joined?: boolean | null
         }
         Update: {
@@ -324,6 +326,7 @@ export type Database = {
           property_name?: string
           room_name?: string
           status?: string
+          visitor_audio_url?: string | null
           visitor_joined?: boolean | null
         }
         Relationships: [
