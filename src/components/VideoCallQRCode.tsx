@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeliveryIcons } from "@/hooks/useDeliveryIcons";
+import { ApprovalReminderAlert } from "@/components/ApprovalReminderAlert";
 
 const colorPresets = [
   { name: 'Clássico', bgColor: '#ffffff', fgColor: '#1a1a2e' },
@@ -34,6 +35,8 @@ interface VideoCallQRCodeProps {
   visitorJoined?: boolean;
   meetLink?: string | null;
   doorbellRinging?: boolean;
+  waitingForApproval?: boolean;
+  onApprovalDismiss?: () => void;
 }
 
 export const VideoCallQRCode = ({
@@ -44,6 +47,8 @@ export const VideoCallQRCode = ({
   visitorJoined = false,
   meetLink,
   doorbellRinging = false,
+  waitingForApproval = false,
+  onApprovalDismiss,
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
   const qrRef = useRef<HTMLDivElement>(null);
@@ -336,6 +341,13 @@ export const VideoCallQRCode = ({
         >
           <X className="w-5 h-5" />
         </Button>
+
+        {/* Approval Reminder Alert - Inside the container */}
+        <ApprovalReminderAlert
+          isVisible={waitingForApproval}
+          onDismiss={onApprovalDismiss || (() => {})}
+          propertyName={propertyName}
+        />
 
         {/* Header */}
         <div className="flex items-center justify-center gap-2 mb-2">
