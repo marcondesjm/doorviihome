@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import VisitorCall from "./pages/VisitorCall";
 import QRCodePage from "./pages/QRCodePage";
+import Install from "./pages/Install";
 import WhatsAppButton from "./components/WhatsAppButton";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/call/:roomName" element={<VisitorCall />} />
             <Route path="/qrcode" element={
               <ProtectedRoute>
