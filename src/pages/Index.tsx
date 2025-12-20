@@ -15,6 +15,7 @@ import GoogleMeetCall from "@/components/GoogleMeetCall";
 import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
 import { ApprovalReminderAlert } from "@/components/ApprovalReminderAlert";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +47,7 @@ const Index = () => {
   const [doorbellInterval, setDoorbellInterval] = useState<NodeJS.Timeout | null>(null);
   const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
   const { data: properties, isLoading: propertiesLoading } = useProperties();
-  const { data: activities, isLoading: activitiesLoading } = useActivities();
+  const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
   const addActivity = useAddActivity();
   const generateCode = useGenerateAccessCode();
@@ -589,7 +590,12 @@ const Index = () => {
                 <AllActivitiesDialog />
               </div>
 
-              <div className="glass rounded-2xl p-4" style={{ boxShadow: "var(--shadow-card)" }}>
+              <PullToRefresh 
+                onRefresh={async () => {
+                  await refetchActivities();
+                }}
+                className="glass rounded-2xl p-4"
+              >
                 {activitiesLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map(i => (
@@ -617,7 +623,7 @@ const Index = () => {
                     </p>
                   </div>
                 )}
-              </div>
+              </PullToRefresh>
             </motion.section>
           </div>
 
