@@ -14,6 +14,8 @@ interface VideoCall {
   status: string;
   created_at: string;
   ended_at: string | null;
+  audio_message_url?: string | null;
+  visitor_audio_url?: string | null;
 }
 
 export const useVideoCalls = () => {

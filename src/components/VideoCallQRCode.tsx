@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { StyledQRCode, defaultCustomization, defaultDeliveryIcons, QRCustomization, DeliveryIcon } from "./StyledQRCode";
 import {
   Dialog,
@@ -37,6 +37,7 @@ interface VideoCallQRCodeProps {
   doorbellRinging?: boolean;
   waitingForApproval?: boolean;
   onApprovalDismiss?: () => void;
+  visitorAudioResponse?: string | null;
 }
 
 export const VideoCallQRCode = ({
@@ -49,6 +50,7 @@ export const VideoCallQRCode = ({
   doorbellRinging = false,
   waitingForApproval = false,
   onApprovalDismiss,
+  visitorAudioResponse,
 }: VideoCallQRCodeProps) => {
   const { toast } = useToast();
   const qrRef = useRef<HTMLDivElement>(null);
@@ -426,6 +428,26 @@ export const VideoCallQRCode = ({
             {visitorJoined ? "Entrar agora - Visitante aguardando!" : "Entrar na chamada"}
           </Button>
         </div>
+
+        {/* Visitor Audio Response */}
+        {visitorAudioResponse && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-3 bg-primary/20 border border-primary/50 rounded-xl"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Volume2 className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Resposta do visitante</span>
+            </div>
+            <audio 
+              src={visitorAudioResponse} 
+              controls 
+              className="w-full h-10"
+              autoPlay
+            />
+          </motion.div>
+        )}
 
         <p className="text-xs text-muted-foreground mt-3">
           Clique em "Entrar na chamada" para iniciar a videochamada do seu lado
