@@ -42,10 +42,10 @@ export const IncomingCall = ({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-xl p-4 overflow-y-auto"
+      className="fixed inset-x-0 top-4 z-50 flex justify-center px-4"
       onClick={() => isActive && setShowControls(true)}
     >
-      <div className="w-full max-w-sm my-auto min-h-fit">
+      <div className="w-full max-w-sm">
         {/* Pulse Rings - Only when ringing */}
         {!isActive && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -68,197 +68,118 @@ export const IncomingCall = ({
         )}
 
         <motion.div
-          initial={{ y: 20 }}
+          initial={{ y: -20 }}
           animate={{ y: 0 }}
-          className="relative glass rounded-3xl p-6 sm:p-8 text-center"
+          className="relative glass rounded-2xl p-4 flex items-center gap-4"
           style={{ boxShadow: "var(--shadow-card)" }}
         >
-          {/* Video Preview / Avatar */}
+          {/* Compact Avatar */}
           <motion.div
             animate={!isActive ? { scale: [1, 1.05, 1] } : {}}
             transition={{ repeat: isActive ? 0 : Infinity, duration: 2 }}
-            className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6"
+            className="relative w-14 h-14 flex-shrink-0"
           >
-            <div className={`absolute inset-0 rounded-full blur-2xl transition-colors ${isActive ? 'bg-success/30' : 'bg-primary/30'}`} />
-            
             {isVideoOff && isActive ? (
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-secondary flex items-center justify-center border-4 border-muted">
-                <VideoOff className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
+              <div className="relative w-14 h-14 rounded-full bg-secondary flex items-center justify-center border-2 border-muted">
+                <VideoOff className="w-6 h-6 text-muted-foreground" />
               </div>
             ) : imageUrl ? (
               <img
                 src={imageUrl}
                 alt={callerName}
-                className={`relative w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}
+                className={`relative w-14 h-14 rounded-full object-cover border-2 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}
               />
             ) : (
-              <div className={`relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-secondary flex items-center justify-center border-4 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}>
-                <Video className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
+              <div className={`relative w-14 h-14 rounded-full bg-secondary flex items-center justify-center border-2 transition-colors ${isActive ? 'border-success/50' : 'border-primary/50'}`}>
+                <Video className="w-6 h-6 text-primary" />
               </div>
             )}
             
             {/* Online indicator */}
             <motion.span 
-              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full border-4 border-card ${isActive ? 'bg-success' : 'bg-warning'}`}
+              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-card ${isActive ? 'bg-success' : 'bg-warning'}`}
               animate={isActive ? {} : { scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 1 }}
             />
           </motion.div>
 
-          {/* Call Status */}
-          <AnimatePresence mode="wait">
-            {isActive ? (
-              <motion.div
-                key="active"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-              >
-                <h2 className="text-xl sm:text-2xl font-bold mb-1 text-success">Chamada em andamento</h2>
-                <motion.p 
-                  className="text-3xl font-mono font-bold text-foreground mb-1"
-                  key={callDuration}
-                >
-                  {formatDuration(callDuration)}
-                </motion.p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="ringing"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-              >
-                <h2 className="text-xl sm:text-2xl font-bold mb-1">Chamada recebida</h2>
-                <motion.p 
-                  className="text-sm text-muted-foreground mb-1"
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  Tocando...
-                </motion.p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          <p className="text-muted-foreground mb-1 text-sm sm:text-base">{callerName}</p>
-          <p className="text-xs sm:text-sm text-primary font-medium mb-6 sm:mb-8">{propertyName}</p>
+          {/* Content */}
+          <div className="flex-1 min-w-0 text-left">
 
-          {/* Call Controls */}
-          <AnimatePresence mode="wait">
-            {isActive ? (
-              <motion.div
-                key="active-controls"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: showControls ? 1 : 0.3, y: 0 }}
-                className="space-y-4"
-              >
-                {/* Main controls */}
-                <div className="flex justify-center gap-2 sm:gap-3">
-                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      variant="glass"
-                      size="iconLg"
-                      onClick={() => setIsMuted(!isMuted)}
-                      className={isMuted ? "bg-destructive/20 text-destructive border-destructive/30" : ""}
-                    >
-                      {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-                    </Button>
-                  </motion.div>
-                  
-                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      variant="glass"
-                      size="iconLg"
-                      onClick={() => setIsVideoOff(!isVideoOff)}
-                      className={isVideoOff ? "bg-destructive/20 text-destructive border-destructive/30" : ""}
-                    >
-                      {isVideoOff ? <VideoOff className="w-6 h-6" /> : <Video className="w-6 h-6" />}
-                    </Button>
-                  </motion.div>
-                  
-                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      variant="glass"
-                      size="iconLg"
-                      onClick={() => setIsSpeakerOn(!isSpeakerOn)}
-                      className={!isSpeakerOn ? "bg-warning/20 text-warning border-warning/30" : ""}
-                    >
-                      {isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
-                    </Button>
-                  </motion.div>
-                </div>
-
-                {/* End call button */}
-                <div className="flex justify-center">
-                  <motion.div 
-                    whileHover={{ scale: 1.1 }} 
-                    whileTap={{ scale: 0.95 }}
+            <AnimatePresence mode="wait">
+              {isActive ? (
+                <motion.div
+                  key="active"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <h2 className="text-base font-bold text-success truncate">Chamada em andamento</h2>
+                  <motion.p 
+                    className="text-lg font-mono font-bold text-foreground"
+                    key={callDuration}
                   >
-                    <Button
-                      variant="endCall"
-                      size="iconXl"
-                      onClick={onDecline}
-                    >
-                      <PhoneOff className="w-7 h-7" />
-                    </Button>
-                  </motion.div>
-                </div>
+                    {formatDuration(callDuration)}
+                  </motion.p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="ringing"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <h2 className="text-base font-bold truncate">Campainha tocando!</h2>
+                  <motion.p 
+                    className="text-xs text-muted-foreground"
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    {propertyName}
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-                {/* Status indicators */}
-                <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-                  {isMuted && <span className="flex items-center gap-1"><MicOff className="w-3 h-3" /> Mudo</span>}
-                  {isVideoOff && <span className="flex items-center gap-1"><VideoOff className="w-3 h-3" /> Vídeo desligado</span>}
-                  {!isSpeakerOn && <span className="flex items-center gap-1"><VolumeX className="w-3 h-3" /> Alto-falante desligado</span>}
-                </div>
-              </motion.div>
+          {/* Action Buttons */}
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {isActive ? (
+              <>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="glass"
+                    size="icon"
+                    onClick={() => setIsMuted(!isMuted)}
+                    className={isMuted ? "bg-destructive/20 text-destructive border-destructive/30" : ""}
+                  >
+                    {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </Button>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="endCall"
+                    size="icon"
+                    onClick={onDecline}
+                  >
+                    <PhoneOff className="w-4 h-4" />
+                  </Button>
+                </motion.div>
+              </>
             ) : (
-              <motion.div
-                key="incoming-controls"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="flex justify-center gap-4 sm:gap-6"
+              <motion.div 
+                whileTap={{ scale: 0.95 }}
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ repeat: Infinity, duration: 1 }}
               >
-                <motion.div 
-                  whileHover={{ scale: 1.1 }} 
-                  whileTap={{ scale: 0.95 }}
-                  animate={{ x: [-2, 2, -2] }}
-                  transition={{ repeat: Infinity, duration: 0.3 }}
-                >
-                  <Button variant="endCall" size="iconXl" onClick={onDecline}>
-                    <PhoneOff className="w-7 h-7" />
-                  </Button>
-                </motion.div>
-                <motion.div 
-                  whileHover={{ scale: 1.1 }} 
-                  whileTap={{ scale: 0.95 }}
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
-                >
-                  <Button variant="call" size="iconXl" onClick={onAnswer}>
-                    <Phone className="w-7 h-7" />
-                  </Button>
-                </motion.div>
+                <Button variant="call" size="default" onClick={onAnswer} className="px-6">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Atender
+                </Button>
               </motion.div>
             )}
-          </AnimatePresence>
-
-          {!isActive && (
-            <motion.p 
-              className="text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-6"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              Deslize ou toque para atender
-            </motion.p>
-          )}
-
-          {isActive && (
-            <p className="text-xs text-muted-foreground mt-4">
-              Toque na tela para mostrar controles
-            </p>
-          )}
+          </div>
         </motion.div>
       </div>
     </motion.div>
