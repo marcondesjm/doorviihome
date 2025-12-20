@@ -14,7 +14,7 @@ import { IncomingCall } from "@/components/IncomingCall";
 import GoogleMeetCall from "@/components/GoogleMeetCall";
 import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
-import { ApprovalReminderAlert } from "@/components/ApprovalReminderAlert";
+
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { Button } from "@/components/ui/button";
@@ -796,6 +796,8 @@ const Index = () => {
             visitorJoined={visitorJoinedCall}
             meetLink={meetLink}
             doorbellRinging={doorbellRinging}
+            waitingForApproval={waitingForApproval}
+            onApprovalDismiss={handleApprovalConfirmed}
           />
         )}
       </AnimatePresence>
@@ -817,13 +819,6 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Approval Reminder Alert - Shows after owner joins Meet */}
-      <ApprovalReminderAlert
-        isVisible={waitingForApproval}
-        onDismiss={handleApprovalConfirmed}
-        propertyName={callState.propertyName || "Sua Propriedade"}
-      />
 
       {/* Doorbell Ringing Alert */}
       <AnimatePresence>

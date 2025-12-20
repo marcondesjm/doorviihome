@@ -94,10 +94,10 @@ export const ApprovalReminderAlert = ({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -100 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -100 }}
-          className="fixed top-20 right-4 z-[60] w-[90%] max-w-md sm:right-8"
+          exit={{ opacity: 0, y: -20 }}
+          className="w-full max-w-md mx-auto mb-4"
         >
           <div className="bg-amber-500 text-amber-950 rounded-2xl p-4 shadow-2xl border-2 border-amber-400">
             <div className="flex items-center gap-3">
