@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-type CallStatus = 'waiting' | 'ringing' | 'answered' | 'video_call' | 'ended';
+type CallStatus = 'waiting' | 'ringing' | 'answered' | 'video_call' | 'audio_message' | 'ended';
 
 const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
@@ -17,6 +17,9 @@ const VisitorCall = () => {
   const [copied, setCopied] = useState(false);
   const [notified, setNotified] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>('waiting');
+  const [audioMessageUrl, setAudioMessageUrl] = useState<string | null>(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Subscribe to real-time updates for owner join status
   useEffect(() => {
@@ -28,7 +31,7 @@ const VisitorCall = () => {
     const fetchCallStatus = async () => {
       const { data, error } = await supabase
         .from('video_calls')
-        .select('owner_joined, status')
+        .select('owner_joined, status, audio_message_url')
         .eq('room_name', roomName)
         .maybeSingle();
 
@@ -36,6 +39,9 @@ const VisitorCall = () => {
         console.log('Initial call status:', data);
         if (data.owner_joined) {
           setCallStatus('video_call');
+        } else if (data.status === 'audio_message' && data.audio_message_url) {
+          setCallStatus('audio_message');
+          setAudioMessageUrl(data.audio_message_url);
         } else if (data.status === 'doorbell_ringing') {
           setCallStatus('ringing');
         } else if (data.status === 'answered') {
@@ -66,9 +72,15 @@ const VisitorCall = () => {
           if (updatedCall.owner_joined) {
             setCallStatus('video_call');
             toast.success('Morador iniciou a videochamada! Entre agora.');
-            // Vibrate if supported
             if ('vibrate' in navigator) {
               navigator.vibrate([300, 100, 300]);
+            }
+          } else if (updatedCall.status === 'audio_message' && updatedCall.audio_message_url) {
+            setCallStatus('audio_message');
+            setAudioMessageUrl(updatedCall.audio_message_url);
+            toast.success('O morador enviou uma mensagem de áudio!');
+            if ('vibrate' in navigator) {
+              navigator.vibrate([200, 100, 200, 100, 200]);
             }
           } else if (updatedCall.status === 'answered') {
             setCallStatus('answered');
@@ -270,6 +282,66 @@ const VisitorCall = () => {
           </motion.div>
         );
       
+      case 'audio_message':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-primary/20 border border-primary/50 rounded-xl p-5 mb-6"
+          >
+            <motion.div 
+              className="flex items-center justify-center gap-2 mb-3"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            >
+              <Volume2 className="w-8 h-8 text-primary" />
+            </motion.div>
+            <h3 className="font-bold text-lg text-primary mb-3">Mensagem do morador</h3>
+            
+            {audioMessageUrl && (
+              <div className="space-y-3">
+                <audio 
+                  ref={audioRef}
+                  src={audioMessageUrl}
+                  onPlay={() => setIsPlayingAudio(true)}
+                  onPause={() => setIsPlayingAudio(false)}
+                  onEnded={() => setIsPlayingAudio(false)}
+                  className="hidden"
+                />
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="default"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => {
+                      if (audioRef.current) {
+                        if (isPlayingAudio) {
+                          audioRef.current.pause();
+                        } else {
+                          audioRef.current.play();
+                        }
+                      }
+                    }}
+                  >
+                    {isPlayingAudio ? (
+                      <>
+                        <Pause className="w-5 h-5 mr-2" />
+                        Pausar
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-5 h-5 mr-2" />
+                        Ouvir mensagem
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
+            )}
+          </motion.div>
+        );
+      
       case 'ended':
         return (
           <motion.div
@@ -309,6 +381,20 @@ const VisitorCall = () => {
                     className="relative w-28 h-28 rounded-full bg-primary/20 border-4 border-primary flex items-center justify-center"
                   >
                     <Video className="w-10 h-10 text-primary" />
+                  </motion.div>
+                ) : callStatus === 'audio_message' ? (
+                  <motion.div
+                    key="audio"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="relative w-28 h-28 rounded-full bg-primary/20 border-4 border-primary flex items-center justify-center"
+                  >
+                    <motion.div
+                      animate={isPlayingAudio ? { scale: [1, 1.1, 1] } : {}}
+                      transition={{ repeat: Infinity, duration: 0.5 }}
+                    >
+                      <Volume2 className="w-10 h-10 text-primary" />
+                    </motion.div>
                   </motion.div>
                 ) : callStatus === 'answered' ? (
                   <motion.div

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -16,6 +16,7 @@ import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
 import { ApprovalReminderAlert } from "@/components/ApprovalReminderAlert";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { AudioRecorder } from "@/components/AudioRecorder";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +48,7 @@ const Index = () => {
   const [doorbellInterval, setDoorbellInterval] = useState<NodeJS.Timeout | null>(null);
   const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
   const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
+  const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -837,25 +839,52 @@ const Index = () => {
               animate={{ y: 0 }}
               className="bg-amber-500 text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-xs text-center"
             >
-              <motion.div
-                animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
-              >
-                <Bell className="w-10 h-10 animate-bounce" />
-              </motion.div>
-              <div className="flex flex-col">
-                <span className="font-bold text-xl">Campainha tocando!</span>
-                <span className="text-sm text-white/80">{doorbellPropertyName}</span>
-              </div>
-              <Button
-                variant="secondary"
-                size="lg"
-                className="bg-white text-amber-600 hover:bg-white/90 w-full"
-                onClick={handleAnswerDoorbell}
-              >
-                <Phone className="w-5 h-5 mr-2" />
-                Atender
-              </Button>
+              {!showAudioRecorder ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
+                    transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+                  >
+                    <Bell className="w-10 h-10 animate-bounce" />
+                  </motion.div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-xl">Campainha tocando!</span>
+                    <span className="text-sm text-white/80">{doorbellPropertyName}</span>
+                  </div>
+                  <div className="flex flex-col gap-2 w-full">
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="bg-white text-amber-600 hover:bg-white/90 w-full"
+                      onClick={handleAnswerDoorbell}
+                    >
+                      <Phone className="w-5 h-5 mr-2" />
+                      Atender
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white/80 hover:text-white hover:bg-white/20 w-full"
+                      onClick={() => setShowAudioRecorder(true)}
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      Enviar áudio
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="w-full">
+                  <h3 className="font-bold text-lg mb-3">Gravar mensagem de áudio</h3>
+                  <AudioRecorder
+                    roomName={currentDoorbellRoomName || ''}
+                    onAudioSent={() => {
+                      setShowAudioRecorder(false);
+                      handleAnswerDoorbell();
+                    }}
+                    onCancel={() => setShowAudioRecorder(false)}
+                  />
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
