@@ -792,18 +792,18 @@ const Index = () => {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
+            className="fixed top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 z-50"
           >
-            <div className="bg-amber-500 text-white px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3">
-              <Bell className="w-6 h-6 animate-bounce" />
-              <div className="flex flex-col">
-                <span className="font-semibold">Campainha tocando!</span>
-                <span className="text-sm text-white/80">{doorbellPropertyName}</span>
+            <div className="bg-amber-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Bell className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce flex-shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="font-semibold text-sm sm:text-base">Campainha tocando!</span>
+                <span className="text-xs sm:text-sm text-white/80 truncate">{doorbellPropertyName}</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-amber-600 ml-2"
+                className="text-white hover:bg-amber-600 flex-shrink-0 px-2 sm:px-3"
                 onClick={() => setDoorbellRinging(false)}
               >
                 Atender
