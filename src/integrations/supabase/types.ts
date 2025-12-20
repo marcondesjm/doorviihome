@@ -261,6 +261,7 @@ export type Database = {
       }
       video_calls: {
         Row: {
+          audio_message_url: string | null
           created_at: string
           ended_at: string | null
           id: string
@@ -273,6 +274,7 @@ export type Database = {
           visitor_joined: boolean | null
         }
         Insert: {
+          audio_message_url?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
@@ -285,6 +287,7 @@ export type Database = {
           visitor_joined?: boolean | null
         }
         Update: {
+          audio_message_url?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
