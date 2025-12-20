@@ -163,11 +163,15 @@ const Index = () => {
     }
   };
 
-  // Clear doorbell interval when stopped
+  // Clear doorbell interval and stop vibration when stopped
   useEffect(() => {
     if (!doorbellRinging && doorbellInterval) {
       clearInterval(doorbellInterval);
       setDoorbellInterval(null);
+      // Stop any ongoing vibration
+      if ('vibrate' in navigator) {
+        navigator.vibrate(0);
+      }
     }
   }, [doorbellRinging, doorbellInterval]);
 
@@ -198,12 +202,21 @@ const Index = () => {
                 .eq('id', payload.new.property_id);
             }
             
+            // Vibrate phone if supported
+            if ('vibrate' in navigator) {
+              // Vibration pattern: vibrate 500ms, pause 200ms, vibrate 500ms
+              navigator.vibrate([500, 200, 500, 200, 500]);
+            }
+            
             // Play sound immediately
             playDoorbellSound();
             
-            // Keep playing sound every 2 seconds until dismissed
+            // Keep playing sound and vibrating every 2 seconds until dismissed
             const interval = setInterval(() => {
               playDoorbellSound();
+              if ('vibrate' in navigator) {
+                navigator.vibrate([500, 200, 500]);
+              }
             }, 2000);
             setDoorbellInterval(interval);
 
