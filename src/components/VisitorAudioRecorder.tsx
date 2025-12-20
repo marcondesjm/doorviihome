@@ -89,10 +89,13 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
     if (!audioBlob) return;
 
     setIsSending(true);
+    console.log('Starting audio upload for visitor response...');
+    console.log('Room name:', roomName);
 
     try {
       // Generate unique filename for visitor response
       const filename = `visitor_audio_${roomName}_${Date.now()}.webm`;
+      console.log('Uploading file:', filename);
       
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -103,8 +106,11 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
         });
 
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
+
+      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: urlData } = supabase.storage
@@ -112,19 +118,25 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
         .getPublicUrl(filename);
 
       const audioUrl = urlData.publicUrl;
+      console.log('Audio URL:', audioUrl);
 
       // Update video_call with visitor audio response URL
-      const { error: updateError } = await supabase
+      console.log('Updating video_call with visitor audio...');
+      const { data: updateData, error: updateError } = await supabase
         .from('video_calls')
         .update({ 
           visitor_audio_url: audioUrl,
           status: 'visitor_audio_response'
         })
-        .eq('room_name', roomName);
+        .eq('room_name', roomName)
+        .select();
 
       if (updateError) {
+        console.error('Update error:', updateError);
         throw updateError;
       }
+
+      console.log('Update successful:', updateData);
 
       toast.success('Resposta enviada ao morador!');
       resetRecorder();
