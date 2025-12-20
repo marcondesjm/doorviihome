@@ -46,6 +46,7 @@ const Index = () => {
   const [doorbellRinging, setDoorbellRinging] = useState(false);
   const [doorbellInterval, setDoorbellInterval] = useState<NodeJS.Timeout | null>(null);
   const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
+  const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
@@ -193,6 +194,7 @@ const Index = () => {
           if (payload.new.status === 'doorbell_ringing') {
             setDoorbellRinging(true);
             setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
+            setCurrentDoorbellRoomName(payload.new.room_name || null);
             
             // Update property status to online when doorbell rings
             if (payload.new.property_id) {
@@ -234,6 +236,23 @@ const Index = () => {
       supabase.removeChannel(channel);
     };
   }, [user, toast]);
+
+  // Function to notify visitor that owner answered
+  const handleAnswerDoorbell = async () => {
+    if (currentDoorbellRoomName) {
+      try {
+        await supabase
+          .from('video_calls')
+          .update({ status: 'answered' })
+          .eq('room_name', currentDoorbellRoomName);
+        console.log('Visitor notified - owner answered');
+      } catch (error) {
+        console.error('Error notifying visitor:', error);
+      }
+    }
+    setDoorbellRinging(false);
+    setCurrentDoorbellRoomName(null);
+  };
 
   const proceedWithAnswer = async () => {
     answerCall();
@@ -832,7 +851,7 @@ const Index = () => {
                 variant="secondary"
                 size="lg"
                 className="bg-white text-amber-600 hover:bg-white/90 w-full"
-                onClick={() => setDoorbellRinging(false)}
+                onClick={handleAnswerDoorbell}
               >
                 <Phone className="w-5 h-5 mr-2" />
                 Atender
