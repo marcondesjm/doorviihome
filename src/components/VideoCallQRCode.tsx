@@ -384,29 +384,6 @@ export const VideoCallQRCode = ({
           )}
         </div>
 
-        {/* Alerta de campainha tocando */}
-        <AnimatePresence>
-          {doorbellRinging && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              className="bg-amber-500 text-amber-950 rounded-xl p-4 mb-4 flex items-center gap-3"
-            >
-              <motion.div
-                animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
-              >
-                <Bell className="w-6 h-6" />
-              </motion.div>
-              <div className="flex-1 text-left">
-                <p className="font-bold">🔔 Campainha tocando!</p>
-                <p className="text-sm opacity-90">Visitante aguardando na porta</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Actions */}
         <div className="flex flex-col gap-3">
           <div className="flex gap-2 justify-center flex-wrap">
