@@ -97,7 +97,7 @@ export const ApprovalReminderAlert = ({
           initial={{ opacity: 0, y: -100 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-md"
+          className="fixed top-20 right-4 z-[60] w-[90%] max-w-md sm:right-8"
         >
           <div className="bg-amber-500 text-amber-950 rounded-2xl p-4 shadow-2xl border-2 border-amber-400">
             <div className="flex items-center gap-3">
