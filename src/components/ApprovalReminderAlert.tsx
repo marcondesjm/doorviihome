@@ -94,17 +94,17 @@ export const ApprovalReminderAlert = ({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="w-full max-w-md mx-auto mb-4"
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          className="w-full mb-3"
         >
-          <div className="bg-amber-500 text-amber-950 rounded-2xl p-4 shadow-2xl border-2 border-amber-400">
-            <div className="flex items-center gap-3">
+          <div className="bg-amber-500 text-amber-950 rounded-xl p-3 shadow-lg border border-amber-400">
+            <div className="flex items-center gap-2">
               <motion.div
                 animate={{ 
-                  rotate: [0, -15, 15, -15, 15, 0],
-                  scale: [1, 1.1, 1, 1.1, 1]
+                  rotate: [0, -10, 10, -10, 10, 0],
+                  scale: [1, 1.05, 1, 1.05, 1]
                 }}
                 transition={{ 
                   duration: 0.5, 
@@ -112,39 +112,38 @@ export const ApprovalReminderAlert = ({
                   repeatDelay: 2.5 
                 }}
               >
-                <Bell className="w-8 h-8" />
+                <Bell className="w-5 h-5" />
               </motion.div>
               
-              <div className="flex-1">
-                <p className="font-bold text-lg">Visitante aguardando!</p>
-                <p className="text-sm opacity-90">
-                  Aprove o visitante no Google Meet para {propertyName}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">Visitante aguardando!</p>
+                <p className="text-xs opacity-90 truncate">
+                  Aprove no Google Meet para {propertyName}
                 </p>
               </div>
 
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-amber-950 hover:bg-amber-400/50"
+                className="text-amber-950 hover:bg-amber-400/50 h-7 w-7"
                 onClick={() => setIsMuted(!isMuted)}
               >
                 {isMuted ? (
-                  <VolumeX className="w-5 h-5" />
+                  <VolumeX className="w-4 h-4" />
                 ) : (
-                  <Volume2 className="w-5 h-5" />
+                  <Volume2 className="w-4 h-4" />
                 )}
               </Button>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <Button
-                onClick={onDismiss}
-                className="flex-1 bg-amber-950 text-amber-100 hover:bg-amber-900"
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Já aprovei o visitante
-              </Button>
-            </div>
+            <Button
+              onClick={onDismiss}
+              size="sm"
+              className="w-full mt-2 bg-amber-950 text-amber-100 hover:bg-amber-900 h-8 text-xs"
+            >
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Já aprovei o visitante
+            </Button>
           </div>
         </motion.div>
       )}
