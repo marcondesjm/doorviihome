@@ -795,26 +795,36 @@ const Index = () => {
       <AnimatePresence>
         {doorbellRinging && (
           <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[calc(100%-2rem)] sm:w-auto max-w-md"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
           >
-            <div className="bg-amber-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 sm:gap-3">
-              <Bell className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce flex-shrink-0" />
-              <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-sm sm:text-base">Campainha tocando!</span>
-                <span className="text-xs sm:text-sm text-white/80 truncate">{doorbellPropertyName}</span>
+            <motion.div
+              initial={{ y: 20 }}
+              animate={{ y: 0 }}
+              className="bg-amber-500 text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-xs text-center"
+            >
+              <motion.div
+                animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+              >
+                <Bell className="w-10 h-10 animate-bounce" />
+              </motion.div>
+              <div className="flex flex-col">
+                <span className="font-bold text-xl">Campainha tocando!</span>
+                <span className="text-sm text-white/80">{doorbellPropertyName}</span>
               </div>
               <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-amber-600 flex-shrink-0 px-2 sm:px-3"
+                variant="secondary"
+                size="lg"
+                className="bg-white text-amber-600 hover:bg-white/90 w-full"
                 onClick={() => setDoorbellRinging(false)}
               >
+                <Phone className="w-5 h-5 mr-2" />
                 Atender
               </Button>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
