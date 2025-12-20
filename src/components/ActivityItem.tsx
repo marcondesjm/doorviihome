@@ -39,21 +39,21 @@ export const ActivityItem = ({
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer"
+      className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer"
     >
-      <div className={`p-3 rounded-xl ${colorClass}`}>
-        <Icon className="w-5 h-5" />
+      <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${colorClass}`}>
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
       
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-foreground truncate">{title}</p>
-        <p className="text-sm text-muted-foreground truncate">{property}</p>
+        <p className="font-medium text-foreground text-sm sm:text-base truncate">{title}</p>
+        <p className="text-xs sm:text-sm text-muted-foreground truncate">{property}</p>
       </div>
 
-      <div className="text-right">
-        <p className="text-sm text-muted-foreground">{time}</p>
+      <div className="text-right flex-shrink-0">
+        <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">{time}</p>
         {duration && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+          <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end whitespace-nowrap">
             <Clock className="w-3 h-3" />
             {duration}
           </p>
