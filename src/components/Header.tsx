@@ -47,6 +47,7 @@ import { InviteMemberDialog } from "./InviteMemberDialog";
 import { AboutCreatorDialog } from "./AboutCreatorDialog";
 import { SupportProjectDialog } from "./SupportProjectDialog";
 import { WhatsAppConfigDialog } from "./WhatsAppConfigDialog";
+import { RingtoneConfigDialog } from "./RingtoneConfigDialog";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import {
   AlertDialog,
@@ -72,6 +73,7 @@ export const Header = () => {
   const [showAboutCreator, setShowAboutCreator] = useState(false);
   const [showSupportProject, setShowSupportProject] = useState(false);
   const [showWhatsAppConfig, setShowWhatsAppConfig] = useState(false);
+  const [showRingtoneConfig, setShowRingtoneConfig] = useState(false);
   
   const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe, permission } = usePushNotifications();
 
@@ -162,10 +164,7 @@ export const Header = () => {
   };
 
   const handleRingtone = () => {
-    toast({
-      title: "Som de Toque",
-      description: "Em breve você poderá personalizar o som de toque!",
-    });
+    setShowRingtoneConfig(true);
   };
 
   const handleJoinAsMember = () => {
@@ -450,6 +449,11 @@ export const Header = () => {
       <WhatsAppConfigDialog
         open={showWhatsAppConfig}
         onOpenChange={setShowWhatsAppConfig}
+      />
+
+      <RingtoneConfigDialog
+        open={showRingtoneConfig}
+        onOpenChange={setShowRingtoneConfig}
       />
     </>
   );
