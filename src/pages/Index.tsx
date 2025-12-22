@@ -66,13 +66,16 @@ const Index = () => {
     checkExistingToken();
   }, [checkExistingToken]);
   
-  // When Google auth completes and we have a pending answer, proceed with the call
+  // When Google auth completes and we have a pending action, proceed with creating Meet
   useEffect(() => {
     if (pendingAnswer && accessToken) {
       setPendingAnswer(false);
-      proceedWithAnswer();
+      // If QR code is already showing, user was trying to start video - create Meet now
+      if (showVideoCallQR) {
+        handleStartGoogleMeet();
+      }
     }
-  }, [accessToken, pendingAnswer]);
+  }, [accessToken, pendingAnswer, showVideoCallQR]);
 
   const {
     activeCall,
@@ -301,41 +304,7 @@ const Index = () => {
       return;
     }
     
-    // Create the Meet link FIRST before showing QR
-    setIsCreatingMeet(true);
-    toast({
-      title: "Criando Google Meet...",
-      description: "Aguarde enquanto preparamos a chamada",
-    });
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('create-google-meet', {
-        body: { accessToken, propertyName: callState.propertyName || 'Propriedade' },
-      });
-
-      if (error) throw error;
-
-      if (data.meetLink) {
-        setMeetLink(data.meetLink);
-        toast({
-          title: "Google Meet criado!",
-          description: "QR Code pronto para o visitante",
-        });
-      }
-    } catch (error) {
-      console.error('Error creating Google Meet:', error);
-      toast({
-        title: "Erro ao criar Meet",
-        description: "Não foi possível criar a chamada",
-        variant: "destructive",
-      });
-      setIsCreatingMeet(false);
-      return;
-    } finally {
-      setIsCreatingMeet(false);
-    }
-    
-    // Show QR code for visitor to scan (now with meetLink)
+    // Show QR code for visitor to scan (Meet link will be created when user clicks to start video)
     setShowVideoCallQR(true);
     
     if (callState.propertyId && properties) {
@@ -358,7 +327,20 @@ const Index = () => {
   };
 
   const handleAnswer = async () => {
-    // If not authenticated with Google, prompt for auth first
+    // Proceed directly without Google auth - auth will be requested when starting video
+    await proceedWithAnswer();
+  };
+
+  const handleStartGoogleMeet = async () => {
+    // If we already have a meet link, just open it
+    if (meetLink) {
+      window.open(meetLink, '_blank');
+      ownerJoinCall();
+      setWaitingForApproval(true);
+      return;
+    }
+    
+    // Check if authenticated with Google - if not, request auth first
     if (!accessToken) {
       toast({
         title: "Conecte sua conta Google",
@@ -369,26 +351,40 @@ const Index = () => {
       return;
     }
     
-    // If already authenticated, proceed directly
-    await proceedWithAnswer();
-  };
-
-  const handleStartGoogleMeet = async () => {
-    // If we already have a meet link, just open it
-    if (meetLink) {
-      window.open(meetLink, '_blank');
-      ownerJoinCall();
-      setWaitingForApproval(true); // Start the approval reminder
-      return;
-    }
-    
-    setShowVideoCallQR(false);
-    setShowGoogleMeet(true);
-    
+    // Create the Meet link
+    setIsCreatingMeet(true);
     toast({
-      title: "Iniciando Google Meet",
-      description: "Criando reunião...",
+      title: "Criando Google Meet...",
+      description: "Aguarde enquanto preparamos a chamada",
     });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-google-meet', {
+        body: { accessToken, propertyName: callState.propertyName || 'Propriedade' },
+      });
+
+      if (error) throw error;
+
+      if (data.meetLink) {
+        setMeetLink(data.meetLink);
+        window.open(data.meetLink, '_blank');
+        ownerJoinCall();
+        setWaitingForApproval(true);
+        toast({
+          title: "Google Meet criado!",
+          description: "Aprove o visitante quando ele entrar",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating Google Meet:', error);
+      toast({
+        title: "Erro ao criar Meet",
+        description: "Não foi possível criar a chamada. Tente reconectar sua conta Google.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingMeet(false);
+    }
   };
 
   const handleApprovalConfirmed = () => {
