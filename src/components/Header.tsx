@@ -20,7 +20,8 @@ import {
   Heart,
   BellRing,
   BellOff,
-  MessageCircle
+  MessageCircle,
+  RefreshCw
 } from "lucide-react";
 
 // WhatsApp icon component
@@ -161,6 +162,49 @@ export const Header = () => {
       title: "Restaurar Pagamento",
       description: "Verificando suas compras anteriores...",
     });
+  };
+
+  const handleClearCache = async () => {
+    try {
+      // Clear localStorage
+      localStorage.clear();
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      
+      // Clear Service Worker caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+      
+      // Unregister service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(
+          registrations.map(registration => registration.unregister())
+        );
+      }
+      
+      toast({
+        title: "Cache limpo!",
+        description: "O cache do aplicativo foi limpo com sucesso. A página será recarregada.",
+      });
+      
+      // Reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível limpar o cache completamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRingtone = () => {
@@ -358,6 +402,10 @@ export const Header = () => {
                   Apoie o Projeto
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleClearCache}>
+                  <RefreshCw className="w-4 h-4 mr-3" />
+                  Limpar Cache
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleRestorePayment}>
                   <CreditCard className="w-4 h-4 mr-3" />
                   Restaurar Pagamento
