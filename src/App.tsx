@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
@@ -33,14 +33,26 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Component to conditionally show WhatsApp button (hide on visitor call page)
+function ConditionalWhatsAppButton() {
+  const location = useLocation();
+  const isVisitorCallPage = location.pathname.startsWith('/call/');
+  
+  if (isVisitorCallPage) {
+    return null;
+  }
+  
+  return <WhatsAppButton />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <WhatsAppButton />
         <BrowserRouter>
+          <ConditionalWhatsAppButton />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
