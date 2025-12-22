@@ -81,6 +81,7 @@ const Index = () => {
     activeCall,
     visitorJoinedCall,
     createCall,
+    fetchCallByRoomName,
     ownerJoinCall,
     endCall: endVideoCall,
     setVisitorJoinedCall,
@@ -271,17 +272,34 @@ const Index = () => {
     };
   }, [user, toast]);
 
-  // Function to notify visitor that owner answered
+  // Function to notify visitor that owner answered and show video interface
   const handleAnswerDoorbell = async () => {
     if (currentDoorbellRoomName) {
       try {
+        // Update status to answered
         await supabase
           .from('video_calls')
           .update({ status: 'answered' })
           .eq('room_name', currentDoorbellRoomName);
         console.log('Visitor notified - owner answered');
+        
+        // Fetch the existing call to show the video interface
+        const existingCall = await fetchCallByRoomName(currentDoorbellRoomName);
+        if (existingCall) {
+          // Show the video call QR/Meet interface
+          setShowVideoCallQR(true);
+          toast({
+            title: "Chamada atendida!",
+            description: "Inicie a videochamada para falar com o visitante",
+          });
+        }
       } catch (error) {
         console.error('Error notifying visitor:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível atender a chamada",
+          variant: "destructive",
+        });
       }
     }
     setDoorbellRinging(false);

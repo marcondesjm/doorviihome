@@ -105,6 +105,30 @@ export const useVideoCalls = () => {
     }
   }, [user, toast]);
 
+  // Fetch an existing call by room name (for when visitor rings doorbell)
+  const fetchCallByRoomName = useCallback(async (roomName: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('video_calls')
+        .select('*')
+        .eq('room_name', roomName)
+        .single();
+
+      if (error) {
+        console.error('Error fetching call:', error);
+        return null;
+      }
+
+      console.log('Fetched existing call:', data);
+      setActiveCall(data);
+      setVisitorJoinedCall(data.visitor_joined || false);
+      return data;
+    } catch (err) {
+      console.error('Exception fetching call:', err);
+      return null;
+    }
+  }, []);
+
   // Owner joins the call
   const ownerJoinCall = useCallback(async () => {
     if (!activeCall?.id) return;
@@ -158,6 +182,7 @@ export const useVideoCalls = () => {
     activeCall,
     visitorJoinedCall,
     createCall,
+    fetchCallByRoomName,
     ownerJoinCall,
     endCall,
     setVisitorJoinedCall,
