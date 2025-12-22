@@ -367,6 +367,15 @@ const Index = () => {
 
       if (data.meetLink) {
         setMeetLink(data.meetLink);
+        
+        // Save meet_link to database for visitor to receive via realtime
+        if (activeCall?.id) {
+          await supabase
+            .from('video_calls')
+            .update({ meet_link: data.meetLink } as any)
+            .eq('id', activeCall.id);
+        }
+        
         window.open(data.meetLink, '_blank');
         ownerJoinCall();
         setWaitingForApproval(true);

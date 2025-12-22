@@ -292,6 +292,7 @@ export type Database = {
           created_at: string
           ended_at: string | null
           id: string
+          meet_link: string | null
           owner_id: string
           owner_joined: boolean | null
           property_id: string | null
@@ -306,6 +307,7 @@ export type Database = {
           created_at?: string
           ended_at?: string | null
           id?: string
+          meet_link?: string | null
           owner_id: string
           owner_joined?: boolean | null
           property_id?: string | null
@@ -320,6 +322,7 @@ export type Database = {
           created_at?: string
           ended_at?: string | null
           id?: string
+          meet_link?: string | null
           owner_id?: string
           owner_joined?: boolean | null
           property_id?: string | null

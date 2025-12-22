@@ -38,35 +38,36 @@ const VisitorCall = () => {
     const fetchCallStatus = async () => {
       const { data, error } = await supabase
         .from('video_calls')
-        .select('owner_joined, status, audio_message_url, meet_link')
+        .select('*')
         .eq('room_name', roomName)
         .maybeSingle();
 
       if (!error && data) {
         console.log('Initial call status:', data);
+        const callData = data as any;
         
         // Update meet link if available from database
-        if (data.meet_link && !meetLink) {
-          setMeetLink(data.meet_link);
+        if (callData.meet_link && !meetLink) {
+          setMeetLink(callData.meet_link);
         }
         
-        if (data.owner_joined) {
+        if (callData.owner_joined) {
           setCallStatus('video_call');
-        } else if (data.status === 'audio_message' && data.audio_message_url) {
+        } else if (callData.status === 'audio_message' && callData.audio_message_url) {
           setCallStatus('audio_message');
           // Add initial audio message
           setAudioMessages(prev => {
-            const exists = prev.some(m => m.url === data.audio_message_url);
+            const exists = prev.some(m => m.url === callData.audio_message_url);
             if (!exists) {
-              return [...prev, { url: data.audio_message_url, timestamp: Date.now() }];
+              return [...prev, { url: callData.audio_message_url, timestamp: Date.now() }];
             }
             return prev;
           });
-        } else if (data.status === 'doorbell_ringing') {
+        } else if (callData.status === 'doorbell_ringing') {
           setCallStatus('ringing');
-        } else if (data.status === 'answered') {
+        } else if (callData.status === 'answered') {
           setCallStatus('answered');
-        } else if (data.status === 'ended') {
+        } else if (callData.status === 'ended') {
           setCallStatus('ended');
         }
       }
