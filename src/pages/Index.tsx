@@ -16,6 +16,7 @@ import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
 import { EnableNotificationsDialog } from "@/components/EnableNotificationsDialog";
 import { InstallAppDialog } from "@/components/InstallAppDialog";
+import { KeepAppOpenAlert } from "@/components/KeepAppOpenAlert";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -716,6 +717,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <KeepAppOpenAlert />
 
       <main className="container mx-auto px-4 py-8">
         <motion.div
