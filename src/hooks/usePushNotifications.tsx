@@ -64,12 +64,23 @@ export function usePushNotifications() {
 
     setLoading(true);
     try {
-      // Request notification permission
-      const permission = await Notification.requestPermission();
-      setPermission(permission);
+      // Check if permission was previously denied
+      if (Notification.permission === 'denied') {
+        toast.error('Notificações bloqueadas. Vá nas configurações do navegador para permitir notificações para este site.');
+        setLoading(false);
+        return false;
+      }
       
-      if (permission !== 'granted') {
-        toast.error('Permissão de notificação negada');
+      // Request notification permission
+      const newPermission = await Notification.requestPermission();
+      setPermission(newPermission);
+      
+      if (newPermission !== 'granted') {
+        if (newPermission === 'denied') {
+          toast.error('Notificações bloqueadas. Para ativar, vá nas configurações do navegador e permita notificações para este site.');
+        } else {
+          toast.error('Permissão de notificação não concedida');
+        }
         return false;
       }
 

@@ -63,7 +63,7 @@ export const Header = () => {
   const [showAboutCreator, setShowAboutCreator] = useState(false);
   const [showSupportProject, setShowSupportProject] = useState(false);
   
-  const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe } = usePushNotifications();
+  const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe, permission } = usePushNotifications();
 
   const handleSignOut = async () => {
     await signOut();
@@ -230,8 +230,18 @@ export const Header = () => {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-popover">
-                {isSupported && !isSubscribed ? (
+              <DropdownMenuContent align="end" className="w-64 bg-popover">
+                {isSupported && permission === 'denied' ? (
+                  <div className="px-3 py-3 text-sm">
+                    <div className="flex items-center gap-2 text-destructive mb-2">
+                      <BellOff className="w-4 h-4" />
+                      <span className="font-medium">Notificações bloqueadas</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Para ativar, toque nos 3 pontos do navegador → Configurações → Notificações → Permitir para este site
+                    </p>
+                  </div>
+                ) : isSupported && !isSubscribed ? (
                   <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
                     <BellRing className="w-4 h-4 mr-2" />
                     Ativar Notificações
