@@ -225,6 +225,14 @@ const Index = () => {
                 .eq('id', payload.new.property_id);
             }
             
+            // Register activity log for doorbell
+            addActivity.mutate({
+              property_id: payload.new.property_id || undefined,
+              type: 'doorbell',
+              title: 'Campainha tocou',
+              property_name: payload.new.property_name || 'Propriedade',
+            });
+            
             // Vibrate phone if supported
             if ('vibrate' in navigator) {
               // Vibration pattern: vibrate 500ms, pause 200ms, vibrate 500ms
