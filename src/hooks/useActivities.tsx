@@ -45,13 +45,19 @@ export function useActivities() {
   return useQuery({
     queryKey: ['activities', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+      
       const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching activities:', error);
+        throw error;
+      }
       return data as ActivityLog[];
     },
     enabled: !!user
@@ -89,12 +95,18 @@ export function useAllActivities() {
   return useQuery({
     queryKey: ['all-activities', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+      
       const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching all activities:', error);
+        throw error;
+      }
       return data as ActivityLog[];
     },
     enabled: !!user
