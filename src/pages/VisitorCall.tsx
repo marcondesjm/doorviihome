@@ -257,6 +257,13 @@ const VisitorCall = () => {
     setCallStatus('ringing');
     
     try {
+      // Get the call to find the owner_id
+      const { data: callData } = await supabase
+        .from('video_calls')
+        .select('owner_id, property_name')
+        .eq('room_name', roomName)
+        .maybeSingle();
+      
       const { error } = await supabase
         .from('video_calls')
         .update({
@@ -270,6 +277,18 @@ const VisitorCall = () => {
         setCallStatus('waiting');
       } else {
         toast.success('Campainha tocando! Aguarde o morador atender...');
+        
+        // Send push notification to owner
+        if (callData?.owner_id) {
+          supabase.functions.invoke('send-push-notification', {
+            body: {
+              userId: callData.owner_id,
+              title: '🔔 Campainha tocando!',
+              body: `Visitante na porta - ${callData.property_name || propertyName}`,
+              data: { roomName, propertyName: callData.property_name || propertyName },
+            },
+          }).catch(err => console.error('Error sending push notification:', err));
+        }
       }
     } catch (err) {
       console.error('Error:', err);
