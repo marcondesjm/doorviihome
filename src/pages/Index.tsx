@@ -45,6 +45,7 @@ const Index = () => {
   const [isCreatingMeet, setIsCreatingMeet] = useState(false);
   const [waitingForApproval, setWaitingForApproval] = useState(false);
   const [doorbellRinging, setDoorbellRinging] = useState(false);
+  const [doorbellAnswered, setDoorbellAnswered] = useState(false);
   const [doorbellInterval, setDoorbellInterval] = useState<NodeJS.Timeout | null>(null);
   const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
   const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
@@ -272,15 +273,15 @@ const Index = () => {
     };
   }, [user, toast]);
 
-  // Function to notify visitor that owner answered and show video interface
+  // Function to notify visitor that owner answered - keeps the interface open
   const handleAnswerDoorbell = async () => {
     if (!currentDoorbellRoomName) {
       setDoorbellRinging(false);
+      setDoorbellAnswered(false);
       return;
     }
     
-    // Stop the doorbell sound immediately
-    setDoorbellRinging(false);
+    // Stop the doorbell sound but keep interface visible
     if (doorbellInterval) {
       clearInterval(doorbellInterval);
       setDoorbellInterval(null);
@@ -299,17 +300,16 @@ const Index = () => {
         .eq('room_name', roomNameToFetch);
       console.log('Visitor notified - owner answered');
       
-      // Fetch the existing call to show the video interface
+      // Fetch the existing call
       const existingCall = await fetchCallByRoomName(roomNameToFetch);
       console.log('Fetched call after answering:', existingCall);
       
       if (existingCall) {
-        // Show the video call QR/Meet interface - this MUST happen
-        setShowVideoCallQR(true);
-        console.log('showVideoCallQR set to true, activeCall:', existingCall);
+        // Mark as answered but keep interface visible
+        setDoorbellAnswered(true);
         toast({
           title: "Chamada atendida!",
-          description: "Inicie a videochamada para falar com o visitante",
+          description: "Escolha como deseja se comunicar com o visitante",
         });
       } else {
         console.error('No call found for room:', roomNameToFetch);
@@ -326,6 +326,17 @@ const Index = () => {
         description: "Não foi possível atender a chamada",
         variant: "destructive",
       });
+    }
+  };
+
+  // Close the doorbell interface completely
+  const handleCloseDoorbell = () => {
+    setDoorbellRinging(false);
+    setDoorbellAnswered(false);
+    setShowAudioRecorder(false);
+    setCurrentDoorbellRoomName(null);
+    if (activeCall) {
+      endCall();
     }
   };
 
@@ -915,9 +926,9 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      {/* Doorbell Ringing Alert */}
+      {/* Doorbell Ringing/Answered Alert */}
       <AnimatePresence>
-        {doorbellRinging && (
+        {(doorbellRinging || doorbellAnswered) && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -927,71 +938,162 @@ const Index = () => {
             <motion.div
               initial={{ y: 20 }}
               animate={{ y: 0 }}
-              className="bg-amber-500 text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-xs text-center"
+              className={`${doorbellAnswered ? 'bg-emerald-600' : 'bg-amber-500'} text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-sm text-center`}
             >
-              {!showAudioRecorder ? (
+              {/* Close button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/20"
+                onClick={handleCloseDoorbell}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+
+              {!doorbellAnswered ? (
+                // Doorbell is ringing - show answer options
+                !showAudioRecorder ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
+                      transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+                    >
+                      <Bell className="w-10 h-10 animate-bounce" />
+                    </motion.div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-xl">Campainha tocando!</span>
+                      <span className="text-sm text-white/80">{doorbellPropertyName}</span>
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="bg-white text-amber-600 hover:bg-white/90 w-full"
+                        onClick={handleAnswerDoorbell}
+                      >
+                        <Phone className="w-5 h-5 mr-2" />
+                        Atender
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/80 hover:text-white hover:bg-white/20 w-full"
+                        onClick={() => setShowAudioRecorder(true)}
+                      >
+                        <Mic className="w-4 h-4 mr-2" />
+                        Enviar áudio
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-lg">Gravar mensagem de áudio</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/70 hover:text-white hover:bg-white/20 -mr-2"
+                        onClick={() => setShowAudioRecorder(false)}
+                      >
+                        Voltar
+                      </Button>
+                    </div>
+                    <AudioRecorder
+                      roomName={currentDoorbellRoomName || ''}
+                      onAudioSent={() => {
+                        // Keep the recorder open to allow sending more messages
+                      }}
+                      compact
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="bg-white text-amber-600 hover:bg-white/90 w-full mt-3"
+                      onClick={handleAnswerDoorbell}
+                    >
+                      <Phone className="w-4 h-4 mr-2" />
+                      Ir atender
+                    </Button>
+                  </div>
+                )
+              ) : (
+                // Doorbell answered - show communication options
                 <>
                   <motion.div
-                    animate={{ rotate: [0, -15, 15, -15, 15, 0] }}
-                    transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center"
                   >
-                    <Bell className="w-10 h-10 animate-bounce" />
+                    <Phone className="w-8 h-8" />
                   </motion.div>
                   <div className="flex flex-col">
-                    <span className="font-bold text-xl">Campainha tocando!</span>
+                    <span className="font-bold text-xl">Chamada atendida!</span>
                     <span className="text-sm text-white/80">{doorbellPropertyName}</span>
                   </div>
-                  <div className="flex flex-col gap-2 w-full">
+                  
+                  <div className="flex flex-col gap-3 w-full">
+                    {/* Video Call Option */}
                     <Button
                       variant="secondary"
                       size="lg"
-                      className="bg-white text-amber-600 hover:bg-white/90 w-full"
-                      onClick={handleAnswerDoorbell}
+                      className="bg-white text-emerald-600 hover:bg-white/90 w-full"
+                      onClick={() => {
+                        setShowVideoCallQR(true);
+                        handleCloseDoorbell();
+                      }}
                     >
-                      <Phone className="w-5 h-5 mr-2" />
-                      Atender
+                      <Video className="w-5 h-5 mr-2" />
+                      Iniciar videochamada
                     </Button>
+                    
+                    {/* Audio Message Option */}
+                    {!showAudioRecorder ? (
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        className="text-white hover:bg-white/20 w-full border border-white/30"
+                        onClick={() => setShowAudioRecorder(true)}
+                      >
+                        <Mic className="w-5 h-5 mr-2" />
+                        Enviar áudio
+                      </Button>
+                    ) : (
+                      <div className="bg-white/10 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Gravar mensagem</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-white/70 hover:text-white hover:bg-white/20 h-7 px-2"
+                            onClick={() => setShowAudioRecorder(false)}
+                          >
+                            Fechar
+                          </Button>
+                        </div>
+                        <AudioRecorder
+                          roomName={currentDoorbellRoomName || activeCall?.room_name || ''}
+                          onAudioSent={() => {
+                            toast({
+                              title: "Áudio enviado!",
+                              description: "O visitante receberá sua mensagem",
+                            });
+                          }}
+                          compact
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Close/End Option */}
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white/80 hover:text-white hover:bg-white/20 w-full"
-                      onClick={() => setShowAudioRecorder(true)}
+                      className="text-white/60 hover:text-white hover:bg-white/10"
+                      onClick={handleCloseDoorbell}
                     >
-                      <Mic className="w-4 h-4 mr-2" />
-                      Enviar áudio
+                      Encerrar
                     </Button>
                   </div>
                 </>
-              ) : (
-                <div className="w-full">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-lg">Gravar mensagem de áudio</h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white/70 hover:text-white hover:bg-white/20 -mr-2"
-                      onClick={() => setShowAudioRecorder(false)}
-                    >
-                      Voltar
-                    </Button>
-                  </div>
-                  <AudioRecorder
-                    roomName={currentDoorbellRoomName || ''}
-                    onAudioSent={() => {
-                      // Keep the recorder open to allow sending more messages
-                    }}
-                    compact
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="bg-white text-amber-600 hover:bg-white/90 w-full mt-3"
-                    onClick={handleAnswerDoorbell}
-                  >
-                    <Phone className="w-4 h-4 mr-2" />
-                    Ir atender
-                  </Button>
-                </div>
               )}
             </motion.div>
           </motion.div>
