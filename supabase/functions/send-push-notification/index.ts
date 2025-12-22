@@ -342,11 +342,6 @@ serve(async (req) => {
       body,
       icon: '/pwa-192x192.png',
       badge: '/pwa-192x192.png',
-      tag: 'doorbell-notification',
-      renotify: true,
-      requireInteraction: true,
-      silent: false,
-      vibrate: [300, 100, 300, 100, 300],
       data,
     });
 
