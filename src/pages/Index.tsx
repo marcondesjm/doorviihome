@@ -897,10 +897,10 @@ const Index = () => {
             <AnimatePresence>
               {showQRCode && latestAccessCode && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <div className="max-w-sm mx-auto">
                     <QRCodeAccess
