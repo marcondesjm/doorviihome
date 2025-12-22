@@ -133,11 +133,11 @@ const Home = () => {
           </motion.div>
           <div className="flex items-center gap-3">
             {user ? (
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button onClick={() => navigate("/dashboard")} className="gap-2">
-                  Acessar Painel <ArrowRight className="w-4 h-4" />
-                </Button>
-              </motion.div>
+              (() => {
+                // Auto-redirect logged users to dashboard
+                navigate("/dashboard", { replace: true });
+                return null;
+              })()
             ) : (
               <>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
