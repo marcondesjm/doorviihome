@@ -17,7 +17,9 @@ import {
   Trash2,
   UserPlus,
   Info,
-  Heart
+  Heart,
+  BellRing,
+  BellOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +38,7 @@ import { JoinAsMemberDialog } from "./JoinAsMemberDialog";
 import { InviteMemberDialog } from "./InviteMemberDialog";
 import { AboutCreatorDialog } from "./AboutCreatorDialog";
 import { SupportProjectDialog } from "./SupportProjectDialog";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,6 +62,8 @@ export const Header = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showAboutCreator, setShowAboutCreator] = useState(false);
   const [showSupportProject, setShowSupportProject] = useState(false);
+  
+  const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe } = usePushNotifications();
 
   const handleSignOut = async () => {
     await signOut();
@@ -157,6 +162,16 @@ export const Header = () => {
     setShowJoinMember(true);
   };
 
+  const handleToggleNotifications = async () => {
+    if (notificationLoading) return;
+    
+    if (isSubscribed) {
+      await unsubscribe();
+    } else {
+      await subscribe();
+    }
+  };
+
   return (
     <>
       <motion.header
@@ -241,6 +256,21 @@ export const Header = () => {
                   Indique o DoorVii Home aos amigos
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                {isSupported && (
+                  <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
+                    {isSubscribed ? (
+                      <>
+                        <BellOff className="w-4 h-4 mr-3" />
+                        Desativar Notificações
+                      </>
+                    ) : (
+                      <>
+                        <BellRing className="w-4 h-4 mr-3" />
+                        Ativar Notificações
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleRingtone}>
                   <Volume2 className="w-4 h-4 mr-3" />
                   Som de Toque
