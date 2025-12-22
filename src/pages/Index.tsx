@@ -856,7 +856,7 @@ const Index = () => {
         {showVideoCallQR && activeCall && (
           <VideoCallQRCode
             roomName={activeCall.room_name}
-            propertyName={callState.propertyName || "Sua Propriedade"}
+            propertyName={activeCall.property_name || callState.propertyName || "Sua Propriedade"}
             onClose={() => {
               setShowVideoCallQR(false);
               endCall();

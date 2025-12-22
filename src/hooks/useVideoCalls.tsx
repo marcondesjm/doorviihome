@@ -106,7 +106,7 @@ export const useVideoCalls = () => {
   }, [user, toast]);
 
   // Fetch an existing call by room name (for when visitor rings doorbell)
-  const fetchCallByRoomName = useCallback(async (roomName: string) => {
+  const fetchCallByRoomName = useCallback(async (roomName: string): Promise<VideoCall | null> => {
     try {
       const { data, error } = await supabase
         .from('video_calls')
@@ -119,10 +119,30 @@ export const useVideoCalls = () => {
         return null;
       }
 
-      console.log('Fetched existing call:', data);
-      setActiveCall(data);
-      setVisitorJoinedCall(data.visitor_joined || false);
-      return data;
+      if (!data) {
+        console.log('No call found for room:', roomName);
+        return null;
+      }
+
+      const callData: VideoCall = {
+        id: data.id,
+        room_name: data.room_name,
+        property_id: data.property_id,
+        property_name: data.property_name,
+        owner_id: data.owner_id,
+        visitor_joined: data.visitor_joined || false,
+        owner_joined: data.owner_joined || false,
+        status: data.status,
+        created_at: data.created_at,
+        ended_at: data.ended_at,
+        audio_message_url: data.audio_message_url,
+        visitor_audio_url: data.visitor_audio_url,
+      };
+
+      console.log('Fetched existing call:', callData);
+      setActiveCall(callData);
+      setVisitorJoinedCall(callData.visitor_joined);
+      return callData;
     } catch (err) {
       console.error('Exception fetching call:', err);
       return null;
