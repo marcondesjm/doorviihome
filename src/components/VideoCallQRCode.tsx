@@ -66,7 +66,7 @@ export const VideoCallQRCode = ({
   const [showAddIcon, setShowAddIcon] = useState(false);
   const [editingIcon, setEditingIcon] = useState<DeliveryIcon | null>(null);
 
-  const { deliveryIcons, dbIcons, addIcon, updateIcon, removeIcon } = useDeliveryIcons();
+  const { deliveryIcons, addIcon, updateIcon, removeIcon, hideDefaultIcon, hiddenDefaults, restoreAllDefaults } = useDeliveryIcons();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -120,11 +120,22 @@ export const VideoCallQRCode = ({
     }
   };
 
-  const handleEditDeliveryIcon = (icon: DeliveryIcon) => {
-    setEditingIcon(icon);
-    setNewIconName(icon.name);
-    setNewIconUrl(icon.url);
-    setShowAddIcon(true);
+  const handleEditDeliveryIcon = async (icon: DeliveryIcon) => {
+    const isDefaultIcon = defaultDeliveryIcons.some(d => d.id === icon.id);
+    
+    if (isDefaultIcon) {
+      // For default icons, we'll create a new custom one with the same data
+      // and hide the default
+      setEditingIcon({ ...icon, id: `custom-${icon.id}` }); // Mark as custom copy
+      setNewIconName(icon.name);
+      setNewIconUrl(icon.url);
+      setShowAddIcon(true);
+    } else {
+      setEditingIcon(icon);
+      setNewIconName(icon.name);
+      setNewIconUrl(icon.url);
+      setShowAddIcon(true);
+    }
   };
 
   const handleUpdateDeliveryIcon = async () => {
@@ -137,21 +148,39 @@ export const VideoCallQRCode = ({
       return;
     }
     
+    // Check if editing a default icon (ID starts with "custom-")
+    const isEditingDefault = editingIcon.id.startsWith("custom-");
+    const originalDefaultId = isEditingDefault ? editingIcon.id.replace("custom-", "") : null;
+    
     try {
-      await updateIcon.mutateAsync({
-        id: editingIcon.id,
-        name: newIconName.trim(),
-        url: newIconUrl.trim(),
-      });
+      if (isEditingDefault && originalDefaultId) {
+        // Create new custom icon and hide the default
+        await addIcon.mutateAsync({
+          name: newIconName.trim(),
+          url: newIconUrl.trim(),
+        });
+        hideDefaultIcon(originalDefaultId);
+        toast({
+          title: "Ícone personalizado!",
+          description: `${newIconName.trim()} foi personalizado com sucesso`,
+        });
+      } else {
+        // Regular update for custom icons
+        await updateIcon.mutateAsync({
+          id: editingIcon.id,
+          name: newIconName.trim(),
+          url: newIconUrl.trim(),
+        });
+        toast({
+          title: "Ícone atualizado!",
+          description: `${newIconName.trim()} foi atualizado com sucesso`,
+        });
+      }
       
       setNewIconName("");
       setNewIconUrl("");
       setShowAddIcon(false);
       setEditingIcon(null);
-      toast({
-        title: "Ícone atualizado!",
-        description: `${newIconName.trim()} foi atualizado com sucesso`,
-      });
     } catch (error) {
       toast({
         title: "Erro ao atualizar",
@@ -162,13 +191,14 @@ export const VideoCallQRCode = ({
   };
 
   const handleRemoveDeliveryIcon = async (id: string) => {
-    // Check if it's a default icon (cannot be removed)
     const isDefaultIcon = defaultDeliveryIcons.some(icon => icon.id === id);
+    
     if (isDefaultIcon) {
+      // Hide the default icon instead of deleting
+      hideDefaultIcon(id);
       toast({
-        title: "Não é possível remover",
-        description: "Este é um ícone padrão do sistema",
-        variant: "destructive",
+        title: "Ícone ocultado",
+        description: "O ícone padrão foi ocultado. Use 'Restaurar padrões' para trazer de volta.",
       });
       return;
     }
@@ -601,29 +631,28 @@ export const VideoCallQRCode = ({
                             }}
                           />
                           <span className="flex-1 text-sm">{icon.name}</span>
-                          {isDefaultIcon ? (
-                            <span className="text-xs text-muted-foreground">Padrão</span>
-                          ) : (
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-muted-foreground hover:text-primary"
-                                onClick={() => handleEditDeliveryIcon(icon)}
-                              >
-                                <Pencil className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
-                                onClick={() => handleRemoveDeliveryIcon(icon.id)}
-                                disabled={removeIcon.isPending}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {isDefaultIcon && (
+                              <span className="text-xs text-muted-foreground mr-1">Padrão</span>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-muted-foreground hover:text-primary"
+                              onClick={() => handleEditDeliveryIcon(icon)}
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                              disabled={removeIcon.isPending}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </div>
                       );
                     })}
@@ -634,6 +663,24 @@ export const VideoCallQRCode = ({
                       </p>
                     )}
                   </div>
+                  
+                  {/* Restore defaults button */}
+                  {hiddenDefaults.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-xs text-muted-foreground"
+                      onClick={() => {
+                        restoreAllDefaults();
+                        toast({
+                          title: "Padrões restaurados",
+                          description: "Os ícones padrão foram restaurados",
+                        });
+                      }}
+                    >
+                      Restaurar ícones padrão ({hiddenDefaults.length} oculto{hiddenDefaults.length > 1 ? 's' : ''})
+                    </Button>
+                  )}
                 </div>
                 
                 {/* Add/Edit Icon Form */}
