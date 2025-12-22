@@ -2,10 +2,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { defaultDeliveryIcons, DeliveryIcon } from "@/components/StyledQRCode";
+import { useState, useEffect } from "react";
+
+const HIDDEN_DEFAULTS_KEY = "hidden-default-delivery-icons";
 
 export const useDeliveryIcons = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [hiddenDefaults, setHiddenDefaults] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(HIDDEN_DEFAULTS_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  // Save hidden defaults to localStorage
+  useEffect(() => {
+    localStorage.setItem(HIDDEN_DEFAULTS_KEY, JSON.stringify(hiddenDefaults));
+  }, [hiddenDefaults]);
 
   const { data: dbIcons = [], isLoading } = useQuery({
     queryKey: ["delivery-icons", user?.id],
@@ -29,8 +44,11 @@ export const useDeliveryIcons = () => {
     enabled: !!user,
   });
 
-  // Combine default icons with user's custom icons
-  const deliveryIcons = [...defaultDeliveryIcons, ...dbIcons];
+  // Filter out hidden default icons and combine with user's custom icons
+  const visibleDefaults = defaultDeliveryIcons.filter(
+    icon => !hiddenDefaults.includes(icon.id)
+  );
+  const deliveryIcons = [...visibleDefaults, ...dbIcons];
 
   const addIcon = useMutation({
     mutationFn: async ({ name, url }: { name: string; url: string }) => {
@@ -91,12 +109,31 @@ export const useDeliveryIcons = () => {
     },
   });
 
+  // Hide a default icon (for "deleting" defaults)
+  const hideDefaultIcon = (iconId: string) => {
+    setHiddenDefaults(prev => [...prev, iconId]);
+  };
+
+  // Restore a hidden default icon
+  const restoreDefaultIcon = (iconId: string) => {
+    setHiddenDefaults(prev => prev.filter(id => id !== iconId));
+  };
+
+  // Restore all hidden defaults
+  const restoreAllDefaults = () => {
+    setHiddenDefaults([]);
+  };
+
   return {
     deliveryIcons,
     dbIcons,
+    hiddenDefaults,
     isLoading,
     addIcon,
     updateIcon,
     removeIcon,
+    hideDefaultIcon,
+    restoreDefaultIcon,
+    restoreAllDefaults,
   };
 };
