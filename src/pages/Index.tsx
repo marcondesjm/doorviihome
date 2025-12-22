@@ -678,14 +678,18 @@ const Index = () => {
                       name={property.name}
                       address={property.address}
                       isOnline={property.is_online}
+                      visitorAlwaysConnected={property.visitor_always_connected}
                       lastActivity={`Adicionada ${formatDistanceToNow(new Date(property.created_at), { locale: ptBR, addSuffix: true })}`}
                       imageUrl={property.image_url || defaultImages[index % defaultImages.length]}
                       onViewLive={() => handleViewLive(property.id, property.name)}
                       onUpdate={(id, data) => {
                         updateProperty.mutate({ propertyId: id, data });
+                        const message = data.visitor_always_connected !== undefined
+                          ? (data.visitor_always_connected ? "Visitante sempre conectado ativado!" : "Visitante sempre conectado desativado!")
+                          : "As alterações foram salvas com sucesso.";
                         toast({
                           title: "Propriedade atualizada",
-                          description: "As alterações foram salvas com sucesso.",
+                          description: message,
                         });
                       }}
                       onDelete={(id) => {

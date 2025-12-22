@@ -154,6 +154,7 @@ export type Database = {
           name: string
           updated_at: string
           user_id: string
+          visitor_always_connected: boolean | null
         }
         Insert: {
           address: string
@@ -164,6 +165,7 @@ export type Database = {
           name: string
           updated_at?: string
           user_id: string
+          visitor_always_connected?: boolean | null
         }
         Update: {
           address?: string
@@ -174,6 +176,7 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+          visitor_always_connected?: boolean | null
         }
         Relationships: []
       }

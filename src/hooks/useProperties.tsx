@@ -9,6 +9,7 @@ export interface Property {
   address: string;
   image_url: string | null;
   is_online: boolean;
+  visitor_always_connected: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -62,7 +63,7 @@ export function useUpdateProperty() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ propertyId, data }: { propertyId: string; data: { name?: string; image_url?: string } }) => {
+    mutationFn: async ({ propertyId, data }: { propertyId: string; data: { name?: string; image_url?: string; visitor_always_connected?: boolean } }) => {
       const { error } = await supabase
         .from('properties')
         .update(data)
