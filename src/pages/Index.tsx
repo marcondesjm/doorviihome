@@ -274,6 +274,7 @@ const Index = () => {
   }, [user, toast]);
 
   // Listen for visitor scans on properties with visitor_always_connected enabled
+  // This only updates property online status - doorbell notification happens when visitor explicitly rings
   useEffect(() => {
     if (!user || !properties) return;
 
@@ -286,39 +287,14 @@ const Index = () => {
     const handleVisitorConnected = async (newData: any, property: any) => {
       console.log('Visitor scanned QR for always-connected property:', property.name);
       
-      // Automatically trigger the doorbell/notification
-      setDoorbellRinging(true);
-      setDoorbellPropertyName(newData.property_name || property.name);
-      setCurrentDoorbellRoomName(newData.room_name || null);
-      
-      // Update property status to online
+      // Only update property status to online - do NOT trigger doorbell
+      // The visitor must explicitly press the doorbell button to notify the owner
       await supabase
         .from('properties')
         .update({ is_online: true })
         .eq('id', property.id);
       
-      // Vibrate phone if supported
-      if ('vibrate' in navigator) {
-        navigator.vibrate([500, 200, 500, 200, 500]);
-      }
-      
-      // Play sound immediately
-      playDoorbellSound();
-      
-      // Keep playing sound and vibrating every 2 seconds
-      const interval = setInterval(() => {
-        playDoorbellSound();
-        if ('vibrate' in navigator) {
-          navigator.vibrate([500, 200, 500]);
-        }
-      }, 2000);
-      doorbellIntervalRef.current = interval;
-
-      toast({
-        title: "🔔 Visitante conectado!",
-        description: `Visitante escaneou o QR Code - ${property.name}`,
-        duration: 10000,
-      });
+      console.log('Property online status updated. Waiting for visitor to ring doorbell.');
     };
 
     const channel = supabase
