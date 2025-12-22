@@ -1053,6 +1053,20 @@ const Index = () => {
                   )}
                   
                   <div className="flex flex-col gap-3 w-full">
+                    {/* Video Call Option */}
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="bg-white text-emerald-600 hover:bg-white/90 w-full"
+                      onClick={() => {
+                        setShowVideoCallQR(true);
+                        handleCloseDoorbell();
+                      }}
+                    >
+                      <Video className="w-5 h-5 mr-2" />
+                      Iniciar videochamada
+                    </Button>
+                    
                     {/* Audio Message Option */}
                     {!showAudioRecorder ? (
                       <Button
