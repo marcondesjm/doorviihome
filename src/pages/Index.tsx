@@ -463,13 +463,31 @@ const Index = () => {
     });
   };
 
-  const handleViewLive = (propertyId: string, propertyName: string) => {
-    startIncomingCall(propertyId, propertyName, 'Visitante');
-    addActivity.mutate({
-      property_id: propertyId,
-      type: 'doorbell',
-      title: 'Campainha tocou',
-      property_name: propertyName
+  const handleViewLive = async (propertyId: string, propertyName: string) => {
+    // Create a video call session and show QR code for visitor to scan
+    const newCall = await createCall(propertyId, propertyName);
+    
+    if (!newCall) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível conectar à campainha. Tente novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Update property to online
+    await supabase
+      .from('properties')
+      .update({ is_online: true })
+      .eq('id', propertyId);
+    
+    // Show QR code for visitor to scan
+    setShowVideoCallQR(true);
+    
+    toast({
+      title: "Campainha conectada!",
+      description: "Agora os visitantes podem escanear o QR Code para chamar você.",
     });
   };
 
