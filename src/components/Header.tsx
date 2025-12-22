@@ -221,10 +221,40 @@ export const Header = () => {
             >
               <QrCode className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="w-5 h-5" />
+                  {!isSubscribed && isSupported && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-popover">
+                {isSupported && !isSubscribed ? (
+                  <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
+                    <BellRing className="w-4 h-4 mr-2" />
+                    Ativar Notificações
+                  </DropdownMenuItem>
+                ) : isSupported && isSubscribed ? (
+                  <>
+                    <div className="px-3 py-2 flex items-center gap-2 text-sm text-green-500">
+                      <Bell className="w-4 h-4" />
+                      Notificações ativadas
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
+                      <BellOff className="w-4 h-4 mr-2" />
+                      Desativar Notificações
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">
+                    Notificações não suportadas neste navegador
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {/* Settings Menu */}
             <DropdownMenu>
