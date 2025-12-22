@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Home, Bell, Video, MoreVertical, Pencil, Camera, Trash2 } from "lucide-react";
+import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,10 +35,11 @@ interface PropertyCardProps {
   name: string;
   address: string;
   isOnline: boolean;
+  visitorAlwaysConnected?: boolean;
   lastActivity?: string;
   imageUrl?: string;
   onViewLive: () => void;
-  onUpdate?: (id: string, data: { name?: string; image_url?: string }) => void;
+  onUpdate?: (id: string, data: { name?: string; image_url?: string; visitor_always_connected?: boolean }) => void;
   onDelete?: (id: string) => void;
 }
 
@@ -47,6 +48,7 @@ export const PropertyCard = ({
   name,
   address,
   isOnline,
+  visitorAlwaysConnected = false,
   lastActivity,
   imageUrl,
   onViewLive,
@@ -149,6 +151,18 @@ export const PropertyCard = ({
                 }}>
                   <Camera className="w-4 h-4 mr-2" />
                   Alterar foto
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onUpdate) {
+                      onUpdate(id, { visitor_always_connected: !visitorAlwaysConnected });
+                    }
+                  }}
+                  className={visitorAlwaysConnected ? "text-success focus:text-success" : ""}
+                >
+                  <UserCheck className="w-4 h-4 mr-2" />
+                  {visitorAlwaysConnected ? "Desativar" : "Ativar"} visitante sempre conectado
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 

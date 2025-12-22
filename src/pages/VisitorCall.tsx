@@ -26,6 +26,7 @@ const VisitorCall = () => {
   const [audioMessages, setAudioMessages] = useState<AudioMessage[]>([]);
   const [currentPlayingIndex, setCurrentPlayingIndex] = useState<number | null>(null);
   const [meetLink, setMeetLink] = useState<string | null>(initialMeetLink);
+  const [visitorAlwaysConnected, setVisitorAlwaysConnected] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Subscribe to real-time updates for owner join status and meet link
@@ -34,17 +35,22 @@ const VisitorCall = () => {
 
     console.log('Setting up real-time subscription for visitor call:', roomName);
 
-    // Fetch initial call status
+    // Fetch initial call status and check if visitor_always_connected is enabled
     const fetchCallStatus = async () => {
       const { data, error } = await supabase
         .from('video_calls')
-        .select('*')
+        .select('*, properties:property_id(visitor_always_connected)')
         .eq('room_name', roomName)
         .maybeSingle();
 
       if (!error && data) {
         console.log('Initial call status:', data);
         const callData = data as any;
+        
+        // Check if visitor_always_connected is enabled
+        if (callData.properties?.visitor_always_connected) {
+          setVisitorAlwaysConnected(true);
+        }
         
         // Update meet link if available from database
         if (callData.meet_link && !meetLink) {
@@ -216,6 +222,33 @@ const VisitorCall = () => {
 
   // Status display component
   const StatusDisplay = () => {
+    // If visitor_always_connected is enabled, show the connected status
+    if (visitorAlwaysConnected && (callStatus === 'waiting' || callStatus === 'ringing')) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-green-500/20 border border-green-500/50 rounded-xl p-5 mb-6"
+        >
+          <motion.div 
+            className="flex items-center justify-center gap-2 mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            <CheckCircle className="w-8 h-8 text-green-500" />
+          </motion.div>
+          <h3 className="font-bold text-lg text-green-500 mb-2">Visitante conectado!</h3>
+          <div className="flex items-center justify-center gap-2 text-foreground">
+            <User className="w-4 h-4" />
+            <p className="text-sm">
+              Você está conectado. Toque a campainha para avisar o morador.
+            </p>
+          </div>
+        </motion.div>
+      );
+    }
+
     switch (callStatus) {
       case 'waiting':
         return (
