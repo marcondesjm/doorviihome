@@ -32,12 +32,17 @@ self.addEventListener('push', (event) => {
     body: data.body,
     icon: data.icon,
     badge: data.badge,
-    vibrate: [200, 100, 200, 100, 200],
+    // High priority notification settings
+    vibrate: [300, 100, 300, 100, 300, 100, 300], // Strong vibration pattern
     data: data.data,
-    requireInteraction: true,
+    requireInteraction: true, // Notification stays until user interacts
+    renotify: true, // Re-notify even if notification with same tag exists
+    tag: 'doorbell-' + Date.now(), // Unique tag to ensure notification shows
+    silent: false, // Ensure sound plays
+    urgency: 'high',
     actions: [
-      { action: 'open', title: 'Abrir' },
-      { action: 'dismiss', title: 'Dispensar' },
+      { action: 'open', title: '🔓 Atender' },
+      { action: 'dismiss', title: '❌ Dispensar' },
     ],
   };
 
@@ -54,20 +59,36 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
 
-  // Open the app
+  const notificationData = event.notification.data || {};
+  const roomName = notificationData.roomName;
+  const propertyName = notificationData.propertyName;
+
+  // Open the app at the home page where IncomingCall will show
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // If there's already an open window, focus it
+        // If there's already an open window, focus it and navigate
         for (const client of clientList) {
-          if (client.url && 'focus' in client) {
-            return client.focus();
+          if ('focus' in client) {
+            client.focus();
+            // Post message to refresh the page and show incoming call
+            client.postMessage({
+              type: 'NOTIFICATION_CLICK',
+              roomName,
+              propertyName,
+            });
+            return;
           }
         }
         // Otherwise, open a new window
         if (self.clients.openWindow) {
-          return self.clients.openWindow('/dashboard');
+          return self.clients.openWindow('/');
         }
       })
   );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+  console.log('Notification closed:', event);
 });

@@ -267,13 +267,15 @@ async function sendWebPush(
   // Create VAPID JWT
   const jwt = await createVapidJwt(audience, vapidPublicKey, vapidPrivateKey);
 
-  // Send the request
+  // Send the request with high priority headers
   const response = await fetch(subscription.endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/octet-stream',
       'Content-Encoding': 'aes128gcm',
       'TTL': '86400',
+      'Urgency': 'high', // High priority for immediate delivery
+      'Topic': 'doorbell', // Topic for notification grouping
       'Authorization': `vapid t=${jwt}, k=${vapidPublicKey}`,
     },
     body: body,
