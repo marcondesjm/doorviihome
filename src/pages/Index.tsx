@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -935,6 +935,52 @@ const Index = () => {
                 </div>
               )}
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Visitor Audio Response */}
+      <AnimatePresence>
+        {visitorAudioResponse && !showVideoCallQR && (
+          <motion.div
+            initial={{ opacity: 0, y: 100, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 100, x: "-50%" }}
+            className="fixed bottom-24 left-1/2 z-50 w-[90vw] max-w-sm"
+          >
+            <div className="bg-primary text-primary-foreground p-4 rounded-2xl shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Volume2 className="w-5 h-5 animate-pulse" />
+                  <span className="font-semibold">Resposta do Visitante</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
+                  onClick={() => setVisitorAudioResponse(null)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <audio 
+                src={visitorAudioResponse} 
+                controls 
+                autoPlay
+                className="w-full h-10"
+              />
+              {activeCall && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full mt-3"
+                  onClick={() => setShowVideoCallQR(true)}
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  Abrir QR Code da chamada
+                </Button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
