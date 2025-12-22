@@ -253,6 +253,15 @@ export const Header = () => {
                       Notificações ativadas
                     </div>
                     <DropdownMenuSeparator />
+                    <div className="px-3 py-2 text-xs text-muted-foreground">
+                      <p className="font-medium mb-1">📱 Para máxima prioridade:</p>
+                      <ul className="space-y-1">
+                        <li>• Instale o app na tela inicial</li>
+                        <li>• Configurações → Apps → Chrome/Navegador → Notificações → Prioridade Alta</li>
+                        <li>• Desative economia de bateria para o app</li>
+                      </ul>
+                    </div>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
                       <BellOff className="w-4 h-4 mr-2" />
                       Desativar Notificações

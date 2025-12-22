@@ -172,10 +172,11 @@ async function encryptPayload(
 function buildAes128gcmHeader(salt: Uint8Array, localPublicKey: Uint8Array): Uint8Array {
   const header = new Uint8Array(86);
   header.set(salt, 0); // 16 bytes salt
-  header[16] = 0; // record size high byte
-  header[17] = 0;
-  header[18] = 16; // record size (4096 in big-endian, but we use smaller)
-  header[19] = 0;
+  // Record size: 4096 bytes (0x00001000 in big-endian)
+  header[16] = 0x00;
+  header[17] = 0x00;
+  header[18] = 0x10;
+  header[19] = 0x00;
   header[20] = 65; // public key length
   header.set(localPublicKey, 21); // 65 bytes public key
   return header;
@@ -341,6 +342,11 @@ serve(async (req) => {
       body,
       icon: '/pwa-192x192.png',
       badge: '/pwa-192x192.png',
+      tag: 'doorbell-notification',
+      renotify: true,
+      requireInteraction: true,
+      silent: false,
+      vibrate: [300, 100, 300, 100, 300],
       data,
     });
 
