@@ -18,16 +18,17 @@ const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
   const [searchParams] = useSearchParams();
   const propertyName = searchParams.get('property') || 'Propriedade';
-  const meetLink = searchParams.get('meet');
+  const initialMeetLink = searchParams.get('meet');
   
   const [copied, setCopied] = useState(false);
   const [notified, setNotified] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>('waiting');
   const [audioMessages, setAudioMessages] = useState<AudioMessage[]>([]);
   const [currentPlayingIndex, setCurrentPlayingIndex] = useState<number | null>(null);
+  const [meetLink, setMeetLink] = useState<string | null>(initialMeetLink);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Subscribe to real-time updates for owner join status
+  // Subscribe to real-time updates for owner join status and meet link
   useEffect(() => {
     if (!roomName) return;
 
@@ -37,12 +38,18 @@ const VisitorCall = () => {
     const fetchCallStatus = async () => {
       const { data, error } = await supabase
         .from('video_calls')
-        .select('owner_joined, status, audio_message_url')
+        .select('owner_joined, status, audio_message_url, meet_link')
         .eq('room_name', roomName)
         .maybeSingle();
 
       if (!error && data) {
         console.log('Initial call status:', data);
+        
+        // Update meet link if available from database
+        if (data.meet_link && !meetLink) {
+          setMeetLink(data.meet_link);
+        }
+        
         if (data.owner_joined) {
           setCallStatus('video_call');
         } else if (data.status === 'audio_message' && data.audio_message_url) {
@@ -81,6 +88,12 @@ const VisitorCall = () => {
         (payload) => {
           console.log('Call updated (visitor):', payload.new);
           const updatedCall = payload.new as any;
+          
+          // Update meet link if it becomes available
+          if (updatedCall.meet_link && !meetLink) {
+            console.log('Meet link received:', updatedCall.meet_link);
+            setMeetLink(updatedCall.meet_link);
+          }
           
           if (updatedCall.owner_joined) {
             setCallStatus('video_call');
@@ -124,7 +137,7 @@ const VisitorCall = () => {
 
   // Notify owner when visitor scans QR code (page loads)
   useEffect(() => {
-    if (!roomName || !meetLink || notified) return;
+    if (!roomName || notified) return;
 
     const notifyOwner = async () => {
       try {
@@ -148,7 +161,7 @@ const VisitorCall = () => {
     };
 
     notifyOwner();
-  }, [roomName, meetLink, notified]);
+  }, [roomName, notified]);
 
   const handleJoinCall = () => {
     if (meetLink) {
@@ -411,8 +424,8 @@ const VisitorCall = () => {
     }
   };
 
-  // If there's a meet link, show the Google Meet page
-  if (meetLink) {
+  // Show the visitor call page if we have a roomName (with or without meetLink)
+  if (roomName) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <motion.div
@@ -564,7 +577,7 @@ const VisitorCall = () => {
     );
   }
 
-  // Fallback for old links without meet parameter
+  // Fallback for links without roomName
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
