@@ -1030,6 +1030,27 @@ const Index = () => {
                     <span className="font-bold text-xl">Chamada atendida!</span>
                     <span className="text-sm text-white/80">{doorbellPropertyName}</span>
                   </div>
+
+                  {/* Visitor Audio Response */}
+                  {visitorAudioResponse && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="w-full bg-white/20 rounded-xl p-3"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Volume2 className="w-4 h-4" />
+                        <span className="text-sm font-medium">Resposta do visitante</span>
+                      </div>
+                      <audio
+                        controls
+                        autoPlay
+                        src={visitorAudioResponse}
+                        className="w-full h-10"
+                        style={{ filter: 'invert(1)' }}
+                      />
+                    </motion.div>
+                  )}
                   
                   <div className="flex flex-col gap-3 w-full">
                     {/* Video Call Option */}
