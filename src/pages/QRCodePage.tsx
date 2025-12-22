@@ -29,6 +29,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useProperties } from "@/hooks/useProperties";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
+import { useDeliveryIcons } from "@/hooks/useDeliveryIcons";
+import { defaultDeliveryIcons, DeliveryIcon } from "@/components/StyledQRCode";
 import { 
   Select,
   SelectContent,
@@ -64,17 +66,7 @@ const sizePresets = [
   { name: "Extra Grande", value: 350 },
 ];
 
-interface DeliveryIcon {
-  id: string;
-  name: string;
-  url: string;
-}
-
-const defaultDeliveryIcons: DeliveryIcon[] = [
-  { id: "correios", name: "Correios", url: "/correios-logo.png" },
-  { id: "aliexpress", name: "AliExpress", url: "/aliexpress-logo.jpg" },
-  { id: "mercadolivre", name: "Mercado Livre", url: "/mercadolivre-logo.png" },
-];
+// DeliveryIcon interface is imported from StyledQRCode
 
 const QRCodePage = () => {
   const { toast } = useToast();
@@ -84,6 +76,7 @@ const QRCodePage = () => {
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: accessCodes } = useAccessCodes();
   const generateCode = useGenerateAccessCode();
+  const { deliveryIcons, addIcon, removeIcon } = useDeliveryIcons();
   
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
   
@@ -106,7 +99,6 @@ const QRCodePage = () => {
     size: 200,
   });
 
-  const [deliveryIcons, setDeliveryIcons] = useState<DeliveryIcon[]>(defaultDeliveryIcons);
   const [newIconName, setNewIconName] = useState("");
   const [newIconUrl, setNewIconUrl] = useState("");
   const [showAddIcon, setShowAddIcon] = useState(false);
@@ -132,7 +124,7 @@ const QRCodePage = () => {
     }
   };
 
-  const handleAddDeliveryIcon = () => {
+  const handleAddDeliveryIcon = async () => {
     if (!newIconName.trim() || !newIconUrl.trim()) {
       toast({
         title: "Preencha todos os campos",
@@ -142,27 +134,52 @@ const QRCodePage = () => {
       return;
     }
     
-    const newIcon: DeliveryIcon = {
-      id: `custom-${Date.now()}`,
-      name: newIconName.trim(),
-      url: newIconUrl.trim(),
-    };
-    
-    setDeliveryIcons([...deliveryIcons, newIcon]);
-    setNewIconName("");
-    setNewIconUrl("");
-    setShowAddIcon(false);
-    toast({
-      title: "Ícone adicionado!",
-      description: `${newIcon.name} foi adicionado à lista`,
-    });
+    try {
+      await addIcon.mutateAsync({
+        name: newIconName.trim(),
+        url: newIconUrl.trim(),
+      });
+      
+      setNewIconName("");
+      setNewIconUrl("");
+      setShowAddIcon(false);
+      toast({
+        title: "Ícone adicionado!",
+        description: `${newIconName.trim()} foi adicionado à lista`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao adicionar",
+        description: "Não foi possível salvar o ícone",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRemoveDeliveryIcon = (id: string) => {
-    setDeliveryIcons(deliveryIcons.filter(icon => icon.id !== id));
-    toast({
-      title: "Ícone removido",
-    });
+  const handleRemoveDeliveryIcon = async (id: string) => {
+    // Check if it's a default icon (cannot be removed)
+    const isDefaultIcon = defaultDeliveryIcons.some(icon => icon.id === id);
+    if (isDefaultIcon) {
+      toast({
+        title: "Não é possível remover",
+        description: "Este é um ícone padrão do sistema",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await removeIcon.mutateAsync(id);
+      toast({
+        title: "Ícone removido",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao remover",
+        description: "Não foi possível remover o ícone",
+        variant: "destructive",
+      });
+    }
   };
 
   // Update subtitle when property changes
