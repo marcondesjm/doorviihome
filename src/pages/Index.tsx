@@ -274,36 +274,59 @@ const Index = () => {
 
   // Function to notify visitor that owner answered and show video interface
   const handleAnswerDoorbell = async () => {
-    if (currentDoorbellRoomName) {
-      try {
-        // Update status to answered
-        await supabase
-          .from('video_calls')
-          .update({ status: 'answered' })
-          .eq('room_name', currentDoorbellRoomName);
-        console.log('Visitor notified - owner answered');
-        
-        // Fetch the existing call to show the video interface
-        const existingCall = await fetchCallByRoomName(currentDoorbellRoomName);
-        if (existingCall) {
-          // Show the video call QR/Meet interface
-          setShowVideoCallQR(true);
-          toast({
-            title: "Chamada atendida!",
-            description: "Inicie a videochamada para falar com o visitante",
-          });
-        }
-      } catch (error) {
-        console.error('Error notifying visitor:', error);
+    if (!currentDoorbellRoomName) {
+      setDoorbellRinging(false);
+      return;
+    }
+    
+    // Stop the doorbell sound immediately
+    setDoorbellRinging(false);
+    if (doorbellInterval) {
+      clearInterval(doorbellInterval);
+      setDoorbellInterval(null);
+    }
+    if ('vibrate' in navigator) {
+      navigator.vibrate(0);
+    }
+    
+    const roomNameToFetch = currentDoorbellRoomName;
+    
+    try {
+      // Update status to answered
+      await supabase
+        .from('video_calls')
+        .update({ status: 'answered' })
+        .eq('room_name', roomNameToFetch);
+      console.log('Visitor notified - owner answered');
+      
+      // Fetch the existing call to show the video interface
+      const existingCall = await fetchCallByRoomName(roomNameToFetch);
+      console.log('Fetched call after answering:', existingCall);
+      
+      if (existingCall) {
+        // Show the video call QR/Meet interface - this MUST happen
+        setShowVideoCallQR(true);
+        console.log('showVideoCallQR set to true, activeCall:', existingCall);
+        toast({
+          title: "Chamada atendida!",
+          description: "Inicie a videochamada para falar com o visitante",
+        });
+      } else {
+        console.error('No call found for room:', roomNameToFetch);
         toast({
           title: "Erro",
-          description: "Não foi possível atender a chamada",
+          description: "Chamada não encontrada",
           variant: "destructive",
         });
       }
+    } catch (error) {
+      console.error('Error answering doorbell:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atender a chamada",
+        variant: "destructive",
+      });
     }
-    setDoorbellRinging(false);
-    setCurrentDoorbellRoomName(null);
   };
 
   const proceedWithAnswer = async () => {
