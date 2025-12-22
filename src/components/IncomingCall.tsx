@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, PhoneOff, Video, Mic, MicOff, Volume2, VolumeX, VideoOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { getSelectedRingtoneUrl } from "./RingtoneConfigDialog";
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -37,6 +38,34 @@ export const IncomingCall = ({
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [showControls, setShowControls] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Play ringtone when ringing (not active)
+  useEffect(() => {
+    if (!isActive) {
+      const ringtoneUrl = getSelectedRingtoneUrl();
+      const audio = new Audio(ringtoneUrl);
+      audio.loop = true;
+      audioRef.current = audio;
+      
+      audio.play().catch((err) => {
+        console.log('Could not play ringtone:', err);
+      });
+      
+      return () => {
+        audio.pause();
+        audio.currentTime = 0;
+        audioRef.current = null;
+      };
+    } else {
+      // Stop ringtone when call is answered
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+    }
+  }, [isActive]);
 
   const handleWhatsApp = () => {
     const phone = ownerPhone?.replace(/\D/g, '') || '';
