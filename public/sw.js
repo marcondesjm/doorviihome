@@ -1,5 +1,5 @@
-// Service Worker for Push Notifications - High Priority Version
-const SW_VERSION = '2.0.0';
+// Service Worker for Push Notifications - Maximum Priority Version
+const SW_VERSION = '3.0.0';
 
 self.addEventListener('install', (event) => {
   console.log('Service Worker v' + SW_VERSION + ' installed');
@@ -30,7 +30,6 @@ self.addEventListener('push', (event) => {
       console.log('Push data parsed:', data);
     } catch (e) {
       console.error('Error parsing push data:', e);
-      // Try as text
       try {
         data.body = event.data.text();
       } catch (e2) {
@@ -39,25 +38,23 @@ self.addEventListener('push', (event) => {
     }
   }
 
-  // High priority notification options
+  // Maximum priority notification options for background delivery
   const options = {
     body: data.body,
     icon: data.icon || '/pwa-192x192.png',
     badge: data.badge || '/pwa-192x192.png',
-    // Strong vibration pattern for urgency
-    vibrate: [400, 100, 400, 100, 400, 100, 400],
+    // Very strong vibration pattern - long pulses for urgency
+    vibrate: [500, 200, 500, 200, 500, 200, 500, 200, 500],
     data: data.data || {},
-    // Keep notification visible until user interacts
+    // CRITICAL: Keep notification visible until user interacts
     requireInteraction: true,
-    // Re-notify even with same tag to ensure visibility
+    // CRITICAL: Re-notify even with same tag
     renotify: true,
-    // Unique tag with timestamp
-    tag: 'doorbell-' + Date.now(),
-    // Ensure sound plays
-    silent: false,
+    // Fixed tag to ensure proper grouping
+    tag: 'doorbell-urgent',
     // Action buttons
     actions: [
-      { action: 'open', title: '🔓 Atender', icon: '/pwa-192x192.png' },
+      { action: 'open', title: '🔓 Atender' },
       { action: 'dismiss', title: '❌ Ignorar' },
     ],
     // Timestamp for sorting
@@ -66,15 +63,16 @@ self.addEventListener('push', (event) => {
 
   console.log('Showing notification with options:', options);
 
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-      .then(() => {
-        console.log('Notification shown successfully');
-      })
-      .catch((err) => {
-        console.error('Error showing notification:', err);
-      })
-  );
+  // Show the notification
+  const notificationPromise = self.registration.showNotification(data.title, options)
+    .then(() => {
+      console.log('Notification shown successfully');
+    })
+    .catch((err) => {
+      console.error('Error showing notification:', err);
+    });
+
+  event.waitUntil(notificationPromise);
 });
 
 self.addEventListener('notificationclick', (event) => {
