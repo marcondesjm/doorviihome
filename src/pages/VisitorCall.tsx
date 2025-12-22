@@ -37,10 +37,12 @@ const VisitorCall = () => {
 
     // Fetch initial call status and check if visitor_always_connected is enabled
     const fetchCallStatus = async () => {
+      // Look for active calls only (not ended)
       const { data, error } = await supabase
         .from('video_calls')
         .select('*, properties:property_id(visitor_always_connected)')
         .eq('room_name', roomName)
+        .neq('status', 'ended')
         .maybeSingle();
 
       if (!error && data) {
@@ -73,9 +75,11 @@ const VisitorCall = () => {
           setCallStatus('ringing');
         } else if (callData.status === 'answered') {
           setCallStatus('answered');
-        } else if (callData.status === 'ended') {
-          setCallStatus('ended');
         }
+        // Don't set 'ended' status on initial load - treat as new session
+      } else {
+        // No active call found - start fresh at waiting
+        setCallStatus('waiting');
       }
     };
 
