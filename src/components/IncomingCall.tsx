@@ -40,19 +40,32 @@ export const IncomingCall = ({
   const [showControls, setShowControls] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Play ringtone when ringing (not active)
+  // Play ringtone when ringing (not active) - keeps playing until answered
   useEffect(() => {
     if (!isActive) {
       const ringtoneUrl = getSelectedRingtoneUrl();
       const audio = new Audio(ringtoneUrl);
       audio.loop = true;
+      audio.volume = 1.0;
       audioRef.current = audio;
       
-      audio.play().catch((err) => {
-        console.log('Could not play ringtone:', err);
-      });
+      const playRingtone = () => {
+        audio.play().catch((err) => {
+          console.log('Could not play ringtone:', err);
+        });
+      };
+      
+      playRingtone();
+      
+      // Ensure audio keeps playing if it somehow stops
+      const checkInterval = setInterval(() => {
+        if (audioRef.current && audioRef.current.paused && !isActive) {
+          playRingtone();
+        }
+      }, 1000);
       
       return () => {
+        clearInterval(checkInterval);
         audio.pause();
         audio.currentTime = 0;
         audioRef.current = null;
