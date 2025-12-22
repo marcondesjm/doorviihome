@@ -273,6 +273,106 @@ const Index = () => {
     };
   }, [user, toast]);
 
+  // Listen for visitor scans on properties with visitor_always_connected enabled
+  useEffect(() => {
+    if (!user || !properties) return;
+
+    // Get properties with visitor_always_connected enabled
+    const alwaysConnectedProperties = properties.filter(p => p.visitor_always_connected);
+    if (alwaysConnectedProperties.length === 0) return;
+
+    console.log('Monitoring properties with visitor_always_connected:', alwaysConnectedProperties.map(p => p.name));
+
+    const handleVisitorConnected = async (newData: any, property: any) => {
+      console.log('Visitor scanned QR for always-connected property:', property.name);
+      
+      // Automatically trigger the doorbell/notification
+      setDoorbellRinging(true);
+      setDoorbellPropertyName(newData.property_name || property.name);
+      setCurrentDoorbellRoomName(newData.room_name || null);
+      
+      // Update property status to online
+      await supabase
+        .from('properties')
+        .update({ is_online: true })
+        .eq('id', property.id);
+      
+      // Vibrate phone if supported
+      if ('vibrate' in navigator) {
+        navigator.vibrate([500, 200, 500, 200, 500]);
+      }
+      
+      // Play sound immediately
+      playDoorbellSound();
+      
+      // Keep playing sound and vibrating every 2 seconds
+      const interval = setInterval(() => {
+        playDoorbellSound();
+        if ('vibrate' in navigator) {
+          navigator.vibrate([500, 200, 500]);
+        }
+      }, 2000);
+      setDoorbellInterval(interval);
+
+      toast({
+        title: "🔔 Visitante conectado!",
+        description: `Visitante escaneou o QR Code - ${property.name}`,
+        duration: 10000,
+      });
+    };
+
+    const channel = supabase
+      .channel('visitor-auto-connect')
+      // Listen for new calls created (when visitor scans QR and call doesn't exist)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'video_calls',
+          filter: `owner_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const newData = payload.new as any;
+          
+          // Check if visitor_joined is true (visitor just created this call)
+          if (newData.visitor_joined === true) {
+            const property = alwaysConnectedProperties.find(p => p.id === newData.property_id);
+            if (property) {
+              await handleVisitorConnected(newData, property);
+            }
+          }
+        }
+      )
+      // Listen for updates (when visitor joins existing call)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'video_calls',
+          filter: `owner_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const newData = payload.new as any;
+          const oldData = payload.old as any;
+          
+          // Check if this is a visitor_joined event (visitor just scanned QR)
+          if (newData.visitor_joined === true && oldData?.visitor_joined === false) {
+            const property = alwaysConnectedProperties.find(p => p.id === newData.property_id);
+            if (property) {
+              await handleVisitorConnected(newData, property);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, properties, toast]);
+
   // Function to notify visitor that owner answered - keeps the interface open
   const handleAnswerDoorbell = async () => {
     if (!currentDoorbellRoomName) {

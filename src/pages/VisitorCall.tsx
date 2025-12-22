@@ -148,19 +148,73 @@ const VisitorCall = () => {
 
     const notifyOwner = async () => {
       try {
-        const { error } = await supabase
+        // First try to update existing video_call
+        const { data: existingCall, error: fetchError } = await supabase
           .from('video_calls')
-          .update({
-            visitor_joined: true,
-            status: 'pending',
-          })
-          .eq('room_name', roomName);
+          .select('id, property_id')
+          .eq('room_name', roomName)
+          .maybeSingle();
 
-        if (error) {
-          console.log('Could not notify owner:', error);
+        if (existingCall) {
+          // Call exists, update it
+          const { error } = await supabase
+            .from('video_calls')
+            .update({
+              visitor_joined: true,
+              status: 'pending',
+            })
+            .eq('room_name', roomName);
+
+          if (error) {
+            console.log('Could not notify owner:', error);
+          } else {
+            console.log('Owner notified - visitor scanned QR code');
+            setNotified(true);
+          }
         } else {
-          console.log('Owner notified - visitor scanned QR code');
-          setNotified(true);
+          // Call doesn't exist - need to find property by access_code and create a new call
+          console.log('No existing call found for room:', roomName);
+          
+          // The roomName is the access code - find the property
+          const { data: accessCode, error: accessError } = await supabase
+            .from('access_codes')
+            .select('property_id, user_id')
+            .eq('code', roomName)
+            .maybeSingle();
+
+          if (accessCode && accessCode.property_id) {
+            // Get property name
+            const { data: property } = await supabase
+              .from('properties')
+              .select('name, visitor_always_connected')
+              .eq('id', accessCode.property_id)
+              .maybeSingle();
+
+            if (property) {
+              // Create a new video_call entry
+              const newRoomName = `${property.name}_${Date.now()}`.replace(/\s+/g, '_');
+              
+              const { error: insertError } = await supabase
+                .from('video_calls')
+                .insert({
+                  room_name: newRoomName,
+                  property_id: accessCode.property_id,
+                  property_name: property.name,
+                  owner_id: accessCode.user_id,
+                  visitor_joined: true,
+                  status: 'pending',
+                });
+
+              if (insertError) {
+                console.error('Error creating video call:', insertError);
+              } else {
+                console.log('Created new video call for visitor');
+                setNotified(true);
+              }
+            }
+          } else {
+            console.log('Access code not found or no property linked:', roomName);
+          }
         }
       } catch (err) {
         console.error('Error notifying owner:', err);
