@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
@@ -46,7 +46,7 @@ const Index = () => {
   const [waitingForApproval, setWaitingForApproval] = useState(false);
   const [doorbellRinging, setDoorbellRinging] = useState(false);
   const [doorbellAnswered, setDoorbellAnswered] = useState(false);
-  const [doorbellInterval, setDoorbellInterval] = useState<NodeJS.Timeout | null>(null);
+  const doorbellIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [doorbellPropertyName, setDoorbellPropertyName] = useState<string>('');
   const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
@@ -174,15 +174,15 @@ const Index = () => {
 
   // Clear doorbell interval and stop vibration when stopped
   useEffect(() => {
-    if (!doorbellRinging && doorbellInterval) {
-      clearInterval(doorbellInterval);
-      setDoorbellInterval(null);
+    if (!doorbellRinging && doorbellIntervalRef.current) {
+      clearInterval(doorbellIntervalRef.current);
+      doorbellIntervalRef.current = null;
       // Stop any ongoing vibration
       if ('vibrate' in navigator) {
         navigator.vibrate(0);
       }
     }
-  }, [doorbellRinging, doorbellInterval]);
+  }, [doorbellRinging]);
 
   // Listen for doorbell rings
   useEffect(() => {
@@ -228,7 +228,7 @@ const Index = () => {
                 navigator.vibrate([500, 200, 500]);
               }
             }, 2000);
-            setDoorbellInterval(interval);
+            doorbellIntervalRef.current = interval;
 
             toast({
               title: "🔔 Campainha tocando!",
@@ -312,7 +312,7 @@ const Index = () => {
           navigator.vibrate([500, 200, 500]);
         }
       }, 2000);
-      setDoorbellInterval(interval);
+      doorbellIntervalRef.current = interval;
 
       toast({
         title: "🔔 Visitante conectado!",
@@ -378,9 +378,9 @@ const Index = () => {
     console.log('handleAnswerDoorbell called');
     
     // Immediately stop all sounds and vibrations
-    if (doorbellInterval) {
-      clearInterval(doorbellInterval);
-      setDoorbellInterval(null);
+    if (doorbellIntervalRef.current) {
+      clearInterval(doorbellIntervalRef.current);
+      doorbellIntervalRef.current = null;
       console.log('Doorbell interval cleared');
     }
     if ('vibrate' in navigator) {
