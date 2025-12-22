@@ -54,6 +54,26 @@ export const useDeliveryIcons = () => {
     },
   });
 
+  const updateIcon = useMutation({
+    mutationFn: async ({ id, name, url }: { id: string; name: string; url: string }) => {
+      if (!user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from("delivery_icons")
+        .update({ name, url })
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["delivery-icons", user?.id] });
+    },
+  });
+
   const removeIcon = useMutation({
     mutationFn: async (iconId: string) => {
       if (!user) throw new Error("User not authenticated");
@@ -76,6 +96,7 @@ export const useDeliveryIcons = () => {
     dbIcons,
     isLoading,
     addIcon,
+    updateIcon,
     removeIcon,
   };
 };
