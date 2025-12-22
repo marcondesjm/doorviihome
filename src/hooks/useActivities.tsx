@@ -154,3 +154,25 @@ export function useDeleteActivity() {
     }
   });
 }
+
+export function useDeleteAllActivities() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const { error } = await supabase
+        .from('activity_logs')
+        .delete()
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['all-activities'] });
+    }
+  });
+}

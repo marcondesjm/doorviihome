@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, PhoneOff, PhoneIncoming, Bell, Clock, Trash2, Calendar } from "lucide-react";
+import { Phone, PhoneOff, PhoneIncoming, Bell, Clock, Trash2, Calendar, Download, Trash } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -24,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAllActivities, useDeleteActivity, ActivityLog } from "@/hooks/useActivities";
+import { useAllActivities, useDeleteActivity, useDeleteAllActivities, ActivityLog } from "@/hooks/useActivities";
 import { useToast } from "@/hooks/use-toast";
 
 type ActivityType = "incoming" | "answered" | "missed" | "doorbell";
@@ -50,8 +50,10 @@ interface GroupedActivities {
 export function AllActivitiesDialog() {
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const { data: activities, isLoading } = useAllActivities();
   const deleteActivity = useDeleteActivity();
+  const deleteAllActivities = useDeleteAllActivities();
   const { toast } = useToast();
 
   const handleDelete = async () => {
@@ -71,6 +73,66 @@ export function AllActivitiesDialog() {
       });
     }
     setDeleteId(null);
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      await deleteAllActivities.mutateAsync();
+      toast({
+        title: "Histórico limpo",
+        description: "Todas as atividades foram excluídas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir as atividades.",
+        variant: "destructive",
+      });
+    }
+    setShowDeleteAllConfirm(false);
+  };
+
+  const handleBackup = () => {
+    if (!activities || activities.length === 0) {
+      toast({
+        title: "Sem dados",
+        description: "Não há atividades para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create CSV content
+    const headers = ["Data", "Hora", "Tipo", "Título", "Propriedade", "Duração"];
+    const rows = activities.map(activity => [
+      format(parseISO(activity.created_at), "dd/MM/yyyy"),
+      format(parseISO(activity.created_at), "HH:mm"),
+      activity.type,
+      activity.title,
+      activity.property_name,
+      activity.duration || "-"
+    ]);
+
+    const csvContent = [
+      headers.join(";"),
+      ...rows.map(row => row.join(";"))
+    ].join("\n");
+
+    // Create and download file
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `historico-atividades-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Backup realizado",
+      description: "O arquivo CSV foi baixado com sucesso.",
+    });
   };
 
   // Group activities by date
@@ -116,8 +178,32 @@ export function AllActivitiesDialog() {
               Todas as Atividades
             </DialogTitle>
           </DialogHeader>
+
+          {/* Action buttons */}
+          {activities && activities.length > 0 && (
+            <div className="flex gap-2 mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleBackup}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Backup
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => setShowDeleteAllConfirm(true)}
+              >
+                <Trash className="w-4 h-4 mr-2" />
+                Excluir tudo
+              </Button>
+            </div>
+          )}
           
-          <ScrollArea className="h-[60vh] pr-4">
+          <ScrollArea className="h-[55vh] pr-4">
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map(i => (
@@ -204,6 +290,7 @@ export function AllActivitiesDialog() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete single activity confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -219,6 +306,28 @@ export function AllActivitiesDialog() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete all activities confirmation */}
+      <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir todo o histórico?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Todas as {activities?.length || 0} atividades serão permanentemente removidas.
+              Recomendamos fazer um backup antes de excluir.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir tudo
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
