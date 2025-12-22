@@ -375,19 +375,25 @@ const Index = () => {
 
   // Function to notify visitor that owner answered - keeps the interface open
   const handleAnswerDoorbell = async () => {
-    if (!currentDoorbellRoomName) {
-      setDoorbellRinging(false);
-      setDoorbellAnswered(false);
-      return;
-    }
+    console.log('handleAnswerDoorbell called');
     
-    // Stop the doorbell sound but keep interface visible
+    // Immediately stop all sounds and vibrations
     if (doorbellInterval) {
       clearInterval(doorbellInterval);
       setDoorbellInterval(null);
+      console.log('Doorbell interval cleared');
     }
     if ('vibrate' in navigator) {
       navigator.vibrate(0);
+      console.log('Vibration stopped');
+    }
+    
+    // Stop the ringing state to prevent useEffect from restarting
+    setDoorbellRinging(false);
+    
+    if (!currentDoorbellRoomName) {
+      setDoorbellAnswered(false);
+      return;
     }
     
     const roomNameToFetch = currentDoorbellRoomName;
