@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2 } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useRef, useState, useEffect } from "react";
@@ -64,8 +64,9 @@ export const VideoCallQRCode = ({
   const [newIconName, setNewIconName] = useState("");
   const [newIconUrl, setNewIconUrl] = useState("");
   const [showAddIcon, setShowAddIcon] = useState(false);
+  const [editingIcon, setEditingIcon] = useState<DeliveryIcon | null>(null);
 
-  const { deliveryIcons, dbIcons, addIcon, removeIcon } = useDeliveryIcons();
+  const { deliveryIcons, dbIcons, addIcon, updateIcon, removeIcon } = useDeliveryIcons();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,6 +115,47 @@ export const VideoCallQRCode = ({
       toast({
         title: "Erro ao adicionar",
         description: "Não foi possível salvar o ícone",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditDeliveryIcon = (icon: DeliveryIcon) => {
+    setEditingIcon(icon);
+    setNewIconName(icon.name);
+    setNewIconUrl(icon.url);
+    setShowAddIcon(true);
+  };
+
+  const handleUpdateDeliveryIcon = async () => {
+    if (!editingIcon || !newIconName.trim() || !newIconUrl.trim()) {
+      toast({
+        title: "Preencha todos os campos",
+        description: "Nome e URL da imagem são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await updateIcon.mutateAsync({
+        id: editingIcon.id,
+        name: newIconName.trim(),
+        url: newIconUrl.trim(),
+      });
+      
+      setNewIconName("");
+      setNewIconUrl("");
+      setShowAddIcon(false);
+      setEditingIcon(null);
+      toast({
+        title: "Ícone atualizado!",
+        description: `${newIconName.trim()} foi atualizado com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o ícone",
         variant: "destructive",
       });
     }
@@ -562,15 +604,25 @@ export const VideoCallQRCode = ({
                           {isDefaultIcon ? (
                             <span className="text-xs text-muted-foreground">Padrão</span>
                           ) : (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
-                              onClick={() => handleRemoveDeliveryIcon(icon.id)}
-                              disabled={removeIcon.isPending}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-muted-foreground hover:text-primary"
+                                onClick={() => handleEditDeliveryIcon(icon)}
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                                disabled={removeIcon.isPending}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
                           )}
                         </div>
                       );
@@ -584,9 +636,10 @@ export const VideoCallQRCode = ({
                   </div>
                 </div>
                 
-                {/* Add Icon Form */}
+                {/* Add/Edit Icon Form */}
                 {showAddIcon ? (
                   <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+                    <p className="text-sm font-medium text-primary">{editingIcon ? "Editar transportadora" : "Nova transportadora"}</p>
                     <div className="space-y-2">
                       <Label>Nome da transportadora</Label>
                       <Input
@@ -642,6 +695,7 @@ export const VideoCallQRCode = ({
                           setShowAddIcon(false);
                           setNewIconName("");
                           setNewIconUrl("");
+                          setEditingIcon(null);
                         }}
                       >
                         Cancelar
@@ -649,10 +703,10 @@ export const VideoCallQRCode = ({
                       <Button 
                         size="sm" 
                         className="flex-1"
-                        onClick={handleAddDeliveryIcon}
-                        disabled={addIcon.isPending}
+                        onClick={editingIcon ? handleUpdateDeliveryIcon : handleAddDeliveryIcon}
+                        disabled={addIcon.isPending || updateIcon.isPending}
                       >
-                        {addIcon.isPending ? "Salvando..." : "Adicionar"}
+                        {(addIcon.isPending || updateIcon.isPending) ? "Salvando..." : editingIcon ? "Salvar" : "Adicionar"}
                       </Button>
                     </div>
                   </div>
