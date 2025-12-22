@@ -14,6 +14,7 @@ import { IncomingCall } from "@/components/IncomingCall";
 import GoogleMeetCall from "@/components/GoogleMeetCall";
 import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
+import { EnableNotificationsDialog } from "@/components/EnableNotificationsDialog";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -28,7 +29,6 @@ import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
 import { useCallSimulation } from "@/hooks/useCallSimulation";
 import { useVideoCalls } from "@/hooks/useVideoCalls";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { supabase } from "@/integrations/supabase/client";
 
 import property1 from "@/assets/property-1.jpg";
@@ -61,19 +61,7 @@ const Index = () => {
   const deleteProperty = useDeleteProperty();
   
   const { accessToken, isAuthenticated, checkExistingToken, signIn: signInGoogle, isLoading: googleAuthLoading } = useGoogleAuth();
-  const { isSupported: pushSupported, isSubscribed, subscribe: subscribePush } = usePushNotifications();
   const [pendingAnswer, setPendingAnswer] = useState(false);
-  
-  // Auto-subscribe to push notifications when user logs in
-  useEffect(() => {
-    if (user && pushSupported && !isSubscribed) {
-      // Small delay to ensure everything is loaded
-      const timer = setTimeout(() => {
-        subscribePush();
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [user, pushSupported, isSubscribed, subscribePush]);
   
   // Check for existing Google token on mount
   useEffect(() => {
@@ -1273,6 +1261,9 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Notification Permission Dialog */}
+      <EnableNotificationsDialog />
     </div>
   );
 };
