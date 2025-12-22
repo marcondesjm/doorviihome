@@ -15,6 +15,7 @@ import GoogleMeetCall from "@/components/GoogleMeetCall";
 import { VideoCallQRCode } from "@/components/VideoCallQRCode";
 import { AddPropertyDialog } from "@/components/AddPropertyDialog";
 import { EnableNotificationsDialog } from "@/components/EnableNotificationsDialog";
+import { InstallAppDialog } from "@/components/InstallAppDialog";
 
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
@@ -1264,6 +1265,9 @@ const Index = () => {
       
       {/* Notification Permission Dialog */}
       <EnableNotificationsDialog />
+      
+      {/* Install App Dialog */}
+      <InstallAppDialog />
     </div>
   );
 };
