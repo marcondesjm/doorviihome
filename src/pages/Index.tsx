@@ -53,9 +53,26 @@ const Index = () => {
   const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
+  const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
   const { data: accessCodes } = useAccessCodes();
+  
+  // Fetch owner phone from profile
+  useEffect(() => {
+    const fetchOwnerPhone = async () => {
+      if (!user?.id) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('user_id', user.id)
+        .single();
+      if (data?.phone) {
+        setOwnerPhone(data.phone);
+      }
+    };
+    fetchOwnerPhone();
+  }, [user?.id]);
   const addActivity = useAddActivity();
   const generateCode = useGenerateAccessCode();
   const updateProperty = useUpdateProperty();
@@ -977,6 +994,7 @@ const Index = () => {
             isActive={false}
             callDuration={0}
             formatDuration={formatDuration}
+            ownerPhone={ownerPhone || undefined}
           />
         )}
       </AnimatePresence>
