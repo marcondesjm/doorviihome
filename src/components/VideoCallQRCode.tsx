@@ -265,7 +265,12 @@ export const VideoCallQRCode = ({
       const padding = 30;
       const headerHeight = 130;
       const warningHeight = 80;
-      const deliveryHeight = deliveryIcons.length > 0 ? 110 : 0;
+      
+      // Calculate delivery section height based on rows (max 4 per row)
+      const iconsPerRow = 4;
+      const rowCount = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
+      const iconRowHeight = 50;
+      const deliveryHeight = deliveryIcons.length > 0 ? 35 + (rowCount * iconRowHeight) + 10 : 0;
       const footerHeight = 40;
       
       canvas.width = canvasWidth;
@@ -324,12 +329,16 @@ export const VideoCallQRCode = ({
           // Delivery icons section
           if (deliveryIcons.length > 0) {
             const deliveryY = warningY + warningHeight + 5;
+            const iconsPerRow = 4;
+            const rowCount = Math.ceil(deliveryIcons.length / iconsPerRow);
+            const iconRowHeight = 50;
+            const deliveryBoxHeight = 35 + (rowCount * iconRowHeight);
             
             ctx.fillStyle = '#eff6ff';
-            ctx.fillRect(padding, deliveryY, boxWidth, 90);
+            ctx.fillRect(padding, deliveryY, boxWidth, deliveryBoxHeight);
             ctx.strokeStyle = '#bfdbfe';
             ctx.lineWidth = 2;
-            ctx.strokeRect(padding, deliveryY, boxWidth, 90);
+            ctx.strokeRect(padding, deliveryY, boxWidth, deliveryBoxHeight);
             
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 13px system-ui';
@@ -343,18 +352,26 @@ export const VideoCallQRCode = ({
                   const iconWidth = 45;
                   const iconHeight = 35;
                   const gap = 15;
-                  const totalWidth = deliveryIcons.length * iconWidth + (deliveryIcons.length - 1) * gap;
-                  const startX = (canvas.width - totalWidth) / 2;
-                  const iconX = startX + index * (iconWidth + gap);
+                  
+                  // Calculate row and column
+                  const row = Math.floor(index / iconsPerRow);
+                  const col = index % iconsPerRow;
+                  const iconsInThisRow = Math.min(iconsPerRow, deliveryIcons.length - row * iconsPerRow);
+                  
+                  // Calculate width for this row
+                  const rowWidth = iconsInThisRow * iconWidth + (iconsInThisRow - 1) * gap;
+                  const rowStartX = (canvas.width - rowWidth) / 2;
+                  const iconX = rowStartX + col * (iconWidth + gap);
+                  const iconY = deliveryY + 35 + row * iconRowHeight;
                   
                   // Icon background
                   ctx.fillStyle = '#ffffff';
-                  ctx.fillRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
+                  ctx.fillRect(iconX - 4, iconY, iconWidth + 8, iconHeight + 8);
                   ctx.strokeStyle = '#e2e8f0';
                   ctx.lineWidth = 1;
-                  ctx.strokeRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
+                  ctx.strokeRect(iconX - 4, iconY, iconWidth + 8, iconHeight + 8);
                   
-                  ctx.drawImage(iconImg, iconX, deliveryY + 39, iconWidth, iconHeight);
+                  ctx.drawImage(iconImg, iconX, iconY + 4, iconWidth, iconHeight);
                   resolveIcon();
                 };
                 iconImg.onerror = () => resolveIcon();
