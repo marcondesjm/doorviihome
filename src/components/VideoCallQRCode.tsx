@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2, Pencil } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2, Pencil, FileImage, FileText, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useRef, useState, useEffect } from "react";
@@ -10,11 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeliveryIcons } from "@/hooks/useDeliveryIcons";
 import { ApprovalReminderAlert } from "@/components/ApprovalReminderAlert";
+import jsPDF from "jspdf";
 
 const colorPresets = [
   { name: 'Clássico', bgColor: '#ffffff', fgColor: '#1a1a2e' },
@@ -241,17 +248,16 @@ export const VideoCallQRCode = ({
     }
   };
 
-  const handleDownload = async () => {
-    if (!qrRef.current) return;
+  const generateQRImage = async (): Promise<HTMLCanvasElement | null> => {
+    if (!qrRef.current) return null;
 
     try {
       const svg = qrRef.current.querySelector('svg');
-      if (!svg) return;
+      if (!svg) return null;
 
       const svgData = new XMLSerializer().serializeToString(svg);
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const img = new Image();
       
       // Fixed proportional dimensions - wider for text
       const canvasWidth = 520;
@@ -264,122 +270,209 @@ export const VideoCallQRCode = ({
       
       canvas.width = canvasWidth;
       canvas.height = headerHeight + qrSize + 30 + warningHeight + deliveryHeight + footerHeight;
-      
-      img.onload = async () => {
-        if (!ctx) return;
+
+      return new Promise((resolve) => {
+        const img = new Image();
         
-        // Background
-        ctx.fillStyle = customization.bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Logo emoji
-        ctx.font = '40px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText(customization.logoText, canvas.width / 2, 50);
-        
-        // Title
-        ctx.fillStyle = customization.fgColor;
-        ctx.font = 'bold 16px system-ui';
-        ctx.fillText(customization.title, canvas.width / 2, 85);
-        
-        // Subtitle
-        ctx.font = '14px system-ui';
-        ctx.fillStyle = '#666';
-        ctx.fillText(customization.subtitle, canvas.width / 2, 110);
-        
-        // QR Code centered
-        const qrX = (canvas.width - qrSize) / 2;
-        const qrY = headerHeight;
-        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
-        
-        // Warning box
-        const warningY = qrY + qrSize + 20;
-        ctx.fillStyle = '#fef3c7';
-        const boxWidth = canvas.width - padding * 2;
-        ctx.fillRect(padding, warningY, boxWidth, warningHeight - 10);
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(padding, warningY, boxWidth, warningHeight - 10);
-        
-        ctx.fillStyle = '#92400e';
-        ctx.font = 'bold 12px system-ui';
-        ctx.fillText('Por favor, nao bata ou soe a campainha fisica.', canvas.width / 2, warningY + 20);
-        ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 38);
-        ctx.fillStyle = '#b45309';
-        ctx.font = '12px system-ui';
-        ctx.fillText('Escaneie o QR Code Usando a Camera ou um App', canvas.width / 2, warningY + 56);
-        
-        // Delivery icons section
-        if (deliveryIcons.length > 0) {
-          const deliveryY = warningY + warningHeight + 5;
+        img.onload = async () => {
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
           
-          ctx.fillStyle = '#eff6ff';
-          ctx.fillRect(padding, deliveryY, boxWidth, 90);
-          ctx.strokeStyle = '#bfdbfe';
+          // Background
+          ctx.fillStyle = customization.bgColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Logo emoji
+          ctx.font = '40px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText(customization.logoText, canvas.width / 2, 50);
+          
+          // Title
+          ctx.fillStyle = customization.fgColor;
+          ctx.font = 'bold 16px system-ui';
+          ctx.fillText(customization.title, canvas.width / 2, 85);
+          
+          // Subtitle
+          ctx.font = '14px system-ui';
+          ctx.fillStyle = '#666';
+          ctx.fillText(customization.subtitle, canvas.width / 2, 110);
+          
+          // QR Code centered
+          const qrX = (canvas.width - qrSize) / 2;
+          const qrY = headerHeight;
+          ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+          
+          // Warning box
+          const warningY = qrY + qrSize + 20;
+          ctx.fillStyle = '#fef3c7';
+          const boxWidth = canvas.width - padding * 2;
+          ctx.fillRect(padding, warningY, boxWidth, warningHeight - 10);
+          ctx.strokeStyle = '#fbbf24';
           ctx.lineWidth = 2;
-          ctx.strokeRect(padding, deliveryY, boxWidth, 90);
+          ctx.strokeRect(padding, warningY, boxWidth, warningHeight - 10);
           
-          ctx.fillStyle = '#1e40af';
-          ctx.font = 'bold 13px system-ui';
-          ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 22);
+          ctx.fillStyle = '#92400e';
+          ctx.font = 'bold 12px system-ui';
+          ctx.fillText('Por favor, nao bata ou soe a campainha fisica.', canvas.width / 2, warningY + 20);
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 38);
+          ctx.fillStyle = '#b45309';
+          ctx.font = '12px system-ui';
+          ctx.fillText('Escaneie o QR Code Usando a Camera ou um App', canvas.width / 2, warningY + 56);
           
-          const iconPromises = deliveryIcons.map((icon, index) => {
-            return new Promise<void>((resolve) => {
-              const iconImg = new Image();
-              iconImg.crossOrigin = 'anonymous';
-              iconImg.onload = () => {
-                const iconWidth = 45;
-                const iconHeight = 35;
-                const gap = 15;
-                const totalWidth = deliveryIcons.length * iconWidth + (deliveryIcons.length - 1) * gap;
-                const startX = (canvas.width - totalWidth) / 2;
-                const iconX = startX + index * (iconWidth + gap);
-                
-                // Icon background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
-                ctx.strokeStyle = '#e2e8f0';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
-                
-                ctx.drawImage(iconImg, iconX, deliveryY + 39, iconWidth, iconHeight);
-                resolve();
-              };
-              iconImg.onerror = () => resolve();
-              iconImg.src = icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url;
+          // Delivery icons section
+          if (deliveryIcons.length > 0) {
+            const deliveryY = warningY + warningHeight + 5;
+            
+            ctx.fillStyle = '#eff6ff';
+            ctx.fillRect(padding, deliveryY, boxWidth, 90);
+            ctx.strokeStyle = '#bfdbfe';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(padding, deliveryY, boxWidth, 90);
+            
+            ctx.fillStyle = '#1e40af';
+            ctx.font = 'bold 13px system-ui';
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 22);
+            
+            const iconPromises = deliveryIcons.map((icon, index) => {
+              return new Promise<void>((resolveIcon) => {
+                const iconImg = new Image();
+                iconImg.crossOrigin = 'anonymous';
+                iconImg.onload = () => {
+                  const iconWidth = 45;
+                  const iconHeight = 35;
+                  const gap = 15;
+                  const totalWidth = deliveryIcons.length * iconWidth + (deliveryIcons.length - 1) * gap;
+                  const startX = (canvas.width - totalWidth) / 2;
+                  const iconX = startX + index * (iconWidth + gap);
+                  
+                  // Icon background
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
+                  ctx.strokeStyle = '#e2e8f0';
+                  ctx.lineWidth = 1;
+                  ctx.strokeRect(iconX - 4, deliveryY + 35, iconWidth + 8, iconHeight + 8);
+                  
+                  ctx.drawImage(iconImg, iconX, deliveryY + 39, iconWidth, iconHeight);
+                  resolveIcon();
+                };
+                iconImg.onerror = () => resolveIcon();
+                iconImg.src = icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url;
+              });
             });
-          });
+            
+            await Promise.all(iconPromises);
+          }
           
-          await Promise.all(iconPromises);
-        }
+          // Permanent code text
+          const codeY = canvas.height - 15;
+          ctx.fillStyle = '#888';
+          ctx.font = '11px system-ui';
+          ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
+          
+          resolve(canvas);
+        };
         
-        // Permanent code text
-        const codeY = canvas.height - 15;
-        ctx.fillStyle = '#888';
-        ctx.font = '11px system-ui';
-        ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
-        
-        // Download
-        const link = document.createElement('a');
-        link.download = `qrcode-${propertyName.replace(/\s+/g, '-').toLowerCase()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        toast({
-          title: "QR Code baixado!",
-          description: "A imagem foi salva no seu dispositivo.",
-        });
-      };
-      
-      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        img.onerror = () => resolve(null);
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+      });
     } catch (e) {
-      console.error('Erro ao baixar:', e);
+      console.error('Erro ao gerar imagem:', e);
+      return null;
+    }
+  };
+
+  const handleDownloadPNG = async () => {
+    const canvas = await generateQRImage();
+    if (!canvas) {
       toast({
         title: "Erro ao baixar",
-        description: "Não foi possível baixar o QR Code.",
+        description: "Não foi possível gerar a imagem.",
         variant: "destructive",
       });
+      return;
     }
+
+    const link = document.createElement('a');
+    link.download = `qrcode-${propertyName.replace(/\s+/g, '-').toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    toast({
+      title: "QR Code baixado!",
+      description: "A imagem PNG foi salva no seu dispositivo.",
+    });
+  };
+
+  const handleDownloadJPG = async () => {
+    const canvas = await generateQRImage();
+    if (!canvas) {
+      toast({
+        title: "Erro ao baixar",
+        description: "Não foi possível gerar a imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.download = `qrcode-${propertyName.replace(/\s+/g, '-').toLowerCase()}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.click();
+    
+    toast({
+      title: "QR Code baixado!",
+      description: "A imagem JPG foi salva no seu dispositivo.",
+    });
+  };
+
+  const handleDownloadPDF = async () => {
+    const canvas = await generateQRImage();
+    if (!canvas) {
+      toast({
+        title: "Erro ao baixar",
+        description: "Não foi possível gerar o PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    // Calculate image dimensions to fit nicely on A4
+    const imgWidth = 140;
+    const imgHeight = (canvas.height / canvas.width) * imgWidth;
+    const x = (pdfWidth - imgWidth) / 2;
+    const y = 30;
+
+    // Add title
+    pdf.setFontSize(18);
+    pdf.setTextColor(51, 51, 51);
+    pdf.text(`QR Code - ${propertyName}`, pdfWidth / 2, 20, { align: 'center' });
+
+    // Add image
+    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+
+    // Add footer
+    pdf.setFontSize(10);
+    pdf.setTextColor(128, 128, 128);
+    pdf.text('Gerado automaticamente pelo sistema de portaria inteligente', pdfWidth / 2, pdfHeight - 10, { align: 'center' });
+
+    pdf.save(`qrcode-${propertyName.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+    
+    toast({
+      title: "PDF baixado!",
+      description: "O arquivo PDF foi salvo no seu dispositivo.",
+    });
   };
 
   const handleStartCall = () => {
@@ -473,10 +566,29 @@ export const VideoCallQRCode = ({
         {/* Actions */}
         <div className="flex flex-col gap-3">
           <div className="flex gap-2 justify-center flex-wrap">
-            <Button variant="secondary" size="sm" onClick={handleDownload}>
-              <Download className="w-4 h-4" />
-              Baixar
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="sm">
+                  <Download className="w-4 h-4" />
+                  Baixar
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center">
+                <DropdownMenuItem onClick={handleDownloadPNG}>
+                  <FileImage className="w-4 h-4 mr-2" />
+                  PNG (Imagem)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownloadJPG}>
+                  <FileImage className="w-4 h-4 mr-2" />
+                  JPG (Imagem)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownloadPDF}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF (Documento)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="secondary" size="sm" onClick={handleCopy}>
               <Copy className="w-4 h-4" />
               Copiar
