@@ -26,9 +26,22 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel, compact = false
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Try different mimeTypes for browser compatibility
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = ''; // Let browser choose default
+          }
+        }
+      }
+      console.log('Using mimeType:', mimeType || 'default');
+      
+      const mediaRecorder = mimeType 
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -40,7 +53,9 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel, compact = false
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+        console.log('Recording stopped, actual mimeType:', actualMimeType);
+        const blob = new Blob(chunksRef.current, { type: actualMimeType });
         setAudioBlob(blob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -90,22 +105,31 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel, compact = false
     if (!audioBlob) return;
 
     setIsSending(true);
+    console.log('Starting audio upload...');
+    console.log('Room name:', roomName);
+    console.log('Audio blob type:', audioBlob.type);
+    console.log('Audio blob size:', audioBlob.size);
 
     try {
-      // Generate unique filename
-      const filename = `audio_${roomName}_${Date.now()}.webm`;
+      // Determine file extension based on blob type
+      const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+      const filename = `audio_${roomName}_${Date.now()}.${extension}`;
+      console.log('Uploading file:', filename);
       
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('audio-messages')
         .upload(filename, audioBlob, {
-          contentType: 'audio/webm',
+          contentType: audioBlob.type || 'audio/webm',
           cacheControl: '3600'
         });
 
       if (uploadError) {
+        console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
+
+      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: urlData } = supabase.storage
@@ -113,27 +137,34 @@ export const AudioRecorder = ({ roomName, onAudioSent, onCancel, compact = false
         .getPublicUrl(filename);
 
       const audioUrl = urlData.publicUrl;
+      console.log('Audio URL:', audioUrl);
 
       // Update video_call with audio message URL
-      const { error: updateError } = await supabase
+      console.log('Updating video_call with audio URL...');
+      const { data: updateData, error: updateError } = await supabase
         .from('video_calls')
         .update({ 
           audio_message_url: audioUrl,
           status: 'audio_message'
         })
-        .eq('room_name', roomName);
+        .eq('room_name', roomName)
+        .select();
 
       if (updateError) {
+        console.error('Update error:', updateError);
         throw updateError;
       }
+
+      console.log('Update successful:', updateData);
 
       toast.success('Áudio enviado ao visitante!');
       resetRecorder();
       onAudioSent?.();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending audio:', error);
-      toast.error('Erro ao enviar áudio. Tente novamente.');
+      const errorMessage = error?.message || 'Erro desconhecido';
+      toast.error(`Erro ao enviar áudio: ${errorMessage}`);
     } finally {
       setIsSending(false);
     }
