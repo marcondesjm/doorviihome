@@ -38,24 +38,31 @@ export interface UserProfile {
 
 export function useAllUsers() {
   const { data: isAdmin } = useIsAdmin();
+  const { session } = useAuth();
   
   return useQuery({
     queryKey: ['all-users'],
     queryFn: async () => {
-      // Fetch profiles
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Use edge function to fetch users with admin privileges
+      const { data, error } = await supabase.functions.invoke('admin-get-users', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
       
       if (error) {
-        console.error('Error fetching profiles:', error);
+        console.error('Error fetching users:', error);
         throw error;
       }
       
-      return profiles as UserProfile[];
+      if (data?.error) {
+        console.error('Error from edge function:', data.error);
+        throw new Error(data.error);
+      }
+      
+      return data.users as UserProfile[];
     },
-    enabled: isAdmin === true,
+    enabled: isAdmin === true && !!session?.access_token,
   });
 }
 
