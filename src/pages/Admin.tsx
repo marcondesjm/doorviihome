@@ -207,6 +207,7 @@ const Admin = () => {
                       <TableRow>
                         <TableHead>Nome</TableHead>
                         <TableHead>Email</TableHead>
+                        <TableHead>WhatsApp</TableHead>
                         <TableHead>Criado em</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -220,6 +221,9 @@ const Admin = () => {
                           </TableCell>
                           <TableCell className="text-sm">
                             {profile.email || '-'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {profile.phone || '-'}
                           </TableCell>
                           <TableCell>
                             {format(new Date(profile.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
