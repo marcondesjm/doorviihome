@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2, Pencil, FileImage, FileText, ChevronDown } from "lucide-react";
+import { Copy, Share2, Video, X, Phone, CheckCircle2, Bell, Download, Settings2, Package, Plus, Trash2, Upload, Volume2, Pencil, FileImage, FileText, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useRef, useState, useEffect } from "react";
@@ -73,7 +73,7 @@ export const VideoCallQRCode = ({
   const [showAddIcon, setShowAddIcon] = useState(false);
   const [editingIcon, setEditingIcon] = useState<DeliveryIcon | null>(null);
 
-  const { deliveryIcons, addIcon, updateIcon, removeIcon, hideDefaultIcon, hiddenDefaults, restoreAllDefaults } = useDeliveryIcons();
+  const { deliveryIcons, addIcon, updateIcon, removeIcon, hideDefaultIcon, hiddenDefaults, restoreAllDefaults, moveIconUp, moveIconDown } = useDeliveryIcons();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -743,14 +743,39 @@ export const VideoCallQRCode = ({
                     <Package className="w-4 h-4" />
                     Transportadoras cadastradas
                   </Label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {deliveryIcons.map((icon) => {
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {deliveryIcons.map((icon, index) => {
                       const isDefaultIcon = defaultDeliveryIcons.some(d => d.id === icon.id);
+                      const isFirst = index === 0;
+                      const isLast = index === deliveryIcons.length - 1;
+                      
                       return (
                         <div 
                           key={icon.id} 
-                          className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 group"
+                          className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 group"
                         >
+                          {/* Reorder buttons */}
+                          <div className="flex flex-col gap-0.5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 text-muted-foreground hover:text-primary disabled:opacity-30"
+                              onClick={() => moveIconUp(icon.id)}
+                              disabled={isFirst}
+                            >
+                              <ChevronUp className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 text-muted-foreground hover:text-primary disabled:opacity-30"
+                              onClick={() => moveIconDown(icon.id)}
+                              disabled={isLast}
+                            >
+                              <ChevronDown className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          
                           <img 
                             src={icon.url} 
                             alt={icon.name} 
@@ -759,7 +784,7 @@ export const VideoCallQRCode = ({
                               (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect fill="%23ccc" width="24" height="24"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="8">?</text></svg>';
                             }}
                           />
-                          <span className="flex-1 text-sm">{icon.name}</span>
+                          <span className="flex-1 text-sm truncate">{icon.name}</span>
                           <div className="flex items-center gap-1">
                             {isDefaultIcon && (
                               <span className="text-xs text-muted-foreground mr-1">Padrão</span>
