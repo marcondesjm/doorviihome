@@ -112,7 +112,12 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
     try {
       // Determine file extension based on blob type
       const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
-      const filename = `visitor_audio_${roomName}_${Date.now()}.${extension}`;
+      // Sanitize room name to remove special characters for valid storage key
+      const sanitizedRoomName = roomName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-zA-Z0-9_-]/g, '_'); // Replace special chars with underscore
+      const filename = `visitor_audio_${sanitizedRoomName}_${Date.now()}.${extension}`;
       console.log('Uploading file:', filename);
       
       // Upload to Supabase Storage
