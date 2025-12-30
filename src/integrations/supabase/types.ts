@@ -93,6 +93,7 @@ export type Database = {
       delivery_icons: {
         Row: {
           created_at: string
+          display_order: number | null
           id: string
           name: string
           url: string
@@ -100,6 +101,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          display_order?: number | null
           id?: string
           name: string
           url: string
@@ -107,6 +109,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          display_order?: number | null
           id?: string
           name?: string
           url?: string
