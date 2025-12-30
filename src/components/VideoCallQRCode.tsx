@@ -67,6 +67,7 @@ export const VideoCallQRCode = ({
     ...defaultCustomization,
     title: "ESCANEIE O QR CODE",
     subtitle: "PARA ENTRAR EM CONTATO",
+    iconSize: 'medium',
   });
   const [newIconName, setNewIconName] = useState("");
   const [newIconUrl, setNewIconUrl] = useState("");
@@ -269,7 +270,8 @@ export const VideoCallQRCode = ({
       // Calculate delivery section height based on rows (max 4 per row)
       const iconsPerRow = 4;
       const rowCount = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-      const iconRowHeight = 50;
+      const iconRowHeights = { small: 40, medium: 50, large: 60 };
+      const iconRowHeight = iconRowHeights[customization.iconSize];
       const deliveryHeight = deliveryIcons.length > 0 ? 35 + (rowCount * iconRowHeight) + 10 : 0;
       const securityNoticeHeight = 35;
       const footerHeight = 30;
@@ -355,8 +357,13 @@ export const VideoCallQRCode = ({
                 const iconImg = new Image();
                 iconImg.crossOrigin = 'anonymous';
                 iconImg.onload = () => {
-                  const iconWidth = 45;
-                  const iconHeight = 35;
+                  // Size based on customization
+                  const iconSizes = {
+                    small: { width: 35, height: 25 },
+                    medium: { width: 45, height: 35 },
+                    large: { width: 55, height: 45 },
+                  };
+                  const { width: iconWidth, height: iconHeight } = iconSizes[customization.iconSize];
                   const gap = 15;
                   
                   // Calculate row and column
@@ -758,6 +765,32 @@ export const VideoCallQRCode = ({
               </TabsContent>
 
               <TabsContent value="delivery" className="space-y-4 mt-4">
+                {/* Icon Size Control */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    Tamanho dos ícones
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { value: 'small', label: 'Pequeno' },
+                      { value: 'medium', label: 'Médio' },
+                      { value: 'large', label: 'Grande' },
+                    ] as const).map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setCustomization({ ...customization, iconSize: option.value })}
+                        className={`p-2 rounded-lg border-2 transition-all text-sm ${
+                          customization.iconSize === option.value
+                            ? 'border-primary bg-primary/10 text-primary font-medium'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Current Icons */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
