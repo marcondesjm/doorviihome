@@ -343,7 +343,7 @@ export const Header = () => {
                   <>
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="w-4 h-4 mr-3 text-primary" />
-                      Painel Admin
+                      Gerenciar Usuários
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
