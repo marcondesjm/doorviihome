@@ -9,6 +9,7 @@ export interface QRCustomization {
   bgColor: string;
   logoText: string;
   size: number;
+  iconSize: 'small' | 'medium' | 'large';
 }
 
 export interface DeliveryIcon {
@@ -24,6 +25,7 @@ export const defaultCustomization: QRCustomization = {
   bgColor: "#f8fafc",
   logoText: "🔔",
   size: 200,
+  iconSize: 'medium',
 };
 
 export const defaultDeliveryIcons: DeliveryIcon[] = [
@@ -126,21 +128,33 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
               <span>Entregas:</span>
             </div>
             <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(deliveryIcons.length, 4)}, minmax(0, 1fr))` }}>
-              {deliveryIcons.map((icon) => (
-                <div 
-                  key={icon.id}
-                  className="bg-white rounded-lg p-2 shadow-md border border-slate-200 flex items-center justify-center"
-                >
-                  <img 
-                    src={icon.url.startsWith('/') ? icon.url : icon.url} 
-                    alt={icon.name}
-                    className={`${compact ? 'h-6 w-10' : 'h-8 w-12'} object-contain`}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              ))}
+              {deliveryIcons.map((icon) => {
+                const sizeClasses = {
+                  small: compact ? 'h-4 w-8' : 'h-6 w-10',
+                  medium: compact ? 'h-6 w-10' : 'h-8 w-12',
+                  large: compact ? 'h-8 w-12' : 'h-10 w-16',
+                };
+                const paddingClasses = {
+                  small: 'p-1.5',
+                  medium: 'p-2',
+                  large: 'p-2.5',
+                };
+                return (
+                  <div 
+                    key={icon.id}
+                    className={`bg-white rounded-lg ${paddingClasses[customization.iconSize]} shadow-md border border-slate-200 flex items-center justify-center`}
+                  >
+                    <img 
+                      src={icon.url.startsWith('/') ? icon.url : icon.url} 
+                      alt={icon.name}
+                      className={`${sizeClasses[customization.iconSize]} object-contain`}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
