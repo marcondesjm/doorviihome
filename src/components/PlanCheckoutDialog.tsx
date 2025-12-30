@@ -32,39 +32,54 @@ const PlanCheckoutDialog = ({
 
   // PIX data
   const pixKey = "48996029392";
-  const pixName = "Marcondes Jorge Machado";
+  const pixName = "MARCONDES JORGE MACHADO";
   const whatsappNumber = "5548996029392";
+  const city = "FLORIANOPOLIS";
 
-  // Generate PIX payload (simplified EMV format)
+  // Generate valid PIX EMV payload
   const generatePixPayload = () => {
-    const merchantName = pixName.substring(0, 25).toUpperCase();
-    const amount = planPrice.toFixed(2);
-    const txId = `DOORVII${Date.now().toString().slice(-8)}`;
-    
-    // Simplified PIX Copy-Paste format
-    const pixPayload = [
-      "00020126",
-      `3604${pixKey.length.toString().padStart(2, '0')}${pixKey}`,
-      "52040000",
-      "5303986",
-      `54${amount.length.toString().padStart(2, '0')}${amount}`,
-      "5802BR",
-      `59${merchantName.length.toString().padStart(2, '0')}${merchantName}`,
-      "6008BRASILIA",
-      `62${(txId.length + 4).toString().padStart(2, '0')}05${txId.length.toString().padStart(2, '0')}${txId}`,
-      "6304"
+    const formatField = (id: string, value: string) => {
+      const len = value.length.toString().padStart(2, '0');
+      return `${id}${len}${value}`;
+    };
+
+    // Merchant Account Information (ID 26)
+    const gui = formatField("00", "br.gov.bcb.pix");
+    const key = formatField("01", pixKey);
+    const merchantAccount = formatField("26", gui + key);
+
+    // Build payload without CRC
+    const payloadWithoutCRC = [
+      formatField("00", "01"), // Payload Format Indicator
+      merchantAccount,
+      formatField("52", "0000"), // Merchant Category Code
+      formatField("53", "986"), // Transaction Currency (BRL)
+      formatField("54", planPrice.toFixed(2)), // Transaction Amount
+      formatField("58", "BR"), // Country Code
+      formatField("59", pixName.substring(0, 25)), // Merchant Name
+      formatField("60", city.substring(0, 15)), // Merchant City
+      formatField("62", formatField("05", "***")), // Additional Data
     ].join('');
 
-    // Calculate CRC16 (simplified - using placeholder)
-    return pixPayload + "0000";
+    // Calculate CRC16-CCITT
+    const payloadForCRC = payloadWithoutCRC + "6304";
+    let crc = 0xFFFF;
+    for (let i = 0; i < payloadForCRC.length; i++) {
+      crc ^= payloadForCRC.charCodeAt(i) << 8;
+      for (let j = 0; j < 8; j++) {
+        if (crc & 0x8000) {
+          crc = (crc << 1) ^ 0x1021;
+        } else {
+          crc <<= 1;
+        }
+      }
+      crc &= 0xFFFF;
+    }
+
+    return payloadForCRC + crc.toString(16).toUpperCase().padStart(4, '0');
   };
 
-  // Generate a simpler PIX string for QR Code
-  const generateSimplePixString = () => {
-    return `00020126580014br.gov.bcb.pix0136${pixKey}5204000053039865802BR5925${pixName.toUpperCase().substring(0, 25)}6008BRASILIA62070503***6304`;
-  };
-
-  const pixCopyPaste = `PIX: ${pixKey}\nValor: R$ ${planPrice.toFixed(2)}\nNome: ${pixName}\nPlano: ${planName}`;
+  const pixPayload = generatePixPayload();
 
   const copyPixKey = () => {
     navigator.clipboard.writeText(pixKey);
@@ -142,7 +157,7 @@ const PlanCheckoutDialog = ({
             </p>
             <div className="bg-white p-4 rounded-lg inline-block">
               <QRCodeSVG
-                value={pixCopyPaste}
+                value={pixPayload}
                 size={180}
                 level="M"
                 includeMargin
