@@ -25,9 +25,22 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
+      // Try different mimeTypes for browser compatibility
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = ''; // Let browser choose default
+          }
+        }
+      }
+      console.log('VisitorAudioRecorder using mimeType:', mimeType || 'default');
+      
+      const mediaRecorder = mimeType 
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -39,7 +52,9 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+        console.log('Recording stopped, actual mimeType:', actualMimeType);
+        const blob = new Blob(chunksRef.current, { type: actualMimeType });
         setAudioBlob(blob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -89,24 +104,27 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
     if (!audioBlob) return;
 
     setIsSending(true);
-    console.log('Starting audio upload for visitor response...');
+    console.log('Starting visitor audio upload...');
     console.log('Room name:', roomName);
+    console.log('Audio blob type:', audioBlob.type);
+    console.log('Audio blob size:', audioBlob.size);
 
     try {
-      // Generate unique filename for visitor response
-      const filename = `visitor_audio_${roomName}_${Date.now()}.webm`;
+      // Determine file extension based on blob type
+      const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+      const filename = `visitor_audio_${roomName}_${Date.now()}.${extension}`;
       console.log('Uploading file:', filename);
       
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('audio-messages')
         .upload(filename, audioBlob, {
-          contentType: 'audio/webm',
+          contentType: audioBlob.type || 'audio/webm',
           cacheControl: '3600'
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
 
@@ -142,9 +160,10 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
       resetRecorder();
       onAudioSent?.();
 
-    } catch (error) {
-      console.error('Error sending audio:', error);
-      toast.error('Erro ao enviar áudio. Tente novamente.');
+    } catch (error: any) {
+      console.error('Error sending visitor audio:', error);
+      const errorMessage = error?.message || 'Erro desconhecido';
+      toast.error(`Erro ao enviar áudio: ${errorMessage}`);
     } finally {
       setIsSending(false);
     }
