@@ -122,22 +122,22 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
 
         {/* Delivery Icons Section */}
         {showDeliveryIcons && deliveryIcons.length > 0 && (
-          <div className="bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 rounded-xl p-3 mb-4 shadow-md">
+          <div className="bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 rounded-xl p-3 mb-4 shadow-md overflow-hidden">
             <div className="flex items-center justify-center gap-2 mb-3 text-blue-800 font-semibold text-sm">
               <span>📦</span>
               <span>Entregas:</span>
             </div>
-            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(deliveryIcons.length, 4)}, minmax(0, 1fr))` }}>
+            <div className="flex flex-wrap justify-center gap-2">
               {deliveryIcons.map((icon) => {
                 const heightClasses = {
-                  small: compact ? 'h-5' : 'h-7',
-                  medium: compact ? 'h-7' : 'h-9',
-                  large: compact ? 'h-9' : 'h-12',
+                  small: 'h-5',
+                  medium: 'h-7',
+                  large: 'h-9',
                 };
                 const paddingClasses = {
-                  small: 'p-1.5',
-                  medium: 'p-2',
-                  large: 'p-2.5',
+                  small: 'p-1',
+                  medium: 'p-1.5',
+                  large: 'p-2',
                 };
                 return (
                   <div 
@@ -147,7 +147,7 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
                     <img 
                       src={icon.url.startsWith('/') ? icon.url : icon.url} 
                       alt={icon.name}
-                      className={`${heightClasses[customization.iconSize]} w-auto max-w-full object-contain`}
+                      className={`${heightClasses[customization.iconSize]} w-auto object-contain`}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
