@@ -21,7 +21,8 @@ import {
   BellRing,
   BellOff,
   MessageCircle,
-  RefreshCw
+  RefreshCw,
+  Shield
 } from "lucide-react";
 
 // WhatsApp icon component
@@ -39,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useAdmin";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -64,6 +66,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
+  const { data: isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showAddProperty, setShowAddProperty] = useState(false);
@@ -336,6 +339,15 @@ export const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 bg-popover">
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <Shield className="w-4 h-4 mr-3 text-primary" />
+                      Painel Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={() => setShowAddProperty(true)}>
                   <Plus className="w-4 h-4 mr-3" />
                   Adicionar propriedade

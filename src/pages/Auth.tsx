@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter pelo menos 6 caracteres');
@@ -81,6 +82,27 @@ export default function Auth() {
             });
           }
         } else {
+          // Check if user account is active
+          const { data: session } = await supabase.auth.getSession();
+          if (session?.session?.user?.id) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('is_active')
+              .eq('user_id', session.session.user.id)
+              .single();
+            
+            if (profile && profile.is_active === false) {
+              // Sign out if account is inactive
+              await supabase.auth.signOut();
+              toast({
+                title: 'Conta desativada',
+                description: 'Sua conta foi desativada. Entre em contato com o administrador.',
+                variant: 'destructive'
+              });
+              return;
+            }
+          }
+          
           toast({
             title: 'Bem-vindo!',
             description: 'Login realizado com sucesso'
