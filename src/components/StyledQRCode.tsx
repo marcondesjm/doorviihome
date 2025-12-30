@@ -129,10 +129,10 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
             </div>
             <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(deliveryIcons.length, 4)}, minmax(0, 1fr))` }}>
               {deliveryIcons.map((icon) => {
-                const sizeClasses = {
-                  small: compact ? 'h-4 w-8' : 'h-6 w-10',
-                  medium: compact ? 'h-6 w-10' : 'h-8 w-12',
-                  large: compact ? 'h-8 w-12' : 'h-10 w-16',
+                const heightClasses = {
+                  small: compact ? 'h-5' : 'h-7',
+                  medium: compact ? 'h-7' : 'h-9',
+                  large: compact ? 'h-9' : 'h-12',
                 };
                 const paddingClasses = {
                   small: 'p-1.5',
@@ -147,7 +147,7 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
                     <img 
                       src={icon.url.startsWith('/') ? icon.url : icon.url} 
                       alt={icon.name}
-                      className={`${sizeClasses[customization.iconSize]} object-contain`}
+                      className={`${heightClasses[customization.iconSize]} w-auto max-w-full object-contain`}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
