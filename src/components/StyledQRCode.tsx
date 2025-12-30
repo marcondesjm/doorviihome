@@ -119,11 +119,11 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
               <span>📦</span>
               <span>Entregas:</span>
             </div>
-            <div className="flex justify-center items-center gap-3 flex-wrap">
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(deliveryIcons.length, 4)}, minmax(0, 1fr))` }}>
               {deliveryIcons.map((icon) => (
                 <div 
                   key={icon.id}
-                  className="bg-white rounded-lg p-2 shadow-md border border-slate-200"
+                  className="bg-white rounded-lg p-2 shadow-md border border-slate-200 flex items-center justify-center"
                 >
                   <img 
                     src={icon.url.startsWith('/') ? icon.url : icon.url} 
