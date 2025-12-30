@@ -63,9 +63,15 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
         style={{ backgroundColor: customization.bgColor }}
       >
         {/* Logo */}
-        <div className={`${compact ? 'text-3xl mb-2' : 'text-5xl mb-3'}`}>
+        <div className={`${compact ? 'text-3xl mb-1' : 'text-5xl mb-2'}`}>
           {customization.logoText}
         </div>
+        <p 
+          className={`font-bold ${compact ? 'text-xs' : 'text-sm'} mb-2 tracking-wide`}
+          style={{ color: customization.fgColor }}
+        >
+          CAMPAINHA VIRTUAL
+        </p>
 
         {/* Title */}
         <h2 
