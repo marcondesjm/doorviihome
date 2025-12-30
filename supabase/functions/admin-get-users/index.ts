@@ -86,6 +86,14 @@ serve(async (req) => {
     // Create a map of existing profiles by user_id
     const profilesMap = new Map(profiles?.map(p => [p.user_id, p]) || [])
 
+    // Get all admin user IDs
+    const { data: adminRoles } = await supabaseAdmin
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'admin')
+    
+    const adminUserIds = new Set(adminRoles?.map(r => r.user_id) || [])
+
     // Merge auth users with profiles - include ALL auth users even if they don't have a profile
     const usersWithEmails = authUsers.users.map(authUser => {
       const profile = profilesMap.get(authUser.id)
@@ -98,7 +106,8 @@ serve(async (req) => {
         is_active: profile?.is_active ?? true,
         created_at: profile?.created_at || authUser.created_at,
         updated_at: profile?.updated_at || authUser.updated_at || authUser.created_at,
-        email: authUser.email || 'Email não disponível'
+        email: authUser.email || 'Email não disponível',
+        is_admin: adminUserIds.has(authUser.id)
       }
     }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 

@@ -71,6 +71,17 @@ serve(async (req) => {
       )
     }
 
+    // Check if target user is an admin - prevent deleting admins
+    const { data: targetIsAdmin } = await supabaseAdmin
+      .rpc('is_admin', { _user_id: userId })
+
+    if (targetIsAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Cannot delete an admin account' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Delete related data first to avoid foreign key constraints
     console.log('Deleting related data for user:', userId)
     
