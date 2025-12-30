@@ -151,8 +151,8 @@ const PlanCheckoutDialog = ({
 
         <div className="space-y-6">
           {/* QR Code PIX */}
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+          <div className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
               Escaneie o QR Code para pagar via PIX
             </p>
             <div className="bg-white p-4 rounded-lg inline-block">
@@ -163,33 +163,33 @@ const PlanCheckoutDialog = ({
                 includeMargin
               />
             </div>
-          </div>
-
-          {/* PIX Key Copy */}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-            <p className="text-sm font-medium text-center">Chave PIX (Celular)</p>
-            <div className="flex items-center gap-2">
-              <Input
-                value={pixKey}
-                readOnly
-                className="text-center font-mono"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={copyPixKey}
-                className="shrink-0"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-green-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
+            
+            {/* PIX Key Copy - Below QR Code */}
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+              <p className="text-xs font-medium">Ou copie a chave PIX:</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  value={pixKey}
+                  readOnly
+                  className="text-center font-mono text-sm"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={copyPixKey}
+                  className="shrink-0"
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {pixName}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              {pixName}
-            </p>
           </div>
 
           {/* Registration Form */}
