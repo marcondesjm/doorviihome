@@ -130,14 +130,14 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
             <div className="flex flex-wrap justify-center gap-2">
               {deliveryIcons.map((icon) => {
                 const heightClasses = {
-                  small: 'h-6',
-                  medium: 'h-9',
-                  large: 'h-12',
+                  small: 'h-8',
+                  medium: 'h-12',
+                  large: 'h-16',
                 };
                 const paddingClasses = {
-                  small: 'p-1.5',
-                  medium: 'p-2',
-                  large: 'p-2.5',
+                  small: 'p-2',
+                  medium: 'p-2.5',
+                  large: 'p-3',
                 };
                 return (
                   <div 
