@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -11,9 +11,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsAdmin, useAllUsers, useToggleUserActive } from '@/hooks/useAdmin';
+import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser } from '@/hooks/useAdmin';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -21,8 +31,10 @@ const Admin = () => {
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { data: users, isLoading: usersLoading, refetch } = useAllUsers();
   const toggleUserActive = useToggleUserActive();
+  const deleteUser = useDeleteUser();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
 
   // Show loading while checking auth and admin status
   if (authLoading || adminLoading) {
@@ -89,6 +101,25 @@ const Admin = () => {
       toast({
         title: 'Erro',
         description: 'Não foi possível alterar o status do usuário.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      await deleteUser.mutateAsync(userToDelete.id);
+      toast({
+        title: 'Usuário removido',
+        description: 'O usuário foi removido permanentemente.',
+      });
+      setUserToDelete(null);
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover o usuário.',
         variant: 'destructive',
       });
     }
@@ -199,24 +230,34 @@ const Admin = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant={profile.is_active ? 'destructive' : 'default'}
-                              size="sm"
-                              onClick={() => handleToggleActive(profile.user_id, profile.is_active)}
-                              disabled={toggleUserActive.isPending}
-                            >
-                              {profile.is_active ? (
-                                <>
-                                  <PowerOff className="w-4 h-4 mr-1" />
-                                  Desativar
-                                </>
-                              ) : (
-                                <>
-                                  <Power className="w-4 h-4 mr-1" />
-                                  Ativar
-                                </>
-                              )}
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant={profile.is_active ? 'destructive' : 'default'}
+                                size="sm"
+                                onClick={() => handleToggleActive(profile.user_id, profile.is_active)}
+                                disabled={toggleUserActive.isPending || deleteUser.isPending}
+                              >
+                                {profile.is_active ? (
+                                  <>
+                                    <PowerOff className="w-4 h-4 mr-1" />
+                                    Desativar
+                                  </>
+                                ) : (
+                                  <>
+                                    <Power className="w-4 h-4 mr-1" />
+                                    Ativar
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setUserToDelete({ id: profile.user_id, email: profile.email || 'Usuário' })}
+                                disabled={toggleUserActive.isPending || deleteUser.isPending}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -228,6 +269,28 @@ const Admin = () => {
           </Card>
         </motion.div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover usuário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover permanentemente o usuário <strong>{userToDelete?.email}</strong>? 
+              Esta ação não pode ser desfeita e todos os dados do usuário serão excluídos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
