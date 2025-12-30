@@ -16,7 +16,11 @@ import {
   Quote,
   Play,
   User,
-  Building
+  Building,
+  Check,
+  Zap,
+  Crown,
+  Sparkles
 } from "lucide-react";
 
 const Home = () => {
@@ -352,6 +356,254 @@ const Home = () => {
             </Card>
           </motion.div>
         </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="container mx-auto px-4 py-20">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <Bell className="w-4 h-4" />
+            Planos de Assinatura
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Escolha o plano ideal para você
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Comece gratuitamente e faça upgrade quando precisar de mais recursos
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {/* Plano Essencial */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="h-full border-2 hover:border-green-500/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-green-500" />
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-green-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">Essencial</h3>
+                    <p className="text-sm text-muted-foreground">Para residências individuais</p>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-foreground">R$ 9,90</span>
+                    <span className="text-muted-foreground">/ mês</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 flex-grow mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Campainha virtual ativa</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">QR Code permanente</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Aviso instantâneo ao morador</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Acesso via celular (sem app obrigatório)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Suporte básico</span>
+                  </li>
+                </ul>
+
+                <div className="text-center text-xs text-muted-foreground mb-4">
+                  🎯 Ideal para casas e apartamentos
+                </div>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full border-green-500/50 hover:bg-green-500/10 hover:text-green-600"
+                  onClick={() => navigate("/auth")}
+                >
+                  Começar Agora
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Plano Plus - Destaque */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="h-full border-2 border-primary shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden scale-[1.02]">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
+              <div className="absolute -top-0 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-b-lg">
+                POPULAR
+              </div>
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">Plus</h3>
+                    <p className="text-sm text-muted-foreground">Mais controle e personalização</p>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-foreground">R$ 19,90</span>
+                    <span className="text-muted-foreground">/ mês</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-primary font-medium mb-3">Tudo do Essencial +</div>
+
+                <ul className="space-y-3 flex-grow mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Nome da residência personalizado</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Mensagem personalizada na tela</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Histórico de toques (últimos acessos)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Suporte prioritário</span>
+                  </li>
+                </ul>
+
+                <div className="text-center text-xs text-muted-foreground mb-4">
+                  🎯 Ideal para famílias, home office
+                </div>
+
+                <Button 
+                  className="w-full"
+                  onClick={() => navigate("/auth")}
+                >
+                  Escolher Plus
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Plano Pro */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="h-full border-2 hover:border-purple-500/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-purple-500" />
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                    <Crown className="w-6 h-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">Pro</h3>
+                    <p className="text-sm text-muted-foreground">Para condomínios e uso profissional</p>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-foreground">R$ 39,90</span>
+                    <span className="text-muted-foreground">/ mês</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-purple-500 font-medium mb-3">Tudo do Plus +</div>
+
+                <ul className="space-y-3 flex-grow mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Múltiplos moradores/notificações</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Página personalizada com identidade visual</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Suporte VIP</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">Prioridade em novas funções</span>
+                  </li>
+                </ul>
+
+                <div className="text-center text-xs text-muted-foreground mb-4">
+                  🎯 Ideal para condomínios, empresas, escritórios
+                </div>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full border-purple-500/50 hover:bg-purple-500/10 hover:text-purple-600"
+                  onClick={() => navigate("/auth")}
+                >
+                  Escolher Pro
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Opcionais/Upsell */}
+        <motion.div
+          className="mt-12 max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="bg-muted/50 border-dashed">
+            <CardContent className="p-6">
+              <h4 className="text-lg font-semibold text-foreground mb-4 text-center">
+                🧩 Opcionais Disponíveis
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-3 rounded-lg bg-background/50">
+                  <p className="text-sm text-muted-foreground">➕ Domínio personalizado</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-background/50">
+                  <p className="text-sm text-muted-foreground">➕ Integração WhatsApp Business</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-background/50">
+                  <p className="text-sm text-muted-foreground">➕ Mensagem automática para entregadores</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-background/50">
+                  <p className="text-sm text-muted-foreground">➕ Relatórios mensais de acessos</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </section>
 
       {/* Testimonials Section */}
