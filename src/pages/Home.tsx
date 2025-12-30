@@ -227,53 +227,6 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="container mx-auto px-4 py-20">
-        <motion.div 
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Tudo que você precisa
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Recursos completos para transformar a segurança da sua casa
-          </p>
-        </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              custom={index}
-              variants={featureCardVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              <Card className="group hover:shadow-lg hover:border-primary/50 transition-all duration-300 h-full">
-                <CardContent className="p-6">
-                  <motion.div 
-                    className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </motion.div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section id="pricing" className="container mx-auto px-4 py-20">
         <motion.div 
@@ -520,6 +473,53 @@ const Home = () => {
             </CardContent>
           </Card>
         </motion.div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="container mx-auto px-4 py-20">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Tudo que você precisa
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Recursos completos para transformar a segurança da sua casa
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              custom={index}
+              variants={featureCardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              <Card className="group hover:shadow-lg hover:border-primary/50 transition-all duration-300 h-full">
+                <CardContent className="p-6">
+                  <motion.div 
+                    className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <feature.icon className="w-6 h-6 text-primary" />
+                  </motion.div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Testimonials Section */}
