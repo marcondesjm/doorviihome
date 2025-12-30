@@ -357,13 +357,14 @@ export const VideoCallQRCode = ({
                 const iconImg = new Image();
                 iconImg.crossOrigin = 'anonymous';
                 iconImg.onload = () => {
-                  // Size based on customization
-                  const iconSizes = {
-                    small: { width: 35, height: 25 },
-                    medium: { width: 45, height: 35 },
-                    large: { width: 55, height: 45 },
-                  };
-                  const { width: iconWidth, height: iconHeight } = iconSizes[customization.iconSize];
+                  // Size based on customization - maintain aspect ratio
+                  const iconHeights = { small: 25, medium: 35, large: 45 };
+                  const targetHeight = iconHeights[customization.iconSize];
+                  
+                  // Calculate width maintaining aspect ratio
+                  const aspectRatio = iconImg.naturalWidth / iconImg.naturalHeight;
+                  const iconHeight = targetHeight;
+                  const iconWidth = Math.min(targetHeight * aspectRatio, 70); // Max width 70px
                   const gap = 15;
                   
                   // Calculate row and column
@@ -371,20 +372,23 @@ export const VideoCallQRCode = ({
                   const col = index % iconsPerRow;
                   const iconsInThisRow = Math.min(iconsPerRow, deliveryIcons.length - row * iconsPerRow);
                   
-                  // Calculate width for this row
-                  const rowWidth = iconsInThisRow * iconWidth + (iconsInThisRow - 1) * gap;
+                  // Calculate width for this row (use max icon width for consistent spacing)
+                  const maxIconWidth = 60;
+                  const rowWidth = iconsInThisRow * maxIconWidth + (iconsInThisRow - 1) * gap;
                   const rowStartX = (canvas.width - rowWidth) / 2;
-                  const iconX = rowStartX + col * (iconWidth + gap);
+                  const iconCenterX = rowStartX + col * (maxIconWidth + gap) + maxIconWidth / 2;
+                  const iconX = iconCenterX - iconWidth / 2;
                   const iconY = deliveryY + 35 + row * iconRowHeight;
                   
                   // Icon background
                   ctx.fillStyle = '#ffffff';
-                  ctx.fillRect(iconX - 4, iconY, iconWidth + 8, iconHeight + 8);
+                  const bgPadding = 6;
+                  ctx.fillRect(iconX - bgPadding, iconY, iconWidth + bgPadding * 2, iconHeight + bgPadding * 2);
                   ctx.strokeStyle = '#e2e8f0';
                   ctx.lineWidth = 1;
-                  ctx.strokeRect(iconX - 4, iconY, iconWidth + 8, iconHeight + 8);
+                  ctx.strokeRect(iconX - bgPadding, iconY, iconWidth + bgPadding * 2, iconHeight + bgPadding * 2);
                   
-                  ctx.drawImage(iconImg, iconX, iconY + 4, iconWidth, iconHeight);
+                  ctx.drawImage(iconImg, iconX, iconY + bgPadding, iconWidth, iconHeight);
                   resolveIcon();
                 };
                 iconImg.onerror = () => resolveIcon();
