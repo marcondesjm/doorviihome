@@ -63,6 +63,17 @@ serve(async (req) => {
       )
     }
 
+    // Check if target user is an admin - prevent modifying admins
+    const { data: targetIsAdmin } = await supabaseAdmin
+      .rpc('is_admin', { _user_id: userId })
+
+    if (targetIsAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Cannot modify an admin account' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Update the user's is_active status
     const { error: updateError } = await supabaseAdmin
       .from('profiles')

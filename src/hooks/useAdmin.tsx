@@ -34,6 +34,7 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   email?: string;
+  is_admin?: boolean;
 }
 
 export function useAllUsers() {
