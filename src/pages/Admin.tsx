@@ -70,6 +70,7 @@ const Admin = () => {
     const searchLower = searchTerm.toLowerCase();
     return (
       u.full_name?.toLowerCase().includes(searchLower) ||
+      u.email?.toLowerCase().includes(searchLower) ||
       u.phone?.toLowerCase().includes(searchLower) ||
       u.user_id.toLowerCase().includes(searchLower)
     );
@@ -149,7 +150,7 @@ const Admin = () => {
                 <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Buscar por nome ou telefone..."
+                    placeholder="Buscar por nome ou email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -174,7 +175,7 @@ const Admin = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Nome</TableHead>
-                        <TableHead>Telefone</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Criado em</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
@@ -186,8 +187,8 @@ const Admin = () => {
                           <TableCell className="font-medium">
                             {profile.full_name || 'Sem nome'}
                           </TableCell>
-                          <TableCell>
-                            {profile.phone || '-'}
+                          <TableCell className="text-sm">
+                            {profile.email || '-'}
                           </TableCell>
                           <TableCell>
                             {format(new Date(profile.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
