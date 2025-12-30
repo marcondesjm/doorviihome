@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -22,10 +23,18 @@ import {
   Crown,
   Sparkles
 } from "lucide-react";
+import PlanCheckoutDialog from "@/components/PlanCheckoutDialog";
 
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState({ name: "", price: 0 });
+
+  const handleSelectPlan = (planName: string, planPrice: number) => {
+    setSelectedPlan({ name: planName, price: planPrice });
+    setCheckoutOpen(true);
+  };
 
   const features = [
     {
@@ -344,7 +353,7 @@ const Home = () => {
                 <Button 
                   variant="outline" 
                   className="w-full border-green-500/50 hover:bg-green-500/10 hover:text-green-600"
-                  onClick={() => navigate("/auth")}
+                  onClick={() => handleSelectPlan("Essencial", 9.90)}
                 >
                   Começar Agora
                 </Button>
@@ -409,7 +418,7 @@ const Home = () => {
 
                 <Button 
                   className="w-full"
-                  onClick={() => navigate("/auth")}
+                  onClick={() => handleSelectPlan("Plus", 19.90)}
                 >
                   Escolher Plus
                 </Button>
@@ -472,7 +481,7 @@ const Home = () => {
                 <Button 
                   variant="outline" 
                   className="w-full border-purple-500/50 hover:bg-purple-500/10 hover:text-purple-600"
-                  onClick={() => navigate("/auth")}
+                  onClick={() => handleSelectPlan("Pro", 39.90)}
                 >
                   Escolher Pro
                 </Button>
@@ -626,6 +635,14 @@ const Home = () => {
           </p>
         </div>
       </motion.footer>
+
+      {/* Plan Checkout Dialog */}
+      <PlanCheckoutDialog
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        planName={selectedPlan.name}
+        planPrice={selectedPlan.price}
+      />
     </div>
   );
 };
