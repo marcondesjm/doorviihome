@@ -260,24 +260,25 @@ export const VideoCallQRCode = ({
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
-      // Fixed proportional dimensions - wider for text
-      const canvasWidth = 520;
-      const qrSize = 220;
-      const padding = 30;
-      const headerHeight = 150; // Increased for "CAMPAINHA VIRTUAL" text
-      const warningHeight = 80;
+      // A4 optimized dimensions (794 x 1123 pixels at 96 DPI, scaled up 1.5x for print quality)
+      const scale = 1.5;
+      const canvasWidth = Math.round(794 * scale);
+      const qrSize = Math.round(400 * scale);
+      const padding = Math.round(60 * scale);
+      const headerHeight = Math.round(200 * scale);
+      const warningHeight = Math.round(120 * scale);
       
       // Calculate delivery section height based on rows (max 4 per row)
       const iconsPerRow = 4;
       const rowCount = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-      const iconRowHeights = { small: 40, medium: 50, large: 60 };
-      const iconRowHeight = iconRowHeights[customization.iconSize];
-      const deliveryHeight = deliveryIcons.length > 0 ? 35 + (rowCount * iconRowHeight) + 10 : 0;
-      const securityNoticeHeight = 35;
-      const footerHeight = 30;
+      const iconRowHeights = { small: 70, medium: 90, large: 110 };
+      const iconRowHeight = Math.round(iconRowHeights[customization.iconSize] * scale);
+      const deliveryHeight = deliveryIcons.length > 0 ? Math.round(60 * scale) + (rowCount * iconRowHeight) + Math.round(20 * scale) : 0;
+      const securityNoticeHeight = Math.round(60 * scale);
+      const footerHeight = Math.round(50 * scale);
       
       canvas.width = canvasWidth;
-      canvas.height = headerHeight + qrSize + 30 + warningHeight + deliveryHeight + securityNoticeHeight + footerHeight;
+      canvas.height = headerHeight + qrSize + Math.round(50 * scale) + warningHeight + deliveryHeight + securityNoticeHeight + footerHeight;
 
       return new Promise((resolve) => {
         const img = new Image();
@@ -293,24 +294,24 @@ export const VideoCallQRCode = ({
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           // Logo emoji
-          ctx.font = '40px system-ui';
+          ctx.font = `${Math.round(80 * scale)}px system-ui`;
           ctx.textAlign = 'center';
-          ctx.fillText(customization.logoText, canvas.width / 2, 45);
+          ctx.fillText(customization.logoText, canvas.width / 2, Math.round(80 * scale));
           
           // "CAMPAINHA VIRTUAL" text
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('CAMPAINHA VIRTUAL', canvas.width / 2, 75);
+          ctx.font = `bold ${Math.round(24 * scale)}px system-ui`;
+          ctx.fillText('CAMPAINHA VIRTUAL', canvas.width / 2, Math.round(120 * scale));
           
           // Title
           ctx.fillStyle = customization.fgColor;
-          ctx.font = 'bold 16px system-ui';
-          ctx.fillText(customization.title, canvas.width / 2, 105);
+          ctx.font = `bold ${Math.round(28 * scale)}px system-ui`;
+          ctx.fillText(customization.title, canvas.width / 2, Math.round(160 * scale));
           
           // Subtitle
-          ctx.font = '14px system-ui';
+          ctx.font = `${Math.round(22 * scale)}px system-ui`;
           ctx.fillStyle = '#666';
-          ctx.fillText(customization.subtitle, canvas.width / 2, 130);
+          ctx.fillText(customization.subtitle, canvas.width / 2, Math.round(190 * scale));
           
           // QR Code centered
           const qrX = (canvas.width - qrSize) / 2;
@@ -318,39 +319,36 @@ export const VideoCallQRCode = ({
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
           // Warning box
-          const warningY = qrY + qrSize + 20;
+          const warningY = qrY + qrSize + Math.round(30 * scale);
           ctx.fillStyle = '#fef3c7';
           const boxWidth = canvas.width - padding * 2;
-          ctx.fillRect(padding, warningY, boxWidth, warningHeight - 10);
+          ctx.fillRect(padding, warningY, boxWidth, warningHeight - Math.round(15 * scale));
           ctx.strokeStyle = '#fbbf24';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(padding, warningY, boxWidth, warningHeight - 10);
+          ctx.lineWidth = Math.round(3 * scale);
+          ctx.strokeRect(padding, warningY, boxWidth, warningHeight - Math.round(15 * scale));
           
           ctx.fillStyle = '#92400e';
-          ctx.font = 'bold 12px system-ui';
-          ctx.fillText('Por favor, nao bata ou soe a campainha fisica.', canvas.width / 2, warningY + 20);
-          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + 38);
+          ctx.font = `bold ${Math.round(20 * scale)}px system-ui`;
+          ctx.fillText('⚠️ Por favor, nao bata ou soe a campainha fisica.', canvas.width / 2, warningY + Math.round(35 * scale));
+          ctx.fillText('Use a do Aplicativo.', canvas.width / 2, warningY + Math.round(60 * scale));
           ctx.fillStyle = '#b45309';
-          ctx.font = '12px system-ui';
-          ctx.fillText('Escaneie o QR Code Usando a Camera ou um App', canvas.width / 2, warningY + 56);
+          ctx.font = `${Math.round(18 * scale)}px system-ui`;
+          ctx.fillText('📱 Escaneie o QR Code Usando a Camera ou um App', canvas.width / 2, warningY + Math.round(88 * scale));
           
           // Delivery icons section
           if (deliveryIcons.length > 0) {
-            const deliveryY = warningY + warningHeight + 5;
-            const iconsPerRow = 4;
-            const rowCount = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const iconRowHeight = 50;
-            const deliveryBoxHeight = 35 + (rowCount * iconRowHeight);
+            const deliveryY = warningY + warningHeight + Math.round(10 * scale);
+            const deliveryBoxHeight = Math.round(55 * scale) + (rowCount * iconRowHeight);
             
             ctx.fillStyle = '#eff6ff';
             ctx.fillRect(padding, deliveryY, boxWidth, deliveryBoxHeight);
             ctx.strokeStyle = '#bfdbfe';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = Math.round(3 * scale);
             ctx.strokeRect(padding, deliveryY, boxWidth, deliveryBoxHeight);
             
             ctx.fillStyle = '#1e40af';
-            ctx.font = 'bold 13px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 22);
+            ctx.font = `bold ${Math.round(22 * scale)}px system-ui`;
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + Math.round(35 * scale));
             
             const iconPromises = deliveryIcons.map((icon, index) => {
               return new Promise<void>((resolveIcon) => {
@@ -358,34 +356,34 @@ export const VideoCallQRCode = ({
                 iconImg.crossOrigin = 'anonymous';
                 iconImg.onload = () => {
                   // Size based on customization - maintain aspect ratio
-                  const iconHeights = { small: 25, medium: 35, large: 45 };
-                  const targetHeight = iconHeights[customization.iconSize];
+                  const iconHeights = { small: 45, medium: 60, large: 80 };
+                  const targetHeight = Math.round(iconHeights[customization.iconSize] * scale);
                   
                   // Calculate width maintaining aspect ratio
                   const aspectRatio = iconImg.naturalWidth / iconImg.naturalHeight;
                   const iconHeight = targetHeight;
-                  const iconWidth = Math.min(targetHeight * aspectRatio, 70); // Max width 70px
-                  const gap = 15;
+                  const iconWidth = Math.min(targetHeight * aspectRatio, Math.round(120 * scale));
+                  const gap = Math.round(25 * scale);
                   
                   // Calculate row and column
                   const row = Math.floor(index / iconsPerRow);
                   const col = index % iconsPerRow;
                   const iconsInThisRow = Math.min(iconsPerRow, deliveryIcons.length - row * iconsPerRow);
                   
-                  // Calculate width for this row (use max icon width for consistent spacing)
-                  const maxIconWidth = 60;
+                  // Calculate width for this row
+                  const maxIconWidth = Math.round(100 * scale);
                   const rowWidth = iconsInThisRow * maxIconWidth + (iconsInThisRow - 1) * gap;
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   const iconCenterX = rowStartX + col * (maxIconWidth + gap) + maxIconWidth / 2;
                   const iconX = iconCenterX - iconWidth / 2;
-                  const iconY = deliveryY + 35 + row * iconRowHeight;
+                  const iconY = deliveryY + Math.round(55 * scale) + row * iconRowHeight;
                   
                   // Icon background
                   ctx.fillStyle = '#ffffff';
-                  const bgPadding = 6;
+                  const bgPadding = Math.round(10 * scale);
                   ctx.fillRect(iconX - bgPadding, iconY, iconWidth + bgPadding * 2, iconHeight + bgPadding * 2);
                   ctx.strokeStyle = '#e2e8f0';
-                  ctx.lineWidth = 1;
+                  ctx.lineWidth = Math.round(2 * scale);
                   ctx.strokeRect(iconX - bgPadding, iconY, iconWidth + bgPadding * 2, iconHeight + bgPadding * 2);
                   
                   ctx.drawImage(iconImg, iconX, iconY + bgPadding, iconWidth, iconHeight);
@@ -401,23 +399,23 @@ export const VideoCallQRCode = ({
           
           // Security notice - "SORRIA, VOCÊ ESTÁ SENDO FILMADO"
           const securityY = deliveryIcons.length > 0 
-            ? warningY + warningHeight + 5 + 35 + (Math.ceil(deliveryIcons.length / iconsPerRow) * iconRowHeight) + 15
-            : warningY + warningHeight + 15;
+            ? warningY + warningHeight + Math.round(10 * scale) + Math.round(55 * scale) + (Math.ceil(deliveryIcons.length / iconsPerRow) * iconRowHeight) + Math.round(25 * scale)
+            : warningY + warningHeight + Math.round(25 * scale);
           
           ctx.fillStyle = '#fef2f2';
-          ctx.fillRect(padding, securityY, boxWidth, 28);
+          ctx.fillRect(padding, securityY, boxWidth, Math.round(45 * scale));
           ctx.strokeStyle = '#fecaca';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(padding, securityY, boxWidth, 28);
+          ctx.lineWidth = Math.round(2 * scale);
+          ctx.strokeRect(padding, securityY, boxWidth, Math.round(45 * scale));
           
           ctx.fillStyle = '#b91c1c';
-          ctx.font = 'bold 11px system-ui';
-          ctx.fillText('📹 SORRIA, VOCÊ ESTÁ SENDO FILMADO', canvas.width / 2, securityY + 18);
+          ctx.font = `bold ${Math.round(18 * scale)}px system-ui`;
+          ctx.fillText('📹 SORRIA, VOCÊ ESTÁ SENDO FILMADO', canvas.width / 2, securityY + Math.round(30 * scale));
           
           // Permanent code text
-          const codeY = canvas.height - 12;
+          const codeY = canvas.height - Math.round(20 * scale);
           ctx.fillStyle = '#888';
-          ctx.font = '11px system-ui';
+          ctx.font = `${Math.round(18 * scale)}px system-ui`;
           ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
           
           resolve(canvas);
