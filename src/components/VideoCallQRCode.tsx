@@ -263,7 +263,7 @@ export const VideoCallQRCode = ({
       const canvasWidth = 520;
       const qrSize = 220;
       const padding = 30;
-      const headerHeight = 130;
+      const headerHeight = 150; // Increased for "CAMPAINHA VIRTUAL" text
       const warningHeight = 80;
       
       // Calculate delivery section height based on rows (max 4 per row)
@@ -271,10 +271,11 @@ export const VideoCallQRCode = ({
       const rowCount = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
       const iconRowHeight = 50;
       const deliveryHeight = deliveryIcons.length > 0 ? 35 + (rowCount * iconRowHeight) + 10 : 0;
-      const footerHeight = 40;
+      const securityNoticeHeight = 35;
+      const footerHeight = 30;
       
       canvas.width = canvasWidth;
-      canvas.height = headerHeight + qrSize + 30 + warningHeight + deliveryHeight + footerHeight;
+      canvas.height = headerHeight + qrSize + 30 + warningHeight + deliveryHeight + securityNoticeHeight + footerHeight;
 
       return new Promise((resolve) => {
         const img = new Image();
@@ -292,17 +293,22 @@ export const VideoCallQRCode = ({
           // Logo emoji
           ctx.font = '40px system-ui';
           ctx.textAlign = 'center';
-          ctx.fillText(customization.logoText, canvas.width / 2, 50);
+          ctx.fillText(customization.logoText, canvas.width / 2, 45);
+          
+          // "CAMPAINHA VIRTUAL" text
+          ctx.fillStyle = customization.fgColor;
+          ctx.font = 'bold 14px system-ui';
+          ctx.fillText('CAMPAINHA VIRTUAL', canvas.width / 2, 75);
           
           // Title
           ctx.fillStyle = customization.fgColor;
           ctx.font = 'bold 16px system-ui';
-          ctx.fillText(customization.title, canvas.width / 2, 85);
+          ctx.fillText(customization.title, canvas.width / 2, 105);
           
           // Subtitle
           ctx.font = '14px system-ui';
           ctx.fillStyle = '#666';
-          ctx.fillText(customization.subtitle, canvas.width / 2, 110);
+          ctx.fillText(customization.subtitle, canvas.width / 2, 130);
           
           // QR Code centered
           const qrX = (canvas.width - qrSize) / 2;
@@ -382,8 +388,23 @@ export const VideoCallQRCode = ({
             await Promise.all(iconPromises);
           }
           
+          // Security notice - "SORRIA, VOCÊ ESTÁ SENDO FILMADO"
+          const securityY = deliveryIcons.length > 0 
+            ? warningY + warningHeight + 5 + 35 + (Math.ceil(deliveryIcons.length / iconsPerRow) * iconRowHeight) + 15
+            : warningY + warningHeight + 15;
+          
+          ctx.fillStyle = '#fef2f2';
+          ctx.fillRect(padding, securityY, boxWidth, 28);
+          ctx.strokeStyle = '#fecaca';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(padding, securityY, boxWidth, 28);
+          
+          ctx.fillStyle = '#b91c1c';
+          ctx.font = 'bold 11px system-ui';
+          ctx.fillText('📹 SORRIA, VOCÊ ESTÁ SENDO FILMADO', canvas.width / 2, securityY + 18);
+          
           // Permanent code text
-          const codeY = canvas.height - 15;
+          const codeY = canvas.height - 12;
           ctx.fillStyle = '#888';
           ctx.font = '11px system-ui';
           ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
