@@ -71,16 +71,76 @@ serve(async (req) => {
       )
     }
 
-    // Delete the user from auth (this will cascade delete the profile)
+    // Delete related data first to avoid foreign key constraints
+    console.log('Deleting related data for user:', userId)
+    
+    // Delete push_subscriptions
+    await supabaseAdmin.from('push_subscriptions').delete().eq('user_id', userId)
+    
+    // Delete video_calls (where user is owner)
+    await supabaseAdmin.from('video_calls').delete().eq('owner_id', userId)
+    
+    // Delete activity_logs
+    await supabaseAdmin.from('activity_logs').delete().eq('user_id', userId)
+    
+    // Delete access_codes
+    await supabaseAdmin.from('access_codes').delete().eq('user_id', userId)
+    
+    // Delete delivery_icons
+    await supabaseAdmin.from('delivery_icons').delete().eq('user_id', userId)
+    
+    // Delete property_members (where user is member or invited_by)
+    await supabaseAdmin.from('property_members').delete().eq('user_id', userId)
+    await supabaseAdmin.from('property_members').delete().eq('invited_by', userId)
+    
+    // Get user's properties to delete related data
+    const { data: userProperties } = await supabaseAdmin
+      .from('properties')
+      .select('id')
+      .eq('user_id', userId)
+    
+    if (userProperties && userProperties.length > 0) {
+      const propertyIds = userProperties.map(p => p.id)
+      
+      // Delete property_invite_codes for user's properties
+      await supabaseAdmin.from('property_invite_codes').delete().in('property_id', propertyIds)
+      
+      // Delete property_members for user's properties
+      await supabaseAdmin.from('property_members').delete().in('property_id', propertyIds)
+      
+      // Delete video_calls for user's properties
+      await supabaseAdmin.from('video_calls').delete().in('property_id', propertyIds)
+      
+      // Delete activity_logs for user's properties
+      await supabaseAdmin.from('activity_logs').delete().in('property_id', propertyIds)
+      
+      // Delete access_codes for user's properties
+      await supabaseAdmin.from('access_codes').delete().in('property_id', propertyIds)
+    }
+    
+    // Delete properties
+    await supabaseAdmin.from('properties').delete().eq('user_id', userId)
+    
+    // Delete user_roles
+    await supabaseAdmin.from('user_roles').delete().eq('user_id', userId)
+    
+    // Delete profile
+    await supabaseAdmin.from('profiles').delete().eq('user_id', userId)
+    
+    console.log('All related data deleted, now deleting auth user')
+
+    // Delete the user from auth
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError)
       return new Response(
-        JSON.stringify({ error: 'Failed to delete user' }),
+        JSON.stringify({ error: 'Failed to delete user: ' + deleteError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    console.log('User deleted successfully:', userId)
 
     return new Response(
       JSON.stringify({ success: true }),
