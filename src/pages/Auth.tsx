@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter pelo menos 6 caracteres');
 const nameSchema = z.string().min(2, 'Nome deve ter pelo menos 2 caracteres');
-const phoneSchema = z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, 'WhatsApp inválido. Use o formato (XX) XXXXX-XXXX');
+const phoneSchema = z.string().min(1, 'WhatsApp é obrigatório').regex(/^\(\d{2}\) \d{5}-\d{4}$/, 'WhatsApp inválido. Use o formato (XX) XXXXX-XXXX');
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -54,11 +54,9 @@ export default function Auth() {
         newErrors.name = nameResult.error.errors[0].message;
       }
       
-      if (phone) {
-        const phoneResult = phoneSchema.safeParse(phone);
-        if (!phoneResult.success) {
-          newErrors.phone = phoneResult.error.errors[0].message;
-        }
+      const phoneResult = phoneSchema.safeParse(phone);
+      if (!phoneResult.success) {
+        newErrors.phone = phoneResult.error.errors[0].message;
       }
     }
 
@@ -195,7 +193,7 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">WhatsApp (opcional)</Label>
+                  <Label htmlFor="phone">WhatsApp</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
