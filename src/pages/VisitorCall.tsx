@@ -239,13 +239,12 @@ const VisitorCall = () => {
               .maybeSingle();
 
             if (property) {
-              // Create a new video_call entry
-              const newRoomName = `${property.name}_${Date.now()}`.replace(/\s+/g, '_');
-              
+              // Create a new video_call entry using the original access code as room_name
+              // This ensures the real-time subscription will work correctly
               const { error: insertError } = await supabase
                 .from('video_calls')
                 .insert({
-                  room_name: newRoomName,
+                  room_name: roomName, // Keep the original access code as room_name
                   property_id: accessCode.property_id,
                   property_name: property.name,
                   owner_id: accessCode.user_id,
@@ -256,8 +255,13 @@ const VisitorCall = () => {
               if (insertError) {
                 console.error('Error creating video call:', insertError);
               } else {
-                console.log('Created new video call for visitor');
+                console.log('Created new video call for visitor with room:', roomName);
                 setNotified(true);
+                
+                // Check if visitor_always_connected is enabled
+                if (property.visitor_always_connected) {
+                  setVisitorAlwaysConnected(true);
+                }
               }
             }
           } else {
