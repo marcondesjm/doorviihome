@@ -68,15 +68,41 @@ export function useAllUsers() {
 
 export function useToggleUserActive() {
   const queryClient = useQueryClient();
+  const { session } = useAuth();
   
   return useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_active: isActive })
-        .eq('user_id', userId);
+      const { data, error } = await supabase.functions.invoke('admin-toggle-user', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
+        body: { userId, isActive }
+      });
       
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
+  
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
+        body: { userId }
+      });
+      
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-users'] });
