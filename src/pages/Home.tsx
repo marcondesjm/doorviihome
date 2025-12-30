@@ -208,7 +208,7 @@ const Home = () => {
                 onClick={() => navigate(user ? "/dashboard" : "/auth")}
                 className="gap-2 text-lg px-8"
               >
-                {user ? "Ir para o Painel" : "Criar Conta Grátis"}
+                {user ? "Ir para o Painel" : "Conta Teste"}
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </motion.div>
