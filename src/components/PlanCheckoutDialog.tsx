@@ -28,7 +28,8 @@ const PlanCheckoutDialog = ({
   const [fullName, setFullName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedPayload, setCopiedPayload] = useState(false);
 
   // PIX data
   const pixKey = "48996029392";
@@ -83,12 +84,22 @@ const PlanCheckoutDialog = ({
 
   const copyPixKey = () => {
     navigator.clipboard.writeText(pixKey);
-    setCopied(true);
+    setCopiedKey(true);
     toast({
       title: "Chave PIX copiada!",
       description: "Cole no seu aplicativo de banco",
     });
-    setTimeout(() => setCopied(false), 3000);
+    setTimeout(() => setCopiedKey(false), 3000);
+  };
+
+  const copyPixPayload = () => {
+    navigator.clipboard.writeText(pixPayload);
+    setCopiedPayload(true);
+    toast({
+      title: "Código PIX copiado!",
+      description: "Cole no seu aplicativo de banco (copia e cola)",
+    });
+    setTimeout(() => setCopiedPayload(false), 3000);
   };
 
   const handleSendWhatsApp = () => {
@@ -165,30 +176,57 @@ const PlanCheckoutDialog = ({
             </div>
             
             {/* PIX Key Copy - Below QR Code */}
-            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-              <p className="text-xs font-medium">Ou copie a chave PIX:</p>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={pixKey}
-                  readOnly
-                  className="text-center font-mono text-sm"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={copyPixKey}
-                  className="shrink-0"
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
+            <div className="bg-muted/50 rounded-lg p-3 space-y-3">
+              {/* Copia e Cola */}
+              <div className="space-y-2">
+                <p className="text-xs font-medium">Copia e Cola PIX:</p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={pixPayload}
+                    readOnly
+                    className="text-center font-mono text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyPixPayload}
+                    className="shrink-0"
+                  >
+                    {copiedPayload ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {pixName}
-              </p>
+
+              {/* Chave PIX */}
+              <div className="space-y-2">
+                <p className="text-xs font-medium">Ou copie a chave PIX:</p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={pixKey}
+                    readOnly
+                    className="text-center font-mono text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyPixKey}
+                    className="shrink-0"
+                  >
+                    {copiedKey ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {pixName}
+                </p>
+              </div>
             </div>
           </div>
 
