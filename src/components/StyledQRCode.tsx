@@ -145,6 +145,13 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
             ✓ Código permanente
           </p>
         )}
+
+        {/* Security Notice */}
+        <div className="mt-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <p className="text-xs font-semibold text-red-700 flex items-center justify-center gap-1">
+            📹 SORRIA, VOCÊ ESTÁ SENDO FILMADO
+          </p>
+        </div>
       </div>
     </div>
   );
