@@ -22,7 +22,8 @@ import {
   BellOff,
   MessageCircle,
   RefreshCw,
-  Shield
+  Shield,
+  ClipboardCheck
 } from "lucide-react";
 
 // WhatsApp icon component
@@ -344,6 +345,10 @@ export const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       <Shield className="w-4 h-4 mr-3 text-primary" />
                       Gerenciar Usuários
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/admin#checklist')}>
+                      <ClipboardCheck className="w-4 h-4 mr-3 text-primary" />
+                      Checklist do Sistema
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
