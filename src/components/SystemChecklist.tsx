@@ -128,23 +128,26 @@ export function SystemChecklist() {
       ));
     }
 
-    // Check Active Users
+    // Check Active Users using edge function
     try {
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('admin-get-users', {
+        headers: {
+          Authorization: `Bearer ${session?.session?.access_token}`
+        }
+      });
       
-      if (error) throw error;
+      const activeCount = data?.users?.filter((u: any) => u.is_active !== false)?.length ?? 0;
+      const totalCount = data?.users?.length ?? 0;
       
       setChecks(prev => prev.map(c => 
         c.id === 'users' 
           ? { 
               ...c, 
-              status: (count ?? 0) > 0 ? 'ok' : 'error',
-              message: (count ?? 0) > 0 
-                ? `${count} usuário(s) ativo(s)` 
-                : 'Nenhum usuário ativo'
+              status: totalCount > 0 ? 'ok' : 'error',
+              message: totalCount > 0 
+                ? `${activeCount} usuário(s) ativo(s) de ${totalCount}` 
+                : 'Nenhum usuário cadastrado'
             } 
           : c
       ));
