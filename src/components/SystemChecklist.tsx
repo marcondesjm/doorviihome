@@ -55,21 +55,16 @@ export function SystemChecklist() {
     // Reset all to loading
     setChecks(prev => prev.map(c => ({ ...c, status: 'loading' as const, message: undefined })));
 
-    // Check VAPID Keys
+    // Check VAPID Keys using edge function
     try {
-      const { data: vapidData, error: vapidError } = await supabase
-        .from('vapid_keys')
-        .select('id')
-        .limit(1);
-      
-      if (vapidError) throw vapidError;
+      const { data, error } = await supabase.functions.invoke('get-vapid-keys');
       
       setChecks(prev => prev.map(c => 
         c.id === 'vapid' 
           ? { 
               ...c, 
-              status: vapidData && vapidData.length > 0 ? 'ok' : 'error',
-              message: vapidData && vapidData.length > 0 
+              status: data?.publicKey ? 'ok' : 'error',
+              message: data?.publicKey 
                 ? 'Chaves VAPID configuradas' 
                 : 'Chaves VAPID não encontradas'
             } 
@@ -78,7 +73,7 @@ export function SystemChecklist() {
     } catch (error) {
       setChecks(prev => prev.map(c => 
         c.id === 'vapid' 
-          ? { ...c, status: 'ok', message: 'Sistema de notificações configurado' } 
+          ? { ...c, status: 'error', message: 'Erro ao verificar chaves VAPID' } 
           : c
       ));
     }
