@@ -24,6 +24,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsAdmin, useAllUsers, useToggleUserActive, useDeleteUser } from '@/hooks/useAdmin';
+import { SystemChecklist } from '@/components/SystemChecklist';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -160,7 +161,16 @@ const Admin = () => {
         </div>
       </motion.header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* System Checklist */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <SystemChecklist />
+        </motion.div>
+
+        {/* Users Management */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
