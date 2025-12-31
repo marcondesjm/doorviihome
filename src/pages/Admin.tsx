@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Users, Search, Power, PowerOff, ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,7 @@ import { SystemChecklist } from '@/components/SystemChecklist';
 
 const Admin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { data: users, isLoading: usersLoading, refetch } = useAllUsers();
@@ -36,6 +37,18 @@ const Admin = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
+
+  // Scroll to checklist if hash is present
+  useEffect(() => {
+    if (location.hash === '#checklist') {
+      const element = document.getElementById('system-checklist');
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, [location.hash]);
 
   // Show loading while checking auth and admin status
   if (authLoading || adminLoading) {
@@ -164,6 +177,7 @@ const Admin = () => {
       <main className="container mx-auto px-4 py-6 space-y-6">
         {/* System Checklist */}
         <motion.div
+          id="system-checklist"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
