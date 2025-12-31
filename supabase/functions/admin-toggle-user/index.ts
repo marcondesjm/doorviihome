@@ -74,11 +74,29 @@ serve(async (req) => {
       )
     }
 
-    // Update the user's is_active status
-    const { error: updateError } = await supabaseAdmin
+    // Check if profile exists
+    const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .update({ is_active: isActive })
+      .select('id')
       .eq('user_id', userId)
+      .maybeSingle()
+
+    let updateError;
+    
+    if (existingProfile) {
+      // Update existing profile
+      const { error } = await supabaseAdmin
+        .from('profiles')
+        .update({ is_active: isActive })
+        .eq('user_id', userId)
+      updateError = error
+    } else {
+      // Create profile with is_active status
+      const { error } = await supabaseAdmin
+        .from('profiles')
+        .insert({ user_id: userId, is_active: isActive })
+      updateError = error
+    }
 
     if (updateError) {
       console.error('Error updating user status:', updateError)
