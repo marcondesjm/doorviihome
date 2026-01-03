@@ -660,7 +660,7 @@ export const VideoCallQRCode = ({
           </Button>
         </div>
 
-        {/* Visitor Audio Response */}
+        {/* Visitor Media Response */}
         {visitorAudioResponse && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -668,15 +668,28 @@ export const VideoCallQRCode = ({
             className="mt-4 p-3 bg-primary/20 border border-primary/50 rounded-xl"
           >
             <div className="flex items-center gap-2 mb-2">
-              <Volume2 className="w-4 h-4 text-primary" />
+              {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                <Video className="w-4 h-4 text-primary" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-primary" />
+              )}
               <span className="text-sm font-medium text-primary">Resposta do visitante</span>
             </div>
-            <audio 
-              src={visitorAudioResponse} 
-              controls 
-              className="w-full h-10"
-              autoPlay
-            />
+            {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+              <video 
+                src={visitorAudioResponse} 
+                controls 
+                className="w-full rounded-lg max-h-48"
+                autoPlay
+              />
+            ) : (
+              <audio 
+                src={visitorAudioResponse} 
+                controls 
+                className="w-full h-10"
+                autoPlay
+              />
+            )}
           </motion.div>
         )}
 
