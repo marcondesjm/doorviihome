@@ -42,12 +42,22 @@ const defaultImages = [property1, property2];
 const isVideoUrl = (url: string): boolean => {
   if (!url) return false;
   const lowerUrl = url.toLowerCase();
+  // Check for video file extensions and markers
+  const hasVideoExtension = lowerUrl.endsWith('.webm') || 
+                            lowerUrl.endsWith('.mp4') || 
+                            lowerUrl.endsWith('.mov') ||
+                            lowerUrl.endsWith('.avi');
   const hasVideoMarker = lowerUrl.includes('visitor_video') || 
-         lowerUrl.includes('.webm') || 
-         lowerUrl.includes('.mp4') ||
-         lowerUrl.includes('video/');
-  console.log('isVideoUrl check:', { url: url.substring(0, 100), lowerUrl: lowerUrl.substring(0, 100), hasVideoMarker });
-  return hasVideoMarker;
+                         lowerUrl.includes('/video/') ||
+                         lowerUrl.includes('video%2f');
+  const isVideo = hasVideoExtension || hasVideoMarker;
+  console.log('isVideoUrl check:', { 
+    url: url.substring(0, 150), 
+    hasVideoExtension, 
+    hasVideoMarker, 
+    isVideo 
+  });
+  return isVideo;
 };
 
 const Index = () => {
