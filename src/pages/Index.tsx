@@ -287,6 +287,16 @@ const Index = () => {
             });
           }
           
+          // Handle not answered - stop doorbell ringing
+          if (payload.new.status === 'not_answered') {
+            console.log('Call not answered - stopping doorbell');
+            setDoorbellRinging(false);
+            if (doorbellIntervalRef.current) {
+              clearInterval(doorbellIntervalRef.current);
+              doorbellIntervalRef.current = null;
+            }
+          }
+          
           // Handle visitor audio response
           if (payload.new.status === 'visitor_audio_response' && payload.new.visitor_audio_url) {
             setVisitorAudioResponse(payload.new.visitor_audio_url);

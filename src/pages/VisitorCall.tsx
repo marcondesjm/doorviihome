@@ -407,10 +407,18 @@ const VisitorCall = () => {
     // Start timeout if ringing and no timeout exists
     if (callStatus === 'ringing' && !ringingTimeoutRef.current) {
       console.log('Starting 60 second timeout for not_answered');
-      ringingTimeoutRef.current = setTimeout(() => {
+      ringingTimeoutRef.current = setTimeout(async () => {
         console.log('Timeout reached - showing not answered dialog');
         setCallStatus('not_answered');
         setShowNotAnsweredDialog(true);
+        
+        // Update database status to stop doorbell on owner's panel
+        if (roomName) {
+          await supabase
+            .from('video_calls')
+            .update({ status: 'not_answered' })
+            .eq('room_name', roomName);
+        }
       }, 60000); // 60 seconds
     }
     
