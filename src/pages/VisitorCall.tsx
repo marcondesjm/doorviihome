@@ -543,31 +543,6 @@ const VisitorCall = () => {
   // Status display component
   const StatusDisplay = () => {
     console.log('StatusDisplay render - callStatus:', callStatus, 'visitorAlwaysConnected:', visitorAlwaysConnected);
-    
-    // If call is ended, show disconnected status (takes priority)
-    if (callStatus === 'ended') {
-      return (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-destructive/20 border border-destructive/50 rounded-xl p-5 mb-6"
-        >
-          <motion.div 
-            className="flex items-center justify-center gap-2 mb-3"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-          >
-            <PhoneOff className="w-8 h-8 text-destructive" />
-          </motion.div>
-          <h3 className="font-bold text-lg text-destructive mb-2">Visitante Desconectado!</h3>
-          <p className="text-sm text-foreground">
-            A chamada foi encerrada pelo morador.
-          </p>
-        </motion.div>
-      );
-    }
-    
     // If visitor_always_connected is enabled OR ringing, show the connected status
     if (visitorAlwaysConnected || callStatus === 'ringing' || callStatus === 'waiting') {
       const isRinging = callStatus === 'ringing';
@@ -832,8 +807,29 @@ const VisitorCall = () => {
           </motion.div>
         );
       
+      case 'ended':
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-destructive/20 border border-destructive/50 rounded-xl p-5 mb-6"
+          >
+            <motion.div 
+              className="flex items-center justify-center gap-2 mb-3"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            >
+              <PhoneOff className="w-8 h-8 text-destructive" />
+            </motion.div>
+            <h3 className="font-bold text-lg text-destructive mb-2">Visitante Desconectado!</h3>
+            <p className="text-sm text-foreground">
+              A chamada foi encerrada pelo morador.
+            </p>
+          </motion.div>
+        );
+      
       default:
-        return null;
         return null;
     }
   };
@@ -955,12 +951,50 @@ const VisitorCall = () => {
 
             {callStatus !== 'video_call' && callStatus !== 'ended' && (
               <div className="space-y-3">
-                {/* Owner Text Message Display - Above Doorbell Button */}
+                {/* Botão de campainha */}
+                <motion.div 
+                  whileHover={{ scale: 1.02 }} 
+                  whileTap={{ scale: 0.98 }}
+                  animate={callStatus === 'waiting' ? { scale: [1, 1.03, 1] } : {}}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <Button
+                    size="lg"
+                    className={`w-full font-semibold text-lg py-6 ${
+                      callStatus === 'answered' || callStatus === 'audio_message'
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : callStatus === 'ringing' 
+                          ? 'bg-amber-600 hover:bg-amber-700' 
+                          : 'bg-amber-500 hover:bg-amber-600'
+                    } text-white`}
+                    onClick={handleRingDoorbell}
+                    disabled={callStatus === 'ringing' || callStatus === 'answered' || callStatus === 'audio_message'}
+                  >
+                    {callStatus === 'answered' || callStatus === 'audio_message' ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>{ownerStatusMessage}</span>
+                      </div>
+                    ) : callStatus === 'ringing' ? (
+                      <>
+                        <Bell className="w-6 h-6 animate-bounce" />
+                        <span>Aguardando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bell className="w-6 h-6" />
+                        <span>Tocar Campainha</span>
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+
+                {/* Owner Text Message Display */}
                 {ownerTextMessage && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-primary/20 border border-primary/50 rounded-xl p-4"
+                    className="bg-primary/20 border border-primary/50 rounded-xl p-4 mb-4"
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <MessageCircle className="w-4 h-4 text-primary" />
@@ -972,12 +1006,12 @@ const VisitorCall = () => {
                   </motion.div>
                 )}
 
-                {/* Received Audio Messages from Owner Display - Above Doorbell Button */}
+                {/* Received Audio Messages from Owner Display */}
                 {audioMessages.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-primary/20 border border-primary/50 rounded-xl p-4"
+                    className="bg-primary/20 border border-primary/50 rounded-xl p-4 mb-4"
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <Volume2 className="w-4 h-4 text-primary" />
@@ -1085,44 +1119,6 @@ const VisitorCall = () => {
                     </div>
                   </motion.div>
                 )}
-
-                {/* Botão de campainha */}
-                <motion.div 
-                  whileHover={{ scale: 1.02 }} 
-                  whileTap={{ scale: 0.98 }}
-                  animate={callStatus === 'waiting' ? { scale: [1, 1.03, 1] } : {}}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <Button
-                    size="lg"
-                    className={`w-full font-semibold text-lg py-6 ${
-                      callStatus === 'answered' || callStatus === 'audio_message'
-                        ? 'bg-green-600 hover:bg-green-700'
-                        : callStatus === 'ringing' 
-                          ? 'bg-amber-600 hover:bg-amber-700' 
-                          : 'bg-amber-500 hover:bg-amber-600'
-                    } text-white`}
-                    onClick={handleRingDoorbell}
-                    disabled={callStatus === 'ringing' || callStatus === 'answered' || callStatus === 'audio_message'}
-                  >
-                    {callStatus === 'answered' || callStatus === 'audio_message' ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>{ownerStatusMessage}</span>
-                      </div>
-                    ) : callStatus === 'ringing' ? (
-                      <>
-                        <Bell className="w-6 h-6 animate-bounce" />
-                        <span>Aguardando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bell className="w-6 h-6" />
-                        <span>Tocar Campainha</span>
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
 
                 {/* Visitor Audio Messages Display */}
                 {visitorAudioMessages.length > 0 && (
