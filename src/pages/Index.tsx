@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle, Send } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -22,7 +22,6 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -78,8 +77,6 @@ const Index = () => {
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
   const [visitorTextMessage, setVisitorTextMessage] = useState<string | null>(null);
-  const [ownerTextReply, setOwnerTextReply] = useState('');
-  const [showTextReply, setShowTextReply] = useState(false);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
@@ -495,50 +492,6 @@ const Index = () => {
 
     syncMissedMedia();
   }, [user, activities]);
-
-  // Check for pending visitor text messages on load
-  useEffect(() => {
-    if (!user) return;
-
-    const checkPendingTextMessages = async () => {
-      try {
-        const { data: pendingMessages, error } = await supabase
-          .from('video_calls')
-          .select('id, property_id, property_name, visitor_text_message, room_name, created_at')
-          .eq('owner_id', user.id)
-          .eq('status', 'visitor_text_message')
-          .not('visitor_text_message', 'is', null)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) {
-          console.error('Error fetching pending text messages:', error);
-          return;
-        }
-
-        if (!pendingMessages || pendingMessages.length === 0) return;
-
-        const latestMessage = pendingMessages[0];
-        
-        // Show the pending message
-        setVisitorTextMessage(latestMessage.visitor_text_message);
-        setDoorbellPropertyName(latestMessage.property_name || 'Propriedade');
-        setCurrentDoorbellRoomName(latestMessage.room_name || null);
-        setDoorbellRinging(true);
-        setDoorbellAnswered(true);
-
-        toast({
-          title: "💬 Mensagem pendente do visitante!",
-          description: "Você tem uma mensagem de texto não lida",
-          duration: 8000,
-        });
-      } catch (err) {
-        console.error('Error checking pending text messages:', err);
-      }
-    };
-
-    checkPendingTextMessages();
-  }, [user, toast]);
 
   // Listen for visitor scans on properties with visitor_always_connected enabled
   // This only updates property online status - doorbell notification happens when visitor explicitly rings
@@ -1391,54 +1344,6 @@ const Index = () => {
                     <span className="text-sm text-white/80">{doorbellPropertyName}</span>
                   </div>
 
-                  {/* Status Message Selector */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full bg-white/10 rounded-xl p-3"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="text-sm font-medium">Status para o visitante</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        'Aguarde, estou indo até você',
-                        'Já estou descendo',
-                        'Um momento, por favor',
-                        'Estou ocupado, aguarde',
-                      ].map((status) => (
-                        <Button
-                          key={status}
-                          variant="ghost"
-                          size="sm"
-                          className="bg-white/20 hover:bg-white/30 text-white text-xs px-2 py-1 h-auto"
-                          onClick={async () => {
-                            const roomName = currentDoorbellRoomName || activeCall?.room_name;
-                            if (!roomName) return;
-                            
-                            try {
-                              await supabase
-                                .from('video_calls')
-                                .update({ owner_status_message: status })
-                                .eq('room_name', roomName);
-                              
-                              toast({
-                                title: "Status atualizado!",
-                                description: `O visitante verá: "${status}"`,
-                                duration: 2000,
-                              });
-                            } catch (error) {
-                              console.error('Error updating status:', error);
-                            }
-                          }}
-                        >
-                          {status}
-                        </Button>
-                      ))}
-                    </div>
-                  </motion.div>
-
                   {/* Visitor Media Response */}
                   {visitorAudioResponse && (
                     <motion.div
@@ -1482,108 +1387,10 @@ const Index = () => {
                       })()}
                     </motion.div>
                   )}
-
-                  {/* Visitor Text Message */}
-                  {visitorTextMessage && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="w-full bg-white/20 rounded-xl p-3"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <MessageCircle className="w-4 h-4" />
-                        <span className="text-sm font-medium">Mensagem do visitante</span>
-                      </div>
-                      <p className="text-sm text-left bg-white/10 rounded-lg p-2">
-                        {visitorTextMessage}
-                      </p>
-                    </motion.div>
-                  )}
                   
                   <div className="flex flex-col gap-3 w-full">
-                    {/* Text Reply Option (show when visitor sent a message) */}
-                    {visitorTextMessage && !showTextReply && !showAudioRecorder && (
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        className="bg-white text-emerald-600 hover:bg-white/90 w-full"
-                        onClick={() => setShowTextReply(true)}
-                      >
-                        <MessageCircle className="w-5 h-5 mr-2" />
-                        Responder mensagem
-                      </Button>
-                    )}
-
-                    {/* Text Reply Input */}
-                    {showTextReply && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white/10 rounded-xl p-4"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Responder ao visitante</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-white/70 hover:text-white hover:bg-white/20 h-7 px-2"
-                            onClick={() => {
-                              setShowTextReply(false);
-                              setOwnerTextReply('');
-                            }}
-                          >
-                            Fechar
-                          </Button>
-                        </div>
-                        <Textarea
-                          placeholder="Digite sua resposta..."
-                          value={ownerTextReply}
-                          onChange={(e) => setOwnerTextReply(e.target.value)}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 mb-2"
-                          rows={3}
-                        />
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="w-full bg-white text-emerald-600 hover:bg-white/90"
-                          disabled={!ownerTextReply.trim()}
-                          onClick={async () => {
-                            if (!ownerTextReply.trim()) return;
-                            
-                            const roomName = currentDoorbellRoomName || activeCall?.room_name;
-                            if (!roomName) {
-                              toast({ title: "Erro", description: "Chamada não encontrada" });
-                              return;
-                            }
-
-                            try {
-                              const { error } = await supabase
-                                .from('video_calls')
-                                .update({ owner_text_message: ownerTextReply.trim() })
-                                .eq('room_name', roomName);
-
-                              if (error) throw error;
-
-                              toast({
-                                title: "Mensagem enviada!",
-                                description: "O visitante receberá sua resposta",
-                              });
-                              setShowTextReply(false);
-                              setOwnerTextReply('');
-                            } catch (error) {
-                              console.error('Error sending text reply:', error);
-                              toast({ title: "Erro", description: "Falha ao enviar mensagem" });
-                            }
-                          }}
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Enviar resposta
-                        </Button>
-                      </motion.div>
-                    )}
-
                     {/* Audio Message Option */}
-                    {!showAudioRecorder && !showTextReply && (
+                    {!showAudioRecorder && (
                       <Button
                         variant="secondary"
                         size="lg"
