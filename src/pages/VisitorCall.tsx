@@ -1091,19 +1091,36 @@ const VisitorCall = () => {
               <Textarea 
                 value={emergencyMessage}
                 onChange={(e) => setEmergencyMessage(e.target.value)}
-                className="min-h-[100px] resize-none"
+                className="min-h-[100px] resize-none border-primary/50"
                 placeholder="Digite sua mensagem..."
               />
             </div>
             <Button 
               className="w-full bg-foreground text-background hover:bg-foreground/90"
-              onClick={() => {
-                if (ownerPhone) {
-                  // Send via SMS
-                  window.open(`sms:${ownerPhone}?body=${encodeURIComponent(emergencyMessage)}`, '_self');
+              onClick={async () => {
+                // Send message to database so owner can see it
+                if (roomName && emergencyMessage.trim()) {
+                  try {
+                    const { error } = await supabase
+                      .from('video_calls')
+                      .update({ 
+                        visitor_text_message: emergencyMessage.trim(),
+                        status: 'visitor_text_message'
+                      })
+                      .eq('room_name', roomName);
+                    
+                    if (error) {
+                      console.error('Error sending message:', error);
+                      toast.error('Erro ao enviar mensagem');
+                    } else {
+                      toast.success('Mensagem enviada!');
+                    }
+                  } catch (e) {
+                    console.error('Error:', e);
+                    toast.error('Erro ao enviar mensagem');
+                  }
                 }
                 setShowMessageSentDialog(false);
-                toast.success('Mensagem enviada!');
               }}
             >
               Mensagem Enviada

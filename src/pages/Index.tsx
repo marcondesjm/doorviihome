@@ -76,6 +76,7 @@ const Index = () => {
   const [currentDoorbellRoomName, setCurrentDoorbellRoomName] = useState<string | null>(null);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
+  const [visitorTextMessage, setVisitorTextMessage] = useState<string | null>(null);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
@@ -358,6 +359,66 @@ const Index = () => {
             toast({
               title: isVideo ? "🎬 Resposta do visitante!" : "🎤 Resposta do visitante!",
               description: isVideo ? "O visitante enviou uma mensagem de vídeo" : "O visitante enviou uma mensagem de áudio",
+              duration: 8000,
+            });
+          }
+          
+          // Handle visitor text message
+          if (payload.new.status === 'visitor_text_message' && payload.new.visitor_text_message) {
+            setVisitorTextMessage(payload.new.visitor_text_message);
+            setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
+            setCurrentDoorbellRoomName(payload.new.room_name || null);
+            
+            // Show the doorbell alert with the text message
+            setDoorbellRinging(true);
+            setDoorbellAnswered(true);
+            
+            // Play notification sound
+            try {
+              const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.frequency.value = 523; // C5
+              osc.type = 'sine';
+              gain.gain.setValueAtTime(0.3, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+              osc.start(ctx.currentTime);
+              osc.stop(ctx.currentTime + 0.2);
+              
+              setTimeout(() => {
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.frequency.value = 659; // E5
+                osc2.type = 'sine';
+                gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc2.start(ctx.currentTime);
+                osc2.stop(ctx.currentTime + 0.2);
+              }, 150);
+            } catch (e) {
+              console.log('Audio not supported');
+            }
+            
+            // Vibrate phone if supported
+            if ('vibrate' in navigator) {
+              navigator.vibrate([200, 100, 200]);
+            }
+            
+            // Register activity
+            addActivity.mutate({
+              property_id: payload.new.property_id || undefined,
+              type: 'incoming',
+              title: 'Mensagem de texto recebida',
+              property_name: payload.new.property_name || 'Propriedade',
+            });
+            
+            toast({
+              title: "💬 Mensagem do visitante!",
+              description: "O visitante enviou uma mensagem de texto",
               duration: 8000,
             });
           }
@@ -711,6 +772,7 @@ const Index = () => {
     setShowVideoCallQR(false);
     setMeetLink(null);
     setWaitingForApproval(false);
+    setVisitorTextMessage(null);
     await endVideoCall();
     
     if (callState.isActive && callState.propertyId && properties) {
@@ -1131,6 +1193,7 @@ const Index = () => {
             callDuration={0}
             formatDuration={formatDuration}
             ownerPhone={ownerPhone || undefined}
+            visitorTextMessage={visitorTextMessage}
           />
         )}
       </AnimatePresence>

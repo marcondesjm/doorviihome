@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, PhoneOff, Video, Mic, MicOff, Volume2, VolumeX, VideoOff, X } from "lucide-react";
+import { Phone, PhoneOff, Video, Mic, MicOff, Volume2, VolumeX, VideoOff, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { getSelectedRingtoneUrl } from "./RingtoneConfigDialog";
@@ -21,6 +21,7 @@ interface IncomingCallProps {
   callDuration?: number;
   formatDuration?: (seconds: number) => string;
   ownerPhone?: string;
+  visitorTextMessage?: string | null;
 }
 
 export const IncomingCall = ({
@@ -33,6 +34,7 @@ export const IncomingCall = ({
   callDuration = 0,
   formatDuration = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`,
   ownerPhone,
+  visitorTextMessage,
 }: IncomingCallProps) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
@@ -187,14 +189,29 @@ export const IncomingCall = ({
               exit={{ opacity: 0, y: 10 }}
               className="mb-6"
             >
-              <h2 className="text-xl font-bold mb-1">Campainha tocando!</h2>
-              <motion.p 
-                className="text-sm text-muted-foreground"
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              >
-                {propertyName}
-              </motion.p>
+              {visitorTextMessage ? (
+                <>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <MessageCircle className="w-5 h-5 text-primary" />
+                    <h2 className="text-lg font-bold">Mensagem do Visitante</h2>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">{propertyName}</p>
+                  <div className="bg-secondary/50 rounded-lg p-3 text-sm text-left max-h-24 overflow-y-auto">
+                    {visitorTextMessage}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-bold mb-1">Campainha tocando!</h2>
+                  <motion.p 
+                    className="text-sm text-muted-foreground"
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    {propertyName}
+                  </motion.p>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
