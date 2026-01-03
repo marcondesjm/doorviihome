@@ -437,6 +437,8 @@ const VisitorCall = () => {
   const StatusDisplay = () => {
     // If visitor_always_connected is enabled, show the connected status
     if (visitorAlwaysConnected && (callStatus === 'waiting' || callStatus === 'ringing')) {
+      const isRinging = callStatus === 'ringing';
+      
       return (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -455,7 +457,9 @@ const VisitorCall = () => {
           <div className="flex items-center justify-center gap-2 text-foreground">
             <User className="w-4 h-4" />
             <p className="text-sm">
-              Você está conectado. Toque a campainha para avisar o morador.
+              {isRinging 
+                ? "Campainha tocada! Aguardando resposta do morador." 
+                : "Você está conectado. Toque a campainha para avisar o morador."}
             </p>
           </div>
         </motion.div>
