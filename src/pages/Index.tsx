@@ -38,6 +38,15 @@ import property2 from "@/assets/property-2.jpg";
 
 const defaultImages = [property1, property2];
 
+// Helper function to detect if URL is a video file
+const isVideoUrl = (url: string): boolean => {
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('visitor_video') || 
+         lowerUrl.includes('.webm') || 
+         lowerUrl.includes('.mp4') ||
+         lowerUrl.includes('video/');
+};
+
 const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -286,9 +295,10 @@ const Index = () => {
               console.log('Audio not supported');
             }
             
+            const isVideo = isVideoUrl(payload.new.visitor_audio_url);
             toast({
-              title: "🎬 Resposta do visitante!",
-              description: "O visitante enviou uma mensagem de vídeo",
+              title: isVideo ? "🎬 Resposta do visitante!" : "🎤 Resposta do visitante!",
+              description: isVideo ? "O visitante enviou uma mensagem de vídeo" : "O visitante enviou uma mensagem de áudio",
               duration: 8000,
             });
           }
@@ -1155,17 +1165,18 @@ const Index = () => {
                       className="w-full bg-white/20 rounded-xl p-3"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                        {isVideoUrl(visitorAudioResponse) ? (
                           <Video className="w-4 h-4" />
                         ) : (
                           <Volume2 className="w-4 h-4" />
                         )}
                         <span className="text-sm font-medium">Resposta do visitante</span>
                       </div>
-                      {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                      {isVideoUrl(visitorAudioResponse) ? (
                         <video
                           controls
                           autoPlay
+                          playsInline
                           src={visitorAudioResponse}
                           className="w-full rounded-lg max-h-48"
                         />
@@ -1284,7 +1295,7 @@ const Index = () => {
             <div className="bg-primary text-primary-foreground p-4 rounded-2xl shadow-lg">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                  {isVideoUrl(visitorAudioResponse) ? (
                     <Video className="w-5 h-5 animate-pulse" />
                   ) : (
                     <Volume2 className="w-5 h-5 animate-pulse" />
@@ -1300,11 +1311,12 @@ const Index = () => {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+              {isVideoUrl(visitorAudioResponse) ? (
                 <video 
                   src={visitorAudioResponse} 
                   controls 
                   autoPlay
+                  playsInline
                   className="w-full rounded-lg max-h-64"
                 />
               ) : (
