@@ -995,6 +995,120 @@ const VisitorCall = () => {
                   </motion.div>
                 )}
 
+                {/* Received Audio Messages from Owner Display */}
+                {audioMessages.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-primary/20 border border-primary/50 rounded-xl p-4 mb-4"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Volume2 className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium text-primary">
+                        {audioMessages.length > 1 ? `${audioMessages.length} áudios recebidos` : 'Áudio recebido'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {audioMessages.map((message, index) => (
+                        <motion.div
+                          key={message.url}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={`flex items-center gap-2 p-2 rounded-lg ${
+                            currentPlayingIndex === index ? 'bg-primary/30' : 'bg-secondary/50'
+                          }`}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 rounded-full flex-shrink-0"
+                            onClick={async () => {
+                              if (currentPlayingIndex === index && audioRef.current) {
+                                audioRef.current.pause();
+                                setCurrentPlayingIndex(null);
+                                return;
+                              }
+                              
+                              try {
+                                const audio = new Audio();
+                                audio.preload = 'auto';
+                                audio.crossOrigin = 'anonymous';
+                                
+                                audio.oncanplaythrough = async () => {
+                                  try {
+                                    await audio.play();
+                                    setCurrentPlayingIndex(index);
+                                    if (audioRef.current) {
+                                      audioRef.current.pause();
+                                    }
+                                    (audioRef as any).current = audio;
+                                  } catch (playError) {
+                                    console.error('[Received Audio] Play error:', playError);
+                                    toast.error('Toque novamente para ouvir');
+                                  }
+                                };
+                                
+                                audio.onended = () => {
+                                  setCurrentPlayingIndex(null);
+                                };
+                                
+                                audio.onerror = () => {
+                                  toast.error('Erro ao carregar áudio');
+                                  setCurrentPlayingIndex(null);
+                                };
+                                
+                                audio.src = message.url;
+                                audio.load();
+                                
+                                setTimeout(async () => {
+                                  if (audio.readyState >= 2) {
+                                    try {
+                                      await audio.play();
+                                      setCurrentPlayingIndex(index);
+                                      (audioRef as any).current = audio;
+                                    } catch (e) {
+                                      console.log('[Received Audio] Waiting for canplaythrough...');
+                                    }
+                                  }
+                                }, 100);
+                                
+                              } catch (error) {
+                                console.error('[Received Audio] Error:', error);
+                                toast.error('Erro ao reproduzir áudio');
+                              }
+                            }}
+                          >
+                            {currentPlayingIndex === index ? (
+                              <Pause className="w-4 h-4" />
+                            ) : (
+                              <Play className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">Áudio do morador {index + 1}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(message.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                          {currentPlayingIndex === index && (
+                            <motion.div
+                              className="flex gap-0.5"
+                              animate={{ opacity: [0.5, 1, 0.5] }}
+                              transition={{ repeat: Infinity, duration: 0.8 }}
+                            >
+                              {[1, 2, 3].map(i => (
+                                <div key={i} className="w-1 h-2 bg-primary rounded-full" style={{ height: `${6 + i * 3}px` }} />
+                              ))}
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Visitor Audio Messages Display */}
                 {visitorAudioMessages.length > 0 && (
                   <motion.div
