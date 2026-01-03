@@ -451,14 +451,20 @@ const VisitorCall = () => {
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
           >
-            <CheckCircle className="w-8 h-8 text-green-500" />
+            {isRinging ? (
+              <Bell className="w-8 h-8 text-amber-500 animate-bounce" />
+            ) : (
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            )}
           </motion.div>
-          <h3 className="font-bold text-lg text-green-500 mb-2">Visitante conectado!</h3>
+          <h3 className={`font-bold text-lg mb-2 ${isRinging ? 'text-amber-500' : 'text-green-500'}`}>
+            {isRinging ? "Campainha tocada!" : "Visitante conectado!"}
+          </h3>
           <div className="flex items-center justify-center gap-2 text-foreground">
             <User className="w-4 h-4" />
             <p className="text-sm">
               {isRinging 
-                ? "Campainha tocada! Aguardando resposta do morador." 
+                ? "Aguardando resposta do morador..." 
                 : "Você está conectado. Toque a campainha para avisar o morador."}
             </p>
           </div>
