@@ -748,11 +748,21 @@ const VisitorCall = () => {
                     disabled={callStatus === 'ringing' || callStatus === 'answered' || callStatus === 'audio_message'}
                   >
                     {callStatus === 'answered' || callStatus === 'audio_message' ? (
-                      <CheckCircle className="w-6 h-6" />
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Aguarde, estou indo até você</span>
+                      </div>
+                    ) : callStatus === 'ringing' ? (
+                      <>
+                        <Bell className="w-6 h-6 animate-bounce" />
+                        <span>Aguardando...</span>
+                      </>
                     ) : (
-                      <Bell className={`w-6 h-6 ${callStatus === 'ringing' ? 'animate-bounce' : ''}`} />
+                      <>
+                        <Bell className="w-6 h-6" />
+                        <span>Tocar Campainha</span>
+                      </>
                     )}
-                    {callStatus === 'ringing' ? 'Aguardando...' : (callStatus === 'answered' || callStatus === 'audio_message') ? 'Aguarde, estou indo até você' : 'Tocar Campainha'}
                   </Button>
                 </motion.div>
 
