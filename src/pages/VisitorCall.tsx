@@ -55,6 +55,7 @@ const VisitorCall = () => {
   const [elapsedTime, setElapsedTime] = useState<string>('00:00');
   const [showNotAnsweredDialog, setShowNotAnsweredDialog] = useState(false);
   const [showMessageSentDialog, setShowMessageSentDialog] = useState(false);
+  const [showEmergencyContact, setShowEmergencyContact] = useState(false);
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -426,8 +427,19 @@ const VisitorCall = () => {
 
   const handleTryAgain = () => {
     setShowNotAnsweredDialog(false);
+    setShowEmergencyContact(false);
     setCallStatus('waiting');
   };
+
+  // Auto-show emergency contact after 5 seconds when dialog opens
+  useEffect(() => {
+    if (showNotAnsweredDialog && !showEmergencyContact) {
+      const timer = setTimeout(() => {
+        setShowEmergencyContact(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showNotAnsweredDialog, showEmergencyContact]);
 
   const handleGoBack = () => {
     window.history.back();
@@ -990,42 +1002,53 @@ const VisitorCall = () => {
                 Tentar Novamente
               </AlertDialogAction>
               
-              <div className="w-full border-t border-border pt-4 mt-2">
-                <p className="text-sm text-muted-foreground mb-3 text-center">Contato de Emergência</p>
-                <div className="flex items-center justify-center gap-2">
-                  {ownerPhone && (
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="rounded-full h-10 w-10"
-                      onClick={() => window.open(`tel:${ownerPhone}`, '_self')}
-                    >
-                      <Phone className="w-4 h-4 text-green-600" />
-                    </Button>
-                  )}
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="rounded-full h-10 w-10 bg-green-500 hover:bg-green-600 border-green-500"
-                    onClick={handleWhatsApp}
+              <AnimatePresence>
+                {showEmergencyContact && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full border-t border-border pt-4 mt-2 overflow-hidden"
                   >
-                    <WhatsAppIcon className="w-4 h-4 text-white" />
-                  </Button>
-                  {ownerPhone && (
-                    <Button
-                      variant="outline"
-                      className="rounded-full h-10 px-4"
-                      onClick={() => {
-                        setShowNotAnsweredDialog(false);
-                        setShowMessageSentDialog(true);
-                      }}
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      Enviar Mensagem
-                    </Button>
-                  )}
-                </div>
-              </div>
+                    <p className="text-sm text-muted-foreground mb-3 text-center">Contato de Emergência</p>
+                    <div className="flex items-center justify-center gap-2">
+                      {ownerPhone && (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="rounded-full h-10 w-10"
+                          onClick={() => window.open(`tel:${ownerPhone}`, '_self')}
+                        >
+                          <Phone className="w-4 h-4 text-green-600" />
+                        </Button>
+                      )}
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="rounded-full h-10 w-10 bg-green-500 hover:bg-green-600 border-green-500"
+                        onClick={handleWhatsApp}
+                      >
+                        <WhatsAppIcon className="w-4 h-4 text-white" />
+                      </Button>
+                      {ownerPhone && (
+                        <Button
+                          variant="outline"
+                          className="rounded-full h-10 px-4"
+                          onClick={() => {
+                            setShowNotAnsweredDialog(false);
+                            setShowEmergencyContact(false);
+                            setShowMessageSentDialog(true);
+                          }}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar Mensagem
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
