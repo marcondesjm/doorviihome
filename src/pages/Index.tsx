@@ -40,11 +40,14 @@ const defaultImages = [property1, property2];
 
 // Helper function to detect if URL is a video file
 const isVideoUrl = (url: string): boolean => {
+  if (!url) return false;
   const lowerUrl = url.toLowerCase();
-  return lowerUrl.includes('visitor_video') || 
+  const hasVideoMarker = lowerUrl.includes('visitor_video') || 
          lowerUrl.includes('.webm') || 
          lowerUrl.includes('.mp4') ||
          lowerUrl.includes('video/');
+  console.log('isVideoUrl check:', { url: url.substring(0, 100), lowerUrl: lowerUrl.substring(0, 100), hasVideoMarker });
+  return hasVideoMarker;
 };
 
 const Index = () => {
@@ -1172,23 +1175,27 @@ const Index = () => {
                         )}
                         <span className="text-sm font-medium">Resposta do visitante</span>
                       </div>
-                      {isVideoUrl(visitorAudioResponse) ? (
-                        <video
-                          controls
-                          autoPlay
-                          playsInline
-                          src={visitorAudioResponse}
-                          className="w-full rounded-lg max-h-48"
-                        />
-                      ) : (
-                        <audio
-                          controls
-                          autoPlay
-                          src={visitorAudioResponse}
-                          className="w-full h-10"
-                          style={{ filter: 'invert(1)' }}
-                        />
-                      )}
+                      {(() => {
+                        const isVideo = isVideoUrl(visitorAudioResponse);
+                        console.log('Rendering visitor response:', { url: visitorAudioResponse, isVideo });
+                        return isVideo ? (
+                          <video
+                            controls
+                            autoPlay
+                            playsInline
+                            src={visitorAudioResponse}
+                            className="w-full rounded-lg max-h-48"
+                          />
+                        ) : (
+                          <audio
+                            controls
+                            autoPlay
+                            src={visitorAudioResponse}
+                            className="w-full h-10"
+                            style={{ filter: 'invert(1)' }}
+                          />
+                        );
+                      })()}
                     </motion.div>
                   )}
                   
