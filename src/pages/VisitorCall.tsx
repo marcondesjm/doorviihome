@@ -148,6 +148,13 @@ const VisitorCall = () => {
           });
         } else if (callData.status === 'doorbell_ringing') {
           setCallStatus('ringing');
+          // Start timeout for not answered if ringing on load
+          if (!ringingTimeoutRef.current) {
+            ringingTimeoutRef.current = setTimeout(() => {
+              setCallStatus('not_answered');
+              setShowNotAnsweredDialog(true);
+            }, 60000);
+          }
         } else if (callData.status === 'answered') {
           setCallStatus('answered');
         }
