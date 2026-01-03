@@ -342,10 +342,12 @@ const Index = () => {
     const syncMissedMedia = async () => {
       try {
         // Get all video_calls with visitor media that belong to this user
+        // Only fetch calls with status 'visitor_audio_response' to avoid syncing old/reused calls
         const { data: callsWithMedia, error } = await supabase
           .from('video_calls')
           .select('id, property_id, property_name, visitor_audio_url, created_at')
           .eq('owner_id', user.id)
+          .eq('status', 'visitor_audio_response')
           .not('visitor_audio_url', 'is', null);
 
         if (error) {
