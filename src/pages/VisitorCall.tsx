@@ -1,12 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock, ArrowLeft, PhoneOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { VisitorAudioRecorder } from '@/components/VisitorAudioRecorder';
 import { VisitorVideoRecorder } from '@/components/VisitorVideoRecorder';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -15,7 +23,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-type CallStatus = 'waiting' | 'ringing' | 'answered' | 'video_call' | 'audio_message' | 'ended';
+type CallStatus = 'waiting' | 'ringing' | 'answered' | 'video_call' | 'audio_message' | 'ended' | 'not_answered';
 
 interface AudioMessage {
   url: string;
@@ -38,7 +46,9 @@ const VisitorCall = () => {
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const [waitStartTime] = useState<number>(Date.now());
   const [elapsedTime, setElapsedTime] = useState<string>('00:00');
+  const [showNotAnsweredDialog, setShowNotAnsweredDialog] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Format elapsed time
   const formatElapsedTime = useCallback((ms: number): string => {
@@ -328,6 +338,17 @@ const VisitorCall = () => {
     
     setCallStatus('ringing');
     
+    // Clear any existing timeout
+    if (ringingTimeoutRef.current) {
+      clearTimeout(ringingTimeoutRef.current);
+    }
+    
+    // Set timeout for not answered (60 seconds)
+    ringingTimeoutRef.current = setTimeout(() => {
+      setCallStatus('not_answered');
+      setShowNotAnsweredDialog(true);
+    }, 60000);
+    
     try {
       // Get the call to find the owner_id
       const { data: callData } = await supabase
@@ -347,6 +368,9 @@ const VisitorCall = () => {
         console.error('Error ringing doorbell:', error);
         toast.error('Erro ao tocar campainha');
         setCallStatus('waiting');
+        if (ringingTimeoutRef.current) {
+          clearTimeout(ringingTimeoutRef.current);
+        }
       } else {
         toast.success('Campainha tocando! Aguarde o morador atender...');
         
@@ -366,7 +390,35 @@ const VisitorCall = () => {
       console.error('Error:', err);
       toast.error('Erro ao tocar campainha');
       setCallStatus('waiting');
+      if (ringingTimeoutRef.current) {
+        clearTimeout(ringingTimeoutRef.current);
+      }
     }
+  };
+
+  // Clear timeout when call status changes to answered/video_call/audio_message
+  useEffect(() => {
+    if (callStatus === 'answered' || callStatus === 'video_call' || callStatus === 'audio_message') {
+      if (ringingTimeoutRef.current) {
+        clearTimeout(ringingTimeoutRef.current);
+        ringingTimeoutRef.current = null;
+      }
+    }
+    
+    return () => {
+      if (ringingTimeoutRef.current) {
+        clearTimeout(ringingTimeoutRef.current);
+      }
+    };
+  }, [callStatus]);
+
+  const handleTryAgain = () => {
+    setShowNotAnsweredDialog(false);
+    setCallStatus('waiting');
+  };
+
+  const handleGoBack = () => {
+    window.history.back();
   };
 
   // Status display component
@@ -753,6 +805,15 @@ const VisitorCall = () => {
                   >
                     <Phone className="w-10 h-10 text-destructive" />
                   </motion.div>
+                ) : callStatus === 'not_answered' ? (
+                  <motion.div
+                    key="not_answered"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="relative w-28 h-28 rounded-full bg-amber-500/20 border-4 border-amber-500 flex items-center justify-center"
+                  >
+                    <PhoneOff className="w-10 h-10 text-amber-500" />
+                  </motion.div>
                 ) : (
                   <motion.div key="default">
                     <motion.div 
@@ -880,6 +941,113 @@ const VisitorCall = () => {
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Copiado!' : 'Copiar link da chamada'}
               </Button>
+            )}
+
+            <p className="text-xs text-muted-foreground mt-6">
+              Powered by DoorVii Home
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Not Answered Dialog */}
+        <AlertDialog open={showNotAnsweredDialog} onOpenChange={setShowNotAnsweredDialog}>
+          <AlertDialogContent className="max-w-sm">
+            <AlertDialogTitle className="text-center text-lg font-semibold">
+              Chamada Não Atendida
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              O morador não atendeu. Por favor, tente novamente ou entre em contato por outro meio.
+            </AlertDialogDescription>
+            <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+              <AlertDialogAction 
+                onClick={handleTryAgain}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                OK
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
+
+  // Not answered state - show buttons even outside dialog
+  if (callStatus === 'not_answered' && !showNotAnsweredDialog) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm text-center"
+        >
+          <div className="glass rounded-3xl p-8" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div className="relative w-28 h-28 mx-auto mb-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="relative w-28 h-28 rounded-full bg-amber-500/20 border-4 border-amber-500 flex items-center justify-center"
+              >
+                <PhoneOff className="w-10 h-10 text-amber-500" />
+              </motion.div>
+            </div>
+
+            <h2 className="text-xl font-bold mb-2">Chamada Não Atendida</h2>
+            <p className="text-muted-foreground mb-6">
+              O morador não está disponível no momento.
+            </p>
+
+            <div className="flex gap-3 mb-4">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleGoBack}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
+              </Button>
+              <Button
+                className="flex-1 bg-primary hover:bg-primary/90"
+                onClick={handleTryAgain}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Ligar Novamente
+              </Button>
+            </div>
+
+            {ownerPhone && (
+              <div className="border-t border-border pt-4">
+                <p className="text-sm text-muted-foreground mb-3">Contato de Emergência</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{ownerPhone}</span>
+                  <div className="flex gap-2">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-full h-10 w-10"
+                      onClick={() => window.open(`tel:${ownerPhone}`, '_self')}
+                    >
+                      <Phone className="w-4 h-4 text-green-600" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-full h-10 w-10"
+                      onClick={() => window.open(`sms:${ownerPhone}`, '_self')}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-full h-10 w-10 bg-green-500 hover:bg-green-600 border-green-500"
+                      onClick={handleWhatsApp}
+                    >
+                      <WhatsAppIcon className="w-4 h-4 text-white" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
 
             <p className="text-xs text-muted-foreground mt-6">
