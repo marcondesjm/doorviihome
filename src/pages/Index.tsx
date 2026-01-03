@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle, Send } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -22,6 +22,7 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -77,6 +78,8 @@ const Index = () => {
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
   const [visitorTextMessage, setVisitorTextMessage] = useState<string | null>(null);
+  const [ownerTextReply, setOwnerTextReply] = useState('');
+  const [showTextReply, setShowTextReply] = useState(false);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
@@ -1450,8 +1453,89 @@ const Index = () => {
                   )}
                   
                   <div className="flex flex-col gap-3 w-full">
+                    {/* Text Reply Option (show when visitor sent a message) */}
+                    {visitorTextMessage && !showTextReply && !showAudioRecorder && (
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="bg-white text-emerald-600 hover:bg-white/90 w-full"
+                        onClick={() => setShowTextReply(true)}
+                      >
+                        <MessageCircle className="w-5 h-5 mr-2" />
+                        Responder mensagem
+                      </Button>
+                    )}
+
+                    {/* Text Reply Input */}
+                    {showTextReply && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white/10 rounded-xl p-4"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Responder ao visitante</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-white/70 hover:text-white hover:bg-white/20 h-7 px-2"
+                            onClick={() => {
+                              setShowTextReply(false);
+                              setOwnerTextReply('');
+                            }}
+                          >
+                            Fechar
+                          </Button>
+                        </div>
+                        <Textarea
+                          placeholder="Digite sua resposta..."
+                          value={ownerTextReply}
+                          onChange={(e) => setOwnerTextReply(e.target.value)}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 mb-2"
+                          rows={3}
+                        />
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="w-full bg-white text-emerald-600 hover:bg-white/90"
+                          disabled={!ownerTextReply.trim()}
+                          onClick={async () => {
+                            if (!ownerTextReply.trim()) return;
+                            
+                            const roomName = currentDoorbellRoomName || activeCall?.room_name;
+                            if (!roomName) {
+                              toast({ title: "Erro", description: "Chamada não encontrada" });
+                              return;
+                            }
+
+                            try {
+                              const { error } = await supabase
+                                .from('video_calls')
+                                .update({ owner_text_message: ownerTextReply.trim() })
+                                .eq('room_name', roomName);
+
+                              if (error) throw error;
+
+                              toast({
+                                title: "Mensagem enviada!",
+                                description: "O visitante receberá sua resposta",
+                              });
+                              setShowTextReply(false);
+                              setOwnerTextReply('');
+                            } catch (error) {
+                              console.error('Error sending text reply:', error);
+                              toast({ title: "Erro", description: "Falha ao enviar mensagem" });
+                            }
+                          }}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar resposta
+                        </Button>
+                      </motion.div>
+                    )}
+
                     {/* Audio Message Option */}
-                    {!showAudioRecorder && (
+                    {!showAudioRecorder && !showTextReply && (
                       <Button
                         variant="secondary"
                         size="lg"

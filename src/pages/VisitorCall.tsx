@@ -59,6 +59,7 @@ const VisitorCall = () => {
   const [emergencyCountdown, setEmergencyCountdown] = useState(5);
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const [hasAutoRung, setHasAutoRung] = useState(false);
+  const [ownerTextMessage, setOwnerTextMessage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -164,6 +165,11 @@ const VisitorCall = () => {
         } else if (callData.status === 'answered') {
           setCallStatus('answered');
         }
+
+        // Check for owner text message on initial load
+        if (callData.owner_text_message) {
+          setOwnerTextMessage(callData.owner_text_message);
+        }
         // Don't set 'ended' status on initial load - treat as new session
       } else {
         // No active call found - start fresh at waiting
@@ -232,6 +238,15 @@ const VisitorCall = () => {
               // Fallback for browsers that don't allow window.close()
               // Navigate to a blank page or show message
             }, 3000);
+          }
+
+          // Check for owner text message
+          if (updatedCall.owner_text_message && updatedCall.owner_text_message !== ownerTextMessage) {
+            setOwnerTextMessage(updatedCall.owner_text_message);
+            toast.success('Nova mensagem do morador!');
+            if ('vibrate' in navigator) {
+              navigator.vibrate([200, 100, 200]);
+            }
           }
         }
       )
@@ -921,6 +936,23 @@ const VisitorCall = () => {
                     )}
                   </Button>
                 </motion.div>
+
+                {/* Owner Text Message Display */}
+                {ownerTextMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-primary/20 border border-primary/50 rounded-xl p-4 mb-4"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium text-primary">Mensagem do morador</span>
+                    </div>
+                    <p className="text-sm text-foreground bg-primary/10 rounded-lg p-3">
+                      {ownerTextMessage}
+                    </p>
+                  </motion.div>
+                )}
 
                 {/* Video recorder button in a box */}
                 <VisitorVideoRecorder 
