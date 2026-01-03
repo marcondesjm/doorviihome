@@ -58,6 +58,7 @@ const VisitorCall = () => {
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
   const [emergencyCountdown, setEmergencyCountdown] = useState(5);
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
+  const [hasAutoRung, setHasAutoRung] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -426,6 +427,19 @@ const VisitorCall = () => {
     };
   }, []);
 
+  // Auto-ring doorbell when visitor connects (scans QR code)
+  useEffect(() => {
+    if (roomName && callStatus === 'waiting' && !hasAutoRung) {
+      console.log('Auto-ringing doorbell on visitor connect');
+      setHasAutoRung(true);
+      // Small delay to ensure everything is loaded
+      const timer = setTimeout(() => {
+        handleRingDoorbell();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [roomName, callStatus, hasAutoRung]);
+
   const handleTryAgain = () => {
     setShowNotAnsweredDialog(false);
     setShowEmergencyContact(false);
@@ -459,8 +473,8 @@ const VisitorCall = () => {
   // Status display component
   const StatusDisplay = () => {
     console.log('StatusDisplay render - callStatus:', callStatus, 'visitorAlwaysConnected:', visitorAlwaysConnected);
-    // If visitor_always_connected is enabled, show the connected status
-    if (visitorAlwaysConnected && (callStatus === 'waiting' || callStatus === 'ringing')) {
+    // If visitor_always_connected is enabled OR ringing, show the connected status
+    if (visitorAlwaysConnected || callStatus === 'ringing' || callStatus === 'waiting') {
       const isRinging = callStatus === 'ringing';
       console.log('isRinging:', isRinging);
       
@@ -483,57 +497,19 @@ const VisitorCall = () => {
             )}
           </motion.div>
           <h3 className={`font-bold text-lg ${isRinging ? 'text-amber-500' : 'text-green-500'}`}>
-            {isRinging ? "Campainha tocada!" : "Visitante Conectado!"}
+            {isRinging ? "Visitante Conectado!" : "Visitante Conectado!"}
           </h3>
-          {isRinging && (
-            <div className="flex items-center justify-center gap-2 text-foreground mt-2">
-              <User className="w-4 h-4" />
-              <p className="text-sm">Aguardando resposta do morador...</p>
-            </div>
-          )}
+          <div className="flex items-center justify-center gap-2 text-foreground mt-2">
+            <User className="w-4 h-4" />
+            <p className="text-sm">
+              {isRinging ? "Aguardando..." : "Conectando..."}
+            </p>
+          </div>
         </motion.div>
       );
     }
 
     switch (callStatus) {
-      case 'waiting':
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-amber-500/20 border border-amber-500/50 rounded-xl p-4 mb-6"
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Bell className="w-5 h-5 text-amber-500" />
-              <span className="font-semibold text-amber-500">Primeiro passo</span>
-            </div>
-            <p className="text-sm text-foreground">
-              Toque a campainha para avisar o morador que você chegou!
-            </p>
-          </motion.div>
-        );
-      
-      case 'ringing':
-        return (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-amber-500/20 border border-amber-500/50 rounded-xl p-4 mb-6"
-          >
-            <motion.div 
-              className="flex items-center justify-center gap-2 mb-2"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ repeat: Infinity, duration: 1 }}
-            >
-              <Bell className="w-5 h-5 text-amber-500 animate-bounce" />
-              <span className="font-semibold text-amber-500">Campainha tocando...</span>
-            </motion.div>
-            <p className="text-sm text-foreground">
-              Aguarde o morador atender
-            </p>
-          </motion.div>
-        );
-      
       case 'answered':
         return (
           <motion.div
