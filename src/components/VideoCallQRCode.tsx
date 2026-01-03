@@ -34,6 +34,15 @@ const colorPresets = [
 
 const emojiOptions = ['🔔', '📦', '🏠', '🚪', '📱', '🔑', '⭐', '🎯'];
 
+// Helper function to detect if URL is a video file
+const isVideoUrl = (url: string): boolean => {
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('visitor_video') || 
+         lowerUrl.includes('.webm') || 
+         lowerUrl.includes('.mp4') ||
+         lowerUrl.includes('video/');
+};
+
 interface VideoCallQRCodeProps {
   roomName: string;
   propertyName: string;
@@ -668,17 +677,18 @@ export const VideoCallQRCode = ({
             className="mt-4 p-3 bg-primary/20 border border-primary/50 rounded-xl"
           >
             <div className="flex items-center gap-2 mb-2">
-              {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+              {isVideoUrl(visitorAudioResponse) ? (
                 <Video className="w-4 h-4 text-primary" />
               ) : (
                 <Volume2 className="w-4 h-4 text-primary" />
               )}
               <span className="text-sm font-medium text-primary">Resposta do visitante</span>
             </div>
-            {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+            {isVideoUrl(visitorAudioResponse) ? (
               <video 
                 src={visitorAudioResponse} 
                 controls 
+                playsInline
                 className="w-full rounded-lg max-h-48"
                 autoPlay
               />
