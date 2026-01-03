@@ -472,6 +472,7 @@ const Index = () => {
     setCurrentDoorbellRoomName(null);
     if (activeCall) {
       endCall();
+      endVideoCall(); // Update status to 'ended' in database for visitor notification
     }
   };
 
