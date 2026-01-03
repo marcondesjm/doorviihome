@@ -493,6 +493,50 @@ const Index = () => {
     syncMissedMedia();
   }, [user, activities]);
 
+  // Check for pending visitor text messages on load
+  useEffect(() => {
+    if (!user) return;
+
+    const checkPendingTextMessages = async () => {
+      try {
+        const { data: pendingMessages, error } = await supabase
+          .from('video_calls')
+          .select('id, property_id, property_name, visitor_text_message, room_name, created_at')
+          .eq('owner_id', user.id)
+          .eq('status', 'visitor_text_message')
+          .not('visitor_text_message', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) {
+          console.error('Error fetching pending text messages:', error);
+          return;
+        }
+
+        if (!pendingMessages || pendingMessages.length === 0) return;
+
+        const latestMessage = pendingMessages[0];
+        
+        // Show the pending message
+        setVisitorTextMessage(latestMessage.visitor_text_message);
+        setDoorbellPropertyName(latestMessage.property_name || 'Propriedade');
+        setCurrentDoorbellRoomName(latestMessage.room_name || null);
+        setDoorbellRinging(true);
+        setDoorbellAnswered(true);
+
+        toast({
+          title: "💬 Mensagem pendente do visitante!",
+          description: "Você tem uma mensagem de texto não lida",
+          duration: 8000,
+        });
+      } catch (err) {
+        console.error('Error checking pending text messages:', err);
+      }
+    };
+
+    checkPendingTextMessages();
+  }, [user, toast]);
+
   // Listen for visitor scans on properties with visitor_always_connected enabled
   // This only updates property online status - doorbell notification happens when visitor explicitly rings
   useEffect(() => {
