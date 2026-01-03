@@ -1299,10 +1299,10 @@ const Index = () => {
             <motion.div
               initial={{ y: 20 }}
               animate={{ y: 0 }}
-              className={`${doorbellAnswered ? 'bg-emerald-600' : 'bg-amber-500'} text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-sm text-center max-h-[85vh] overflow-hidden relative`}
+              className={`${doorbellAnswered ? 'bg-emerald-600' : 'bg-amber-500'} text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-sm text-center max-h-[85vh] overflow-hidden`}
             >
-              <ScrollArea className="w-full h-full max-h-[calc(85vh-40px)]">
-                <div className="flex flex-col items-center gap-4 w-full text-center px-1">
+            <ScrollArea className="w-full max-h-[75vh]">
+              <div className="flex flex-col items-center gap-4 w-full text-center pr-2">
               {/* Close button */}
               <Button
                 variant="ghost"
