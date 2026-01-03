@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,7 +36,27 @@ const VisitorCall = () => {
   const [meetLink, setMeetLink] = useState<string | null>(initialMeetLink);
   const [visitorAlwaysConnected, setVisitorAlwaysConnected] = useState(false);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
+  const [waitStartTime] = useState<number>(Date.now());
+  const [elapsedTime, setElapsedTime] = useState<string>('00:00');
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Format elapsed time
+  const formatElapsedTime = useCallback((ms: number): string => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }, []);
+
+  // Timer for elapsed time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - waitStartTime;
+      setElapsedTime(formatElapsedTime(elapsed));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [waitStartTime, formatElapsedTime]);
 
   // Fetch owner phone number
   useEffect(() => {
@@ -755,7 +775,20 @@ const VisitorCall = () => {
             </div>
 
             <h1 className="text-2xl font-bold mb-2">{decodeURIComponent(propertyName)}</h1>
-            <p className="text-muted-foreground mb-4">Portaria Virtual</p>
+            <p className="text-muted-foreground mb-2">Portaria Virtual</p>
+            
+            {/* Wait time counter */}
+            {callStatus !== 'ended' && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-center gap-2 mb-4 text-muted-foreground"
+              >
+                <Clock className="w-4 h-4" />
+                <span className="text-sm font-mono">{elapsedTime}</span>
+                <span className="text-xs">de espera</span>
+              </motion.div>
+            )}
 
             <AnimatePresence mode="wait">
               <StatusDisplay key={callStatus} />
