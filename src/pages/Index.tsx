@@ -77,6 +77,8 @@ const Index = () => {
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [visitorAudioResponse, setVisitorAudioResponse] = useState<string | null>(null);
   const [visitorTextMessage, setVisitorTextMessage] = useState<string | null>(null);
+  const [ownerTextReply, setOwnerTextReply] = useState('');
+  const [showTextReply, setShowTextReply] = useState(false);
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useActivities();
