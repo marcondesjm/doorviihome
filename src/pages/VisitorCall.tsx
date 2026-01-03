@@ -226,6 +226,12 @@ const VisitorCall = () => {
             if ('vibrate' in navigator) {
               navigator.vibrate([500, 200, 500, 200, 500]);
             }
+            // Close the app/tab after 3 seconds
+            setTimeout(() => {
+              window.close();
+              // Fallback for browsers that don't allow window.close()
+              // Navigate to a blank page or show message
+            }, 3000);
           }
         }
       )
@@ -747,26 +753,12 @@ const VisitorCall = () => {
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200 }}
             >
-              <Phone className="w-8 h-8 text-destructive" />
+              <PhoneOff className="w-8 h-8 text-destructive" />
             </motion.div>
-            <h3 className="font-bold text-lg text-destructive mb-2">Chamada encerrada</h3>
-            <p className="text-sm text-foreground mb-4">
-              O morador encerrou a chamada. Obrigado pela visita!
+            <h3 className="font-bold text-lg text-destructive mb-2">Visitante Desconectado!</h3>
+            <p className="text-sm text-foreground">
+              A chamada foi encerrada pelo morador.
             </p>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => {
-                setCallStatus('waiting');
-                setAudioMessages([]);
-                setMeetLink(null);
-                setNotified(false);
-              }}
-            >
-              <Bell className="w-5 h-5 mr-2" />
-              Tocar campainha novamente
-            </Button>
           </motion.div>
         );
       
