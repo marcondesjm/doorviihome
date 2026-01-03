@@ -26,10 +26,28 @@ export const VisitorVideoRecorder = ({ roomName, onVideoSent, onCancel }: Visito
 
   const startCamera = async () => {
     try {
+      console.log('Starting camera...');
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' }, 
+        video: { 
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }, 
         audio: true 
       });
+      
+      // Verify video track exists
+      const videoTracks = mediaStream.getVideoTracks();
+      const audioTracks = mediaStream.getAudioTracks();
+      console.log('Video tracks:', videoTracks.length, videoTracks.map(t => t.label));
+      console.log('Audio tracks:', audioTracks.length, audioTracks.map(t => t.label));
+      
+      if (videoTracks.length === 0) {
+        console.error('No video track found!');
+        toast.error('Câmera não encontrada. Verifique as permissões.');
+        return;
+      }
+      
       setStream(mediaStream);
       setIsExpanded(true);
       
@@ -46,30 +64,52 @@ export const VisitorVideoRecorder = ({ roomName, onVideoSent, onCancel }: Visito
     if (!stream) return;
 
     try {
-      // Try different mimeTypes for browser compatibility
-      let mimeType = 'video/webm;codecs=vp9,opus';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=vp8,opus';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm';
-          if (!MediaRecorder.isTypeSupported(mimeType)) {
-            mimeType = 'video/mp4';
-            if (!MediaRecorder.isTypeSupported(mimeType)) {
-              mimeType = '';
-            }
-          }
+      // Verify stream has video track before recording
+      const videoTracks = stream.getVideoTracks();
+      console.log('Starting recording with video tracks:', videoTracks.length);
+      
+      if (videoTracks.length === 0) {
+        console.error('No video track in stream!');
+        toast.error('Erro: câmera não está ativa');
+        return;
+      }
+
+      // Try different mimeTypes for browser compatibility - prioritize video codecs
+      const mimeTypes = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=h264,opus',
+        'video/webm',
+        'video/mp4;codecs=h264,aac',
+        'video/mp4',
+      ];
+      
+      let selectedMimeType = '';
+      for (const type of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          selectedMimeType = type;
+          break;
         }
       }
-      console.log('VisitorVideoRecorder using mimeType:', mimeType || 'default');
       
-      const mediaRecorder = mimeType 
-        ? new MediaRecorder(stream, { mimeType })
-        : new MediaRecorder(stream);
+      console.log('VisitorVideoRecorder using mimeType:', selectedMimeType || 'default');
+      
+      const options: MediaRecorderOptions = {
+        videoBitsPerSecond: 2500000, // 2.5 Mbps for good video quality
+        audioBitsPerSecond: 128000,  // 128 kbps for audio
+      };
+      
+      if (selectedMimeType) {
+        options.mimeType = selectedMimeType;
+      }
+      
+      const mediaRecorder = new MediaRecorder(stream, options);
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
+        console.log('Data available:', e.data.size, 'bytes, type:', e.data.type);
         if (e.data.size > 0) {
           chunksRef.current.push(e.data);
         }
@@ -78,11 +118,17 @@ export const VisitorVideoRecorder = ({ roomName, onVideoSent, onCancel }: Visito
       mediaRecorder.onstop = () => {
         const actualMimeType = mediaRecorder.mimeType || 'video/webm';
         console.log('Recording stopped, actual mimeType:', actualMimeType);
+        console.log('Total chunks:', chunksRef.current.length);
+        const totalSize = chunksRef.current.reduce((acc, chunk) => acc + chunk.size, 0);
+        console.log('Total recording size:', totalSize, 'bytes');
+        
         const blob = new Blob(chunksRef.current, { type: actualMimeType });
+        console.log('Created blob:', blob.size, 'bytes, type:', blob.type);
         setVideoBlob(blob);
       };
 
-      mediaRecorder.start();
+      // Request data every 1 second to ensure we capture everything
+      mediaRecorder.start(1000);
       setIsRecording(true);
       setRecordingTime(0);
 
