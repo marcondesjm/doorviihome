@@ -978,10 +978,10 @@ const VisitorCall = () => {
                 Tentar Novamente
               </AlertDialogAction>
               
-              {ownerPhone && (
-                <div className="w-full border-t border-border pt-4 mt-2">
-                  <p className="text-sm text-muted-foreground mb-3 text-center">Contato de Emergência</p>
-                  <div className="flex items-center justify-center gap-2">
+              <div className="w-full border-t border-border pt-4 mt-2">
+                <p className="text-sm text-muted-foreground mb-3 text-center">Contato de Emergência</p>
+                <div className="flex items-center justify-center gap-2">
+                  {ownerPhone && (
                     <Button
                       size="icon"
                       variant="outline"
@@ -990,14 +990,16 @@ const VisitorCall = () => {
                     >
                       <Phone className="w-4 h-4 text-green-600" />
                     </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="rounded-full h-10 w-10 bg-green-500 hover:bg-green-600 border-green-500"
-                      onClick={handleWhatsApp}
-                    >
-                      <WhatsAppIcon className="w-4 h-4 text-white" />
-                    </Button>
+                  )}
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full h-10 w-10 bg-green-500 hover:bg-green-600 border-green-500"
+                    onClick={handleWhatsApp}
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-white" />
+                  </Button>
+                  {ownerPhone && (
                     <Button
                       variant="outline"
                       className="rounded-full h-10 px-4"
@@ -1009,9 +1011,9 @@ const VisitorCall = () => {
                       <Send className="w-4 h-4 mr-2" />
                       Enviar Mensagem
                     </Button>
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
