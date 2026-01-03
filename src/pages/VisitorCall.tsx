@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { VisitorAudioRecorder } from '@/components/VisitorAudioRecorder';
+import { VisitorVideoRecorder } from '@/components/VisitorVideoRecorder';
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -749,26 +750,11 @@ const VisitorCall = () => {
                   </Button>
                 </motion.div>
 
-                {/* WhatsApp button */}
-                {ownerPhone && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    whileHover={{ scale: 1.02 }} 
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full font-semibold text-[#25D366] border-[#25D366]/50 hover:bg-[#25D366]/10"
-                      onClick={handleWhatsApp}
-                    >
-                      <WhatsAppIcon className="w-5 h-5" />
-                      Enviar WhatsApp
-                    </Button>
-                  </motion.div>
-                )}
+                {/* Video recorder button in a box */}
+                <VisitorVideoRecorder 
+                  roomName={roomName || ''} 
+                  onVideoSent={() => toast.success('Vídeo enviado!')}
+                />
 
                 {(callStatus === 'answered' || callStatus === 'ringing') && (
                   <div className="border-t border-border my-4 pt-4">
