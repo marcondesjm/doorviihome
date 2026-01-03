@@ -12,6 +12,8 @@ export interface ActivityLog {
   property_name: string;
   duration: string | null;
   created_at: string;
+  media_url: string | null;
+  media_type: 'audio' | 'video' | null;
 }
 
 export function useActivities() {
@@ -124,6 +126,8 @@ export function useAddActivity() {
       title: string;
       property_name: string;
       duration?: string;
+      media_url?: string;
+      media_type?: 'audio' | 'video';
     }) => {
       const { data, error } = await supabase
         .from('activity_logs')
@@ -133,7 +137,9 @@ export function useAddActivity() {
           type: activity.type,
           title: activity.title,
           property_name: activity.property_name,
-          duration: activity.duration || null
+          duration: activity.duration || null,
+          media_url: activity.media_url || null,
+          media_type: activity.media_type || null
         })
         .select()
         .single();

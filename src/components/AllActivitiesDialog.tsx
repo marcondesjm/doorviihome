@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, PhoneOff, PhoneIncoming, Bell, Clock, Trash2, Calendar, Download, Trash } from "lucide-react";
+import { Phone, PhoneOff, PhoneIncoming, Bell, Clock, Trash2, Calendar, Download, Trash, Video, Mic, Play, Pause, ExternalLink } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -51,6 +51,9 @@ export function AllActivitiesDialog() {
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [playingMediaId, setPlayingMediaId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { data: activities, isLoading } = useAllActivities();
   const deleteActivity = useDeleteActivity();
   const deleteAllActivities = useDeleteAllActivities();
@@ -102,15 +105,17 @@ export function AllActivitiesDialog() {
       return;
     }
 
-    // Create CSV content
-    const headers = ["Data", "Hora", "Tipo", "Título", "Propriedade", "Duração"];
+    // Create CSV content with media columns
+    const headers = ["Data", "Hora", "Tipo", "Título", "Propriedade", "Duração", "Mídia", "URL Mídia"];
     const rows = activities.map(activity => [
       format(parseISO(activity.created_at), "dd/MM/yyyy"),
       format(parseISO(activity.created_at), "HH:mm"),
       activity.type,
       activity.title,
       activity.property_name,
-      activity.duration || "-"
+      activity.duration || "-",
+      activity.media_type || "-",
+      activity.media_url || "-"
     ]);
 
     const csvContent = [
@@ -225,8 +230,12 @@ export function AllActivitiesDialog() {
                       <div className="space-y-2">
                         <AnimatePresence mode="popLayout">
                           {dayActivities.map((activity) => {
-                            const Icon = iconMap[activity.type as ActivityType] || Bell;
-                            const colorClass = colorMap[activity.type as ActivityType] || "text-muted-foreground bg-muted";
+                            const Icon = activity.media_type === 'video' ? Video : 
+                                        activity.media_type === 'audio' ? Mic :
+                                        iconMap[activity.type as ActivityType] || Bell;
+                            const colorClass = activity.media_type 
+                              ? "text-primary bg-primary/10" 
+                              : colorMap[activity.type as ActivityType] || "text-muted-foreground bg-muted";
                             
                             return (
                               <motion.div
@@ -234,42 +243,78 @@ export function AllActivitiesDialog() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20, height: 0 }}
-                                className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group"
+                                className="flex flex-col gap-2 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group"
                               >
-                                <div className={`p-2.5 rounded-xl ${colorClass}`}>
-                                  <Icon className="w-4 h-4" />
+                                <div className="flex items-center gap-3">
+                                  <div className={`p-2.5 rounded-xl ${colorClass}`}>
+                                    <Icon className="w-4 h-4" />
+                                  </div>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-foreground text-sm truncate">
+                                      {activity.title}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {activity.property_name}
+                                    </p>
+                                  </div>
+
+                                  <div className="text-right flex items-center gap-2">
+                                    <div>
+                                      <p className="text-xs text-muted-foreground">
+                                        {formatActivityTime(activity.created_at)}
+                                      </p>
+                                      {activity.duration && (
+                                        <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                                          <Clock className="w-3 h-3" />
+                                          {activity.duration}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      onClick={() => setDeleteId(activity.id)}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
                                 </div>
                                 
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-foreground text-sm truncate">
-                                    {activity.title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {activity.property_name}
-                                  </p>
-                                </div>
-
-                                <div className="text-right flex items-center gap-2">
-                                  <div>
-                                    <p className="text-xs text-muted-foreground">
-                                      {formatActivityTime(activity.created_at)}
-                                    </p>
-                                    {activity.duration && (
-                                      <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
-                                        <Clock className="w-3 h-3" />
-                                        {activity.duration}
-                                      </p>
+                                {/* Media player for audio/video */}
+                                {activity.media_url && (
+                                  <div className="ml-12 mt-1">
+                                    {activity.media_type === 'video' ? (
+                                      <div className="relative rounded-lg overflow-hidden bg-black/20">
+                                        <video
+                                          src={activity.media_url}
+                                          controls
+                                          className="w-full max-h-40 rounded-lg"
+                                          preload="metadata"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-2">
+                                        <audio
+                                          src={activity.media_url}
+                                          controls
+                                          className="w-full h-8"
+                                          preload="metadata"
+                                        />
+                                      </div>
                                     )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="mt-1 h-6 text-xs text-muted-foreground hover:text-foreground"
+                                      onClick={() => window.open(activity.media_url!, '_blank')}
+                                    >
+                                      <ExternalLink className="w-3 h-3 mr-1" />
+                                      Abrir em nova aba
+                                    </Button>
                                   </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={() => setDeleteId(activity.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
+                                )}
                               </motion.div>
                             );
                           })}
