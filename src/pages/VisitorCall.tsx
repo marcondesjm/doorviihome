@@ -430,7 +430,8 @@ const VisitorCall = () => {
     setShowNotAnsweredDialog(false);
     setShowEmergencyContact(false);
     setEmergencyCountdown(5);
-    setCallStatus('waiting');
+    // Toca a campainha novamente para alertar o proprietário
+    handleRingDoorbell();
   };
 
   // Auto-show emergency contact after 5 seconds when dialog opens with countdown
