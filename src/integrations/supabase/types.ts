@@ -358,6 +358,7 @@ export type Database = {
           status: string
           visitor_audio_url: string | null
           visitor_joined: boolean | null
+          visitor_text_message: string | null
         }
         Insert: {
           audio_message_url?: string | null
@@ -373,6 +374,7 @@ export type Database = {
           status?: string
           visitor_audio_url?: string | null
           visitor_joined?: boolean | null
+          visitor_text_message?: string | null
         }
         Update: {
           audio_message_url?: string | null
@@ -388,6 +390,7 @@ export type Database = {
           status?: string
           visitor_audio_url?: string | null
           visitor_joined?: boolean | null
+          visitor_text_message?: string | null
         }
         Relationships: [
           {
