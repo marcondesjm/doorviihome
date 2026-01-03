@@ -872,11 +872,17 @@ const VisitorCall = () => {
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-center gap-2 mb-4 text-muted-foreground"
+                className="flex flex-col items-center gap-2 mb-4"
               >
-                <Clock className="w-4 h-4" />
-                <span className="text-sm font-mono">{elapsedTime}</span>
-                <span className="text-xs">de espera</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm font-mono">{elapsedTime}</span>
+                  <span className="text-xs">de espera</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-amber-500">
+                  <span className="font-bold">!</span>
+                  <span>Esta chamada está sendo gravada para consultas futuras</span>
+                </div>
               </motion.div>
             )}
 
