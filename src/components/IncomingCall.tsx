@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, PhoneOff, Video, Mic, MicOff, Volume2, VolumeX, VideoOff } from "lucide-react";
+import { Phone, PhoneOff, Video, Mic, MicOff, Volume2, VolumeX, VideoOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { getSelectedRingtoneUrl } from "./RingtoneConfigDialog";
@@ -281,13 +281,30 @@ export const IncomingCall = ({
         </div>
 
         {!isActive && (
-          <motion.p 
-            className="text-xs text-muted-foreground mt-4"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            Toque para atender ou recusar
-          </motion.p>
+          <>
+            <motion.p 
+              className="text-xs text-muted-foreground mt-4"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              Toque para atender ou recusar
+            </motion.p>
+            
+            <motion.div 
+              className="mt-4"
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDecline}
+                className="text-muted-foreground hover:text-foreground gap-2"
+              >
+                <X className="w-4 h-4" />
+                Fechar
+              </Button>
+            </motion.div>
+          </>
         )}
       </motion.div>
     </motion.div>
