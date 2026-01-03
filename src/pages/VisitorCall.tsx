@@ -59,6 +59,7 @@ const VisitorCall = () => {
   const [emergencyCountdown, setEmergencyCountdown] = useState(5);
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const [hasAutoRung, setHasAutoRung] = useState(false);
+  const [ownerTextMessage, setOwnerTextMessage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
