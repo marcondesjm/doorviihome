@@ -37,6 +37,11 @@ interface AudioMessage {
   timestamp: number;
 }
 
+interface VisitorAudioMessage {
+  url: string;
+  timestamp: number;
+}
+
 const VisitorCall = () => {
   const { roomName } = useParams<{ roomName: string }>();
   const [searchParams] = useSearchParams();
@@ -60,7 +65,10 @@ const VisitorCall = () => {
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const [hasAutoRung, setHasAutoRung] = useState(false);
   const [ownerTextMessage, setOwnerTextMessage] = useState<string | null>(null);
+  const [visitorAudioMessages, setVisitorAudioMessages] = useState<VisitorAudioMessage[]>([]);
+  const [currentPlayingVisitorIndex, setCurrentPlayingVisitorIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const visitorAudioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Format elapsed time
@@ -170,6 +178,17 @@ const VisitorCall = () => {
         if (callData.owner_text_message) {
           setOwnerTextMessage(callData.owner_text_message);
         }
+
+        // Check for visitor audio on initial load
+        if (callData.visitor_audio_url) {
+          setVisitorAudioMessages(prev => {
+            const exists = prev.some(m => m.url === callData.visitor_audio_url);
+            if (!exists) {
+              return [...prev, { url: callData.visitor_audio_url, timestamp: Date.now() }];
+            }
+            return prev;
+          });
+        }
         // Don't set 'ended' status on initial load - treat as new session
       } else {
         // No active call found - start fresh at waiting
@@ -247,6 +266,17 @@ const VisitorCall = () => {
             if ('vibrate' in navigator) {
               navigator.vibrate([200, 100, 200]);
             }
+          }
+
+          // Check for visitor audio (when visitor sends audio, it appears here)
+          if (updatedCall.visitor_audio_url) {
+            setVisitorAudioMessages(prev => {
+              const exists = prev.some(m => m.url === updatedCall.visitor_audio_url);
+              if (!exists) {
+                return [...prev, { url: updatedCall.visitor_audio_url, timestamp: Date.now() }];
+              }
+              return prev;
+            });
           }
         }
       )
@@ -749,7 +779,18 @@ const VisitorCall = () => {
               <p className="text-xs text-muted-foreground mb-2 text-center">Responder com áudio</p>
               <VisitorAudioRecorder 
                 roomName={roomName || ''} 
-                onAudioSent={() => toast.success('Resposta enviada!')}
+                onAudioSent={(audioUrl) => {
+                  if (audioUrl) {
+                    setVisitorAudioMessages(prev => {
+                      const exists = prev.some(m => m.url === audioUrl);
+                      if (!exists) {
+                        return [...prev, { url: audioUrl, timestamp: Date.now() }];
+                      }
+                      return prev;
+                    });
+                  }
+                  toast.success('Resposta enviada!');
+                }}
               />
             </div>
           </motion.div>
@@ -954,11 +995,150 @@ const VisitorCall = () => {
                   </motion.div>
                 )}
 
+                {/* Visitor Audio Messages Display */}
+                {visitorAudioMessages.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-green-500/20 border border-green-500/50 rounded-xl p-4 mb-4"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Mic className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-medium text-green-500">
+                        {visitorAudioMessages.length > 1 ? `${visitorAudioMessages.length} áudios enviados` : 'Áudio enviado'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {visitorAudioMessages.map((message, index) => (
+                        <motion.div
+                          key={message.url}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={`flex items-center gap-2 p-2 rounded-lg ${
+                            currentPlayingVisitorIndex === index ? 'bg-green-500/30' : 'bg-secondary/50'
+                          }`}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 rounded-full flex-shrink-0"
+                            onClick={async () => {
+                              if (currentPlayingVisitorIndex === index && visitorAudioRef.current) {
+                                visitorAudioRef.current.pause();
+                                setCurrentPlayingVisitorIndex(null);
+                                return;
+                              }
+                              
+                              try {
+                                const audio = new Audio();
+                                audio.preload = 'auto';
+                                audio.crossOrigin = 'anonymous';
+                                
+                                audio.oncanplaythrough = async () => {
+                                  try {
+                                    await audio.play();
+                                    setCurrentPlayingVisitorIndex(index);
+                                    if (visitorAudioRef.current) {
+                                      visitorAudioRef.current.pause();
+                                    }
+                                    (visitorAudioRef as any).current = audio;
+                                  } catch (playError) {
+                                    console.error('[Visitor Audio] Play error:', playError);
+                                    toast.error('Toque novamente para ouvir');
+                                  }
+                                };
+                                
+                                audio.onended = () => {
+                                  setCurrentPlayingVisitorIndex(null);
+                                };
+                                
+                                audio.onerror = () => {
+                                  toast.error('Erro ao carregar áudio');
+                                  setCurrentPlayingVisitorIndex(null);
+                                };
+                                
+                                audio.src = message.url;
+                                audio.load();
+                                
+                                setTimeout(async () => {
+                                  if (audio.readyState >= 2) {
+                                    try {
+                                      await audio.play();
+                                      setCurrentPlayingVisitorIndex(index);
+                                      (visitorAudioRef as any).current = audio;
+                                    } catch (e) {
+                                      console.log('[Visitor Audio] Waiting for canplaythrough...');
+                                    }
+                                  }
+                                }, 100);
+                                
+                              } catch (error) {
+                                console.error('[Visitor Audio] Error:', error);
+                                toast.error('Erro ao reproduzir áudio');
+                              }
+                            }}
+                          >
+                            {currentPlayingVisitorIndex === index ? (
+                              <Pause className="w-4 h-4" />
+                            ) : (
+                              <Play className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">Seu áudio {index + 1}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(message.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                          {currentPlayingVisitorIndex === index && (
+                            <motion.div
+                              className="flex gap-0.5"
+                              animate={{ opacity: [0.5, 1, 0.5] }}
+                              transition={{ repeat: Infinity, duration: 0.8 }}
+                            >
+                              {[1, 2, 3].map(i => (
+                                <div key={i} className="w-1 h-2 bg-green-500 rounded-full" style={{ height: `${6 + i * 3}px` }} />
+                              ))}
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                    
+                    <audio 
+                      ref={visitorAudioRef}
+                      onEnded={() => setCurrentPlayingVisitorIndex(null)}
+                      className="hidden"
+                    />
+                  </motion.div>
+                )}
+
                 {/* Video recorder button in a box */}
                 <VisitorVideoRecorder 
                   roomName={roomName || ''} 
                   onVideoSent={() => toast.success('Vídeo enviado!')}
                 />
+
+                {/* Audio recorder for visitor */}
+                <div className="mt-3">
+                  <VisitorAudioRecorder 
+                    roomName={roomName || ''} 
+                    onAudioSent={(audioUrl) => {
+                      if (audioUrl) {
+                        setVisitorAudioMessages(prev => {
+                          const exists = prev.some(m => m.url === audioUrl);
+                          if (!exists) {
+                            return [...prev, { url: audioUrl, timestamp: Date.now() }];
+                          }
+                          return prev;
+                        });
+                      }
+                      toast.success('Áudio enviado!');
+                    }}
+                  />
+                </div>
 
                 {(callStatus === 'answered' || callStatus === 'ringing') && (
                   <div className="border-t border-border my-4 pt-4">

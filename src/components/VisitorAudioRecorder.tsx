@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 interface VisitorAudioRecorderProps {
   roomName: string;
-  onAudioSent?: () => void;
+  onAudioSent?: (audioUrl?: string) => void;
   onCancel?: () => void;
 }
 
@@ -163,7 +163,7 @@ export const VisitorAudioRecorder = ({ roomName, onAudioSent, onCancel }: Visito
 
       toast.success('Resposta enviada ao morador!');
       resetRecorder();
-      onAudioSent?.();
+      onAudioSent?.(audioUrl);
 
     } catch (error: any) {
       console.error('Error sending visitor audio:', error);
