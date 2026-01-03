@@ -1003,17 +1003,30 @@ const VisitorCall = () => {
               O morador não atendeu. Por favor, tente novamente ou entre em contato por outro meio.
             </AlertDialogDescription>
             
-            {/* Countdown timer */}
-            {!showEmergencyContact && emergencyCountdown > 0 && (
+            {/* Countdown timer with contact button */}
+            {!showEmergencyContact && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-center justify-center gap-2 py-2"
+                className="flex items-center justify-center gap-3 py-2"
               >
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Opções de contato em <span className="font-bold text-foreground">{emergencyCountdown}s</span>
-                </span>
+                {emergencyCountdown > 0 ? (
+                  <>
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Opções de contato em <span className="font-bold text-foreground">{emergencyCountdown}s</span>
+                    </span>
+                  </>
+                ) : null}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-primary hover:text-primary/80"
+                  onClick={() => setShowEmergencyContact(true)}
+                >
+                  <Phone className="w-4 h-4 mr-1" />
+                  Contato
+                </Button>
               </motion.div>
             )}
             <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
