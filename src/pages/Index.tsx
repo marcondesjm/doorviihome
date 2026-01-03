@@ -308,9 +308,9 @@ const Index = () => {
             setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
             setCurrentDoorbellRoomName(payload.new.room_name || null);
             
-            // Show the doorbell alert - keep as ringing until owner answers
+            // Show the doorbell alert with the audio/video response
             setDoorbellRinging(true);
-            // Don't set doorbellAnswered - let user decide to answer first
+            setDoorbellAnswered(true); // Show as answered so we see the media
             
             // Play notification sound
             try {
@@ -373,9 +373,9 @@ const Index = () => {
             setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
             setCurrentDoorbellRoomName(payload.new.room_name || null);
             
-            // Show the doorbell alert with the text message - keep as ringing, not answered
+            // Show the doorbell alert with the text message
             setDoorbellRinging(true);
-            // Don't set doorbellAnswered - let user decide to answer first
+            setDoorbellAnswered(true);
             
             // Play notification sound
             try {
@@ -521,12 +521,12 @@ const Index = () => {
 
         const latestMessage = pendingMessages[0];
         
-        // Show the pending message - keep as ringing until owner answers
+        // Show the pending message
         setVisitorTextMessage(latestMessage.visitor_text_message);
         setDoorbellPropertyName(latestMessage.property_name || 'Propriedade');
         setCurrentDoorbellRoomName(latestMessage.room_name || null);
         setDoorbellRinging(true);
-        // Don't set doorbellAnswered - let user decide to answer first
+        setDoorbellAnswered(true);
 
         toast({
           title: "💬 Mensagem pendente do visitante!",
@@ -1327,56 +1327,6 @@ const Index = () => {
                       <span className="font-bold text-xl">Campainha tocando!</span>
                       <span className="text-sm text-white/80">{doorbellPropertyName}</span>
                     </div>
-                    
-                    {/* Show visitor text message if available */}
-                    {visitorTextMessage && (
-                      <div className="w-full bg-white/20 rounded-xl p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <MessageCircle className="w-4 h-4" />
-                          <span className="text-sm font-medium">Mensagem do visitante</span>
-                        </div>
-                        <p className="text-sm text-left bg-white/10 rounded-lg p-2">
-                          {visitorTextMessage}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {/* Show visitor audio/video response if available */}
-                    {visitorAudioResponse && (
-                      <div className="w-full bg-white/20 rounded-xl p-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          {isVideoUrl(visitorAudioResponse) ? (
-                            <Video className="w-4 h-4" />
-                          ) : (
-                            <Volume2 className="w-4 h-4" />
-                          )}
-                          <span className="text-sm font-medium">Resposta do visitante</span>
-                        </div>
-                        {isVideoUrl(visitorAudioResponse) ? (
-                          <video
-                            controls
-                            autoPlay
-                            playsInline
-                            muted
-                            onClick={(e) => {
-                              const video = e.currentTarget;
-                              video.muted = false;
-                            }}
-                            src={visitorAudioResponse}
-                            className="w-full rounded-lg max-h-32"
-                          />
-                        ) : (
-                          <audio
-                            controls
-                            autoPlay
-                            src={visitorAudioResponse}
-                            className="w-full h-10"
-                            style={{ filter: 'invert(1)' }}
-                          />
-                        )}
-                      </div>
-                    )}
-                    
                     <div className="flex flex-col gap-2 w-full">
                       <Button
                         variant="secondary"

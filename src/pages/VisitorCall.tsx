@@ -71,19 +71,6 @@ const VisitorCall = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const visitorAudioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Refs to track latest values for realtime comparison
-  const ownerTextMessageRef = useRef<string | null>(null);
-  const ownerStatusMessageRef = useRef<string>('Aguarde, estou indo até você');
-  
-  // Keep refs in sync with state
-  useEffect(() => {
-    ownerTextMessageRef.current = ownerTextMessage;
-  }, [ownerTextMessage]);
-  
-  useEffect(() => {
-    ownerStatusMessageRef.current = ownerStatusMessage;
-  }, [ownerStatusMessage]);
 
   // Format elapsed time
   const formatElapsedTime = useCallback((ms: number): string => {
@@ -279,7 +266,7 @@ const VisitorCall = () => {
           }
 
           // Check for owner text message
-          if (updatedCall.owner_text_message && updatedCall.owner_text_message !== ownerTextMessageRef.current) {
+          if (updatedCall.owner_text_message && updatedCall.owner_text_message !== ownerTextMessage) {
             setOwnerTextMessage(updatedCall.owner_text_message);
             toast.success('Nova mensagem do morador!');
             if ('vibrate' in navigator) {
@@ -288,9 +275,8 @@ const VisitorCall = () => {
           }
 
           // Check for owner status message updates
-          if (updatedCall.owner_status_message && updatedCall.owner_status_message !== ownerStatusMessageRef.current) {
+          if (updatedCall.owner_status_message && updatedCall.owner_status_message !== ownerStatusMessage) {
             setOwnerStatusMessage(updatedCall.owner_status_message);
-            toast.success('Status atualizado pelo morador!');
           }
 
           // Check for visitor audio (when visitor sends audio, it appears here)
