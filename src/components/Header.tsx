@@ -53,6 +53,7 @@ import { AboutCreatorDialog } from "./AboutCreatorDialog";
 import { SupportProjectDialog } from "./SupportProjectDialog";
 import { WhatsAppConfigDialog } from "./WhatsAppConfigDialog";
 import { RingtoneConfigDialog } from "./RingtoneConfigDialog";
+import { NotificationSettingsDialog } from "./NotificationSettingsDialog";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import {
   AlertDialog,
@@ -80,6 +81,7 @@ export const Header = () => {
   const [showSupportProject, setShowSupportProject] = useState(false);
   const [showWhatsAppConfig, setShowWhatsAppConfig] = useState(false);
   const [showRingtoneConfig, setShowRingtoneConfig] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   
   const { isSupported, isSubscribed, loading: notificationLoading, subscribe, unsubscribe, permission } = usePushNotifications();
 
@@ -279,59 +281,17 @@ export const Header = () => {
             >
               <QrCode className="w-5 h-5" />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="w-5 h-5" />
-                  {!isSubscribed && isSupported && (
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-popover">
-                {isSupported && permission === 'denied' ? (
-                  <div className="px-3 py-3 text-sm">
-                    <div className="flex items-center gap-2 text-destructive mb-2">
-                      <BellOff className="w-4 h-4" />
-                      <span className="font-medium">Notificações bloqueadas</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Para ativar, toque nos 3 pontos do navegador → Configurações → Notificações → Permitir para este site
-                    </p>
-                  </div>
-                ) : isSupported && !isSubscribed ? (
-                  <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
-                    <BellRing className="w-4 h-4 mr-2" />
-                    Ativar Notificações
-                  </DropdownMenuItem>
-                ) : isSupported && isSubscribed ? (
-                  <>
-                    <div className="px-3 py-2 flex items-center gap-2 text-sm text-green-500">
-                      <Bell className="w-4 h-4" />
-                      Notificações ativadas
-                    </div>
-                    <DropdownMenuSeparator />
-                    <div className="px-3 py-2 text-xs text-muted-foreground">
-                      <p className="font-medium mb-1">📱 Para máxima prioridade:</p>
-                      <ul className="space-y-1">
-                        <li>• Instale o app na tela inicial</li>
-                        <li>• Configurações → Apps → Chrome/Navegador → Notificações → Prioridade Alta</li>
-                        <li>• Desative economia de bateria para o app</li>
-                      </ul>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
-                      <BellOff className="w-4 h-4 mr-2" />
-                      Desativar Notificações
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    Notificações não suportadas neste navegador
-                  </div>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative"
+              onClick={() => setShowNotificationSettings(true)}
+            >
+              <Bell className="w-5 h-5" />
+              {!isSubscribed && isSupported && (
+                <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
+              )}
+            </Button>
             
             {/* Settings Menu */}
             <DropdownMenu>
@@ -376,21 +336,13 @@ export const Header = () => {
                   Indique o DoorVii Home aos amigos
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {isSupported && (
-                  <DropdownMenuItem onClick={handleToggleNotifications} disabled={notificationLoading}>
-                    {isSubscribed ? (
-                      <>
-                        <BellOff className="w-4 h-4 mr-3" />
-                        Desativar Notificações
-                      </>
-                    ) : (
-                      <>
-                        <BellRing className="w-4 h-4 mr-3" />
-                        Ativar Notificações
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={() => setShowNotificationSettings(true)}>
+                  <Bell className="w-4 h-4 mr-3" />
+                  Configurações de Notificação
+                  {!isSubscribed && isSupported && (
+                    <span className="ml-auto w-2 h-2 bg-accent rounded-full" />
+                  )}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowWhatsAppConfig(true)}>
                   <WhatsAppIcon className="w-4 h-4 mr-3 text-[#25D366]" />
                   Notificação WhatsApp
@@ -524,6 +476,11 @@ export const Header = () => {
       <RingtoneConfigDialog
         open={showRingtoneConfig}
         onOpenChange={setShowRingtoneConfig}
+      />
+
+      <NotificationSettingsDialog
+        open={showNotificationSettings}
+        onOpenChange={setShowNotificationSettings}
       />
     </>
   );
