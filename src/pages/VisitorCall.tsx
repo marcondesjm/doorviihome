@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock, ArrowLeft, PhoneOff } from 'lucide-react';
+import { Video, ExternalLink, Copy, Check, Bell, CheckCircle, User, Phone, Volume2, Pause, Play, Mic, MessageCircle, Clock, ArrowLeft, PhoneOff, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +15,13 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -47,6 +54,8 @@ const VisitorCall = () => {
   const [waitStartTime] = useState<number>(Date.now());
   const [elapsedTime, setElapsedTime] = useState<string>('00:00');
   const [showNotAnsweredDialog, setShowNotAnsweredDialog] = useState(false);
+  const [showMessageSentDialog, setShowMessageSentDialog] = useState(false);
+  const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -966,11 +975,78 @@ const VisitorCall = () => {
                 onClick={handleTryAgain}
                 className="w-full bg-primary hover:bg-primary/90"
               >
-                OK
+                Tentar Novamente
               </AlertDialogAction>
+              
+              {ownerPhone && (
+                <div className="w-full border-t border-border pt-4 mt-2">
+                  <p className="text-sm text-muted-foreground mb-3 text-center">Contato de Emergência</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-full h-10 w-10"
+                      onClick={() => window.open(`tel:${ownerPhone}`, '_self')}
+                    >
+                      <Phone className="w-4 h-4 text-green-600" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="rounded-full h-10 w-10 bg-green-500 hover:bg-green-600 border-green-500"
+                      onClick={handleWhatsApp}
+                    >
+                      <WhatsAppIcon className="w-4 h-4 text-white" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="rounded-full h-10 px-4"
+                      onClick={() => {
+                        setShowNotAnsweredDialog(false);
+                        setShowMessageSentDialog(true);
+                      }}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Enviar Mensagem
+                    </Button>
+                  </div>
+                </div>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Message Sent Dialog */}
+        <Dialog open={showMessageSentDialog} onOpenChange={setShowMessageSentDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-center text-lg font-semibold">
+                Enviou uma mensagem para o proprietário
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea 
+                value={emergencyMessage}
+                onChange={(e) => setEmergencyMessage(e.target.value)}
+                className="min-h-[100px] resize-none"
+                placeholder="Digite sua mensagem..."
+              />
+            </div>
+            <Button 
+              className="w-full bg-foreground text-background hover:bg-foreground/90"
+              onClick={() => {
+                if (ownerPhone) {
+                  // Send via SMS
+                  window.open(`sms:${ownerPhone}?body=${encodeURIComponent(emergencyMessage)}`, '_self');
+                }
+                setShowMessageSentDialog(false);
+                toast.success('Mensagem enviada!');
+              }}
+            >
+              Mensagem Enviada
+            </Button>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
