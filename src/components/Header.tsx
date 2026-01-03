@@ -10,7 +10,8 @@ import {
   Share2, 
   Gift, 
   Volume2, 
-  Star, 
+  Star,
+  Download,
   HelpCircle, 
   Instagram, 
   CreditCard, 
@@ -417,6 +418,10 @@ export const Header = () => {
                 <DropdownMenuItem onClick={() => setShowSupportProject(true)}>
                   <Heart className="w-4 h-4 mr-3" />
                   Apoie o Projeto
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/install')}>
+                  <Download className="w-4 h-4 mr-3" />
+                  Instalar Aplicativo
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleClearCache}>
