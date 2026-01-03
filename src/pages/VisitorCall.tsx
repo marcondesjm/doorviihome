@@ -148,13 +148,7 @@ const VisitorCall = () => {
           });
         } else if (callData.status === 'doorbell_ringing') {
           setCallStatus('ringing');
-          // Start timeout for not answered if ringing on load
-          if (!ringingTimeoutRef.current) {
-            ringingTimeoutRef.current = setTimeout(() => {
-              setCallStatus('not_answered');
-              setShowNotAnsweredDialog(true);
-            }, 60000);
-          }
+          // Timeout will be started by the useEffect that manages ringing timeout
         } else if (callData.status === 'answered') {
           setCallStatus('answered');
         }
@@ -343,18 +337,8 @@ const VisitorCall = () => {
   const handleRingDoorbell = async () => {
     if (!roomName || callStatus === 'ringing') return;
     
+    // Set status to ringing - timeout will be started by useEffect
     setCallStatus('ringing');
-    
-    // Clear any existing timeout
-    if (ringingTimeoutRef.current) {
-      clearTimeout(ringingTimeoutRef.current);
-    }
-    
-    // Set timeout for not answered (60 seconds)
-    ringingTimeoutRef.current = setTimeout(() => {
-      setCallStatus('not_answered');
-      setShowNotAnsweredDialog(true);
-    }, 60000);
     
     try {
       // Get the call to find the owner_id
@@ -375,9 +359,6 @@ const VisitorCall = () => {
         console.error('Error ringing doorbell:', error);
         toast.error('Erro ao tocar campainha');
         setCallStatus('waiting');
-        if (ringingTimeoutRef.current) {
-          clearTimeout(ringingTimeoutRef.current);
-        }
       } else {
         toast.success('Campainha tocando! Aguarde o morador atender...');
         
@@ -397,27 +378,42 @@ const VisitorCall = () => {
       console.error('Error:', err);
       toast.error('Erro ao tocar campainha');
       setCallStatus('waiting');
-      if (ringingTimeoutRef.current) {
-        clearTimeout(ringingTimeoutRef.current);
-      }
     }
   };
 
-  // Clear timeout when call status changes to answered/video_call/audio_message
+  // Manage ringing timeout - start when ringing, clear when answered
   useEffect(() => {
-    if (callStatus === 'answered' || callStatus === 'video_call' || callStatus === 'audio_message') {
+    // Clear timeout if call was answered
+    if (callStatus === 'answered' || callStatus === 'video_call' || callStatus === 'audio_message' || callStatus === 'ended') {
       if (ringingTimeoutRef.current) {
+        console.log('Clearing ringing timeout - call answered or ended');
         clearTimeout(ringingTimeoutRef.current);
         ringingTimeoutRef.current = null;
       }
     }
     
+    // Start timeout if ringing and no timeout exists
+    if (callStatus === 'ringing' && !ringingTimeoutRef.current) {
+      console.log('Starting 60 second timeout for not_answered');
+      ringingTimeoutRef.current = setTimeout(() => {
+        console.log('Timeout reached - showing not answered dialog');
+        setCallStatus('not_answered');
+        setShowNotAnsweredDialog(true);
+      }, 60000); // 60 seconds
+    }
+    
+    // Cleanup only on unmount, not on every re-render
+  }, [callStatus]);
+  
+  // Separate cleanup effect for unmount only
+  useEffect(() => {
     return () => {
       if (ringingTimeoutRef.current) {
+        console.log('Component unmounting - clearing timeout');
         clearTimeout(ringingTimeoutRef.current);
       }
     };
-  }, [callStatus]);
+  }, []);
 
   const handleTryAgain = () => {
     setShowNotAnsweredDialog(false);
