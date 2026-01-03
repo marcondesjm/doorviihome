@@ -309,6 +309,17 @@ const Index = () => {
             }
             
             const isVideo = isVideoUrl(payload.new.visitor_audio_url);
+            
+            // Register activity with media
+            addActivity.mutate({
+              property_id: payload.new.property_id || undefined,
+              type: 'incoming',
+              title: isVideo ? 'Mensagem de vídeo recebida' : 'Mensagem de áudio recebida',
+              property_name: payload.new.property_name || 'Propriedade',
+              media_url: payload.new.visitor_audio_url,
+              media_type: isVideo ? 'video' : 'audio'
+            });
+            
             toast({
               title: isVideo ? "🎬 Resposta do visitante!" : "🎤 Resposta do visitante!",
               description: isVideo ? "O visitante enviou uma mensagem de vídeo" : "O visitante enviou uma mensagem de áudio",

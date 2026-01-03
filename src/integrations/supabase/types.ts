@@ -54,6 +54,8 @@ export type Database = {
           created_at: string
           duration: string | null
           id: string
+          media_type: string | null
+          media_url: string | null
           property_id: string | null
           property_name: string
           title: string
@@ -64,6 +66,8 @@ export type Database = {
           created_at?: string
           duration?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           property_id?: string | null
           property_name: string
           title: string
@@ -74,6 +78,8 @@ export type Database = {
           created_at?: string
           duration?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           property_id?: string | null
           property_name?: string
           title?: string
