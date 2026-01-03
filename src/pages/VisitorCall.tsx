@@ -234,6 +234,15 @@ const VisitorCall = () => {
               // Navigate to a blank page or show message
             }, 3000);
           }
+
+          // Check for owner text message
+          if (updatedCall.owner_text_message && updatedCall.owner_text_message !== ownerTextMessage) {
+            setOwnerTextMessage(updatedCall.owner_text_message);
+            toast.success('Nova mensagem do morador!');
+            if ('vibrate' in navigator) {
+              navigator.vibrate([200, 100, 200]);
+            }
+          }
         }
       )
       .subscribe();
