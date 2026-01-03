@@ -287,8 +287,8 @@ const Index = () => {
             }
             
             toast({
-              title: "🎤 Resposta do visitante!",
-              description: "O visitante enviou uma mensagem de áudio",
+              title: "🎬 Resposta do visitante!",
+              description: "O visitante enviou uma mensagem de vídeo",
               duration: 8000,
             });
           }
@@ -1147,7 +1147,7 @@ const Index = () => {
                     <span className="text-sm text-white/80">{doorbellPropertyName}</span>
                   </div>
 
-                  {/* Visitor Audio Response */}
+                  {/* Visitor Media Response */}
                   {visitorAudioResponse && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
@@ -1155,16 +1155,29 @@ const Index = () => {
                       className="w-full bg-white/20 rounded-xl p-3"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <Volume2 className="w-4 h-4" />
+                        {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                          <Video className="w-4 h-4" />
+                        ) : (
+                          <Volume2 className="w-4 h-4" />
+                        )}
                         <span className="text-sm font-medium">Resposta do visitante</span>
                       </div>
-                      <audio
-                        controls
-                        autoPlay
-                        src={visitorAudioResponse}
-                        className="w-full h-10"
-                        style={{ filter: 'invert(1)' }}
-                      />
+                      {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                        <video
+                          controls
+                          autoPlay
+                          src={visitorAudioResponse}
+                          className="w-full rounded-lg max-h-48"
+                        />
+                      ) : (
+                        <audio
+                          controls
+                          autoPlay
+                          src={visitorAudioResponse}
+                          className="w-full h-10"
+                          style={{ filter: 'invert(1)' }}
+                        />
+                      )}
                     </motion.div>
                   )}
                   
@@ -1259,7 +1272,7 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Visitor Audio Response */}
+      {/* Floating Visitor Media Response */}
       <AnimatePresence>
         {visitorAudioResponse && !showVideoCallQR && (
           <motion.div
@@ -1271,7 +1284,11 @@ const Index = () => {
             <div className="bg-primary text-primary-foreground p-4 rounded-2xl shadow-lg">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Volume2 className="w-5 h-5 animate-pulse" />
+                  {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                    <Video className="w-5 h-5 animate-pulse" />
+                  ) : (
+                    <Volume2 className="w-5 h-5 animate-pulse" />
+                  )}
                   <span className="font-semibold">Resposta do Visitante</span>
                 </div>
                 <Button
@@ -1283,12 +1300,21 @@ const Index = () => {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              <audio 
-                src={visitorAudioResponse} 
-                controls 
-                autoPlay
-                className="w-full h-10"
-              />
+              {visitorAudioResponse.includes('video') || visitorAudioResponse.endsWith('.webm') || visitorAudioResponse.endsWith('.mp4') ? (
+                <video 
+                  src={visitorAudioResponse} 
+                  controls 
+                  autoPlay
+                  className="w-full rounded-lg max-h-64"
+                />
+              ) : (
+                <audio 
+                  src={visitorAudioResponse} 
+                  controls 
+                  autoPlay
+                  className="w-full h-10"
+                />
+              )}
               {activeCall && (
                 <Button
                   variant="secondary"
