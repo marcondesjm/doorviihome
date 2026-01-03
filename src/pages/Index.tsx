@@ -430,6 +430,8 @@ const Index = () => {
       if (existingCall) {
         // Mark as answered but keep interface visible
         setDoorbellAnswered(true);
+        // Reset audio recorder to show the button
+        setShowAudioRecorder(false);
         toast({
           title: "Chamada atendida!",
           description: "Escolha como deseja se comunicar com o visitante",
