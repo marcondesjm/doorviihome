@@ -633,13 +633,36 @@ const VisitorCall = () => {
       case 'ended':
         return (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-muted/20 border border-muted/50 rounded-xl p-4 mb-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-destructive/20 border border-destructive/50 rounded-xl p-5 mb-6"
           >
-            <p className="text-muted-foreground">
-              A chamada foi encerrada.
+            <motion.div 
+              className="flex items-center justify-center gap-2 mb-3"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            >
+              <Phone className="w-8 h-8 text-destructive" />
+            </motion.div>
+            <h3 className="font-bold text-lg text-destructive mb-2">Chamada encerrada</h3>
+            <p className="text-sm text-foreground mb-4">
+              O morador encerrou a chamada. Obrigado pela visita!
             </p>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                setCallStatus('waiting');
+                setAudioMessages([]);
+                setMeetLink(null);
+                setNotified(false);
+              }}
+            >
+              <Bell className="w-5 h-5 mr-2" />
+              Tocar campainha novamente
+            </Button>
           </motion.div>
         );
       
@@ -697,6 +720,15 @@ const VisitorCall = () => {
                     className="relative w-28 h-28 rounded-full bg-green-500/20 border-4 border-green-500 flex items-center justify-center"
                   >
                     <CheckCircle className="w-10 h-10 text-green-500" />
+                  </motion.div>
+                ) : callStatus === 'ended' ? (
+                  <motion.div
+                    key="ended"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="relative w-28 h-28 rounded-full bg-destructive/20 border-4 border-destructive flex items-center justify-center"
+                  >
+                    <Phone className="w-10 h-10 text-destructive" />
                   </motion.div>
                 ) : (
                   <motion.div key="default">
