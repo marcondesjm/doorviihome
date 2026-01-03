@@ -932,6 +932,23 @@ const VisitorCall = () => {
                   </Button>
                 </motion.div>
 
+                {/* Owner Text Message Display */}
+                {ownerTextMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-primary/20 border border-primary/50 rounded-xl p-4 mb-4"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium text-primary">Mensagem do morador</span>
+                    </div>
+                    <p className="text-sm text-foreground bg-primary/10 rounded-lg p-3">
+                      {ownerTextMessage}
+                    </p>
+                  </motion.div>
+                )}
+
                 {/* Video recorder button in a box */}
                 <VisitorVideoRecorder 
                   roomName={roomName || ''} 
