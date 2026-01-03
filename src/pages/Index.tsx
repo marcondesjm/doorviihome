@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle, Send } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -1298,8 +1299,10 @@ const Index = () => {
             <motion.div
               initial={{ y: 20 }}
               animate={{ y: 0 }}
-              className={`${doorbellAnswered ? 'bg-emerald-600' : 'bg-amber-500'} text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-sm text-center`}
+              className={`${doorbellAnswered ? 'bg-emerald-600' : 'bg-amber-500'} text-white px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center gap-4 w-full max-w-sm text-center max-h-[85vh] overflow-hidden`}
             >
+            <ScrollArea className="w-full max-h-[75vh]">
+              <div className="flex flex-col items-center gap-4 w-full text-center pr-2">
               {/* Close button */}
               <Button
                 variant="ghost"
@@ -1634,6 +1637,8 @@ const Index = () => {
                   </div>
                 </>
               )}
+              </div>
+            </ScrollArea>
             </motion.div>
           </motion.div>
         )}
