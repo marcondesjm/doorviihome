@@ -335,6 +335,66 @@ const Index = () => {
     };
   }, [user, toast]);
 
+  // Sync missed visitor media messages to activity_logs on load
+  useEffect(() => {
+    if (!user || !activities) return;
+
+    const syncMissedMedia = async () => {
+      try {
+        // Get all video_calls with visitor media that belong to this user
+        const { data: callsWithMedia, error } = await supabase
+          .from('video_calls')
+          .select('id, property_id, property_name, visitor_audio_url, created_at')
+          .eq('owner_id', user.id)
+          .not('visitor_audio_url', 'is', null);
+
+        if (error) {
+          console.error('Error fetching calls with media:', error);
+          return;
+        }
+
+        if (!callsWithMedia || callsWithMedia.length === 0) return;
+
+        // Get existing activity media URLs to avoid duplicates
+        const existingMediaUrls = new Set(
+          activities
+            .filter(a => a.media_url)
+            .map(a => a.media_url)
+        );
+
+        // Find calls that don't have corresponding activity logs
+        const missedCalls = callsWithMedia.filter(
+          call => call.visitor_audio_url && !existingMediaUrls.has(call.visitor_audio_url)
+        );
+
+        if (missedCalls.length === 0) return;
+
+        console.log(`Found ${missedCalls.length} missed media messages to sync`);
+
+        // Register each missed call as an activity
+        for (const call of missedCalls) {
+          const isVideo = isVideoUrl(call.visitor_audio_url!);
+          
+          await supabase.from('activity_logs').insert({
+            user_id: user.id,
+            property_id: call.property_id || null,
+            type: 'incoming',
+            title: isVideo ? 'Mensagem de vídeo recebida' : 'Mensagem de áudio recebida',
+            property_name: call.property_name || 'Propriedade',
+            media_url: call.visitor_audio_url,
+            media_type: isVideo ? 'video' : 'audio'
+          });
+        }
+
+        console.log(`Synced ${missedCalls.length} missed media messages`);
+      } catch (err) {
+        console.error('Error syncing missed media:', err);
+      }
+    };
+
+    syncMissedMedia();
+  }, [user, activities]);
+
   // Listen for visitor scans on properties with visitor_always_connected enabled
   // This only updates property online status - doorbell notification happens when visitor explicitly rings
   useEffect(() => {
