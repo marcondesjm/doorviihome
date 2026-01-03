@@ -1391,6 +1391,54 @@ const Index = () => {
                     <span className="text-sm text-white/80">{doorbellPropertyName}</span>
                   </div>
 
+                  {/* Status Message Selector */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full bg-white/10 rounded-xl p-3"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="text-sm font-medium">Status para o visitante</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'Aguarde, estou indo até você',
+                        'Já estou descendo',
+                        'Um momento, por favor',
+                        'Estou ocupado, aguarde',
+                      ].map((status) => (
+                        <Button
+                          key={status}
+                          variant="ghost"
+                          size="sm"
+                          className="bg-white/20 hover:bg-white/30 text-white text-xs px-2 py-1 h-auto"
+                          onClick={async () => {
+                            const roomName = currentDoorbellRoomName || activeCall?.room_name;
+                            if (!roomName) return;
+                            
+                            try {
+                              await supabase
+                                .from('video_calls')
+                                .update({ owner_status_message: status })
+                                .eq('room_name', roomName);
+                              
+                              toast({
+                                title: "Status atualizado!",
+                                description: `O visitante verá: "${status}"`,
+                                duration: 2000,
+                              });
+                            } catch (error) {
+                              console.error('Error updating status:', error);
+                            }
+                          }}
+                        >
+                          {status}
+                        </Button>
+                      ))}
+                    </div>
+                  </motion.div>
+
                   {/* Visitor Media Response */}
                   {visitorAudioResponse && (
                     <motion.div

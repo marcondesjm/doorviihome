@@ -65,6 +65,7 @@ const VisitorCall = () => {
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const [hasAutoRung, setHasAutoRung] = useState(false);
   const [ownerTextMessage, setOwnerTextMessage] = useState<string | null>(null);
+  const [ownerStatusMessage, setOwnerStatusMessage] = useState<string>('Aguarde, estou indo até você');
   const [visitorAudioMessages, setVisitorAudioMessages] = useState<VisitorAudioMessage[]>([]);
   const [currentPlayingVisitorIndex, setCurrentPlayingVisitorIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -179,6 +180,11 @@ const VisitorCall = () => {
           setOwnerTextMessage(callData.owner_text_message);
         }
 
+        // Check for owner status message on initial load
+        if (callData.owner_status_message) {
+          setOwnerStatusMessage(callData.owner_status_message);
+        }
+
         // Check for visitor audio on initial load
         if (callData.visitor_audio_url) {
           setVisitorAudioMessages(prev => {
@@ -266,6 +272,11 @@ const VisitorCall = () => {
             if ('vibrate' in navigator) {
               navigator.vibrate([200, 100, 200]);
             }
+          }
+
+          // Check for owner status message updates
+          if (updatedCall.owner_status_message && updatedCall.owner_status_message !== ownerStatusMessage) {
+            setOwnerStatusMessage(updatedCall.owner_status_message);
           }
 
           // Check for visitor audio (when visitor sends audio, it appears here)
@@ -962,7 +973,7 @@ const VisitorCall = () => {
                     {callStatus === 'answered' || callStatus === 'audio_message' ? (
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Aguarde, estou indo até você</span>
+                        <span>{ownerStatusMessage}</span>
                       </div>
                     ) : callStatus === 'ringing' ? (
                       <>
