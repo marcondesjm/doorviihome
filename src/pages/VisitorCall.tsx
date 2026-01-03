@@ -543,6 +543,31 @@ const VisitorCall = () => {
   // Status display component
   const StatusDisplay = () => {
     console.log('StatusDisplay render - callStatus:', callStatus, 'visitorAlwaysConnected:', visitorAlwaysConnected);
+    
+    // If call is ended, show disconnected status (takes priority)
+    if (callStatus === 'ended') {
+      return (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-destructive/20 border border-destructive/50 rounded-xl p-5 mb-6"
+        >
+          <motion.div 
+            className="flex items-center justify-center gap-2 mb-3"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            <PhoneOff className="w-8 h-8 text-destructive" />
+          </motion.div>
+          <h3 className="font-bold text-lg text-destructive mb-2">Visitante Desconectado!</h3>
+          <p className="text-sm text-foreground">
+            A chamada foi encerrada pelo morador.
+          </p>
+        </motion.div>
+      );
+    }
+    
     // If visitor_always_connected is enabled OR ringing, show the connected status
     if (visitorAlwaysConnected || callStatus === 'ringing' || callStatus === 'waiting') {
       const isRinging = callStatus === 'ringing';
@@ -807,29 +832,8 @@ const VisitorCall = () => {
           </motion.div>
         );
       
-      case 'ended':
-        return (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-destructive/20 border border-destructive/50 rounded-xl p-5 mb-6"
-          >
-            <motion.div 
-              className="flex items-center justify-center gap-2 mb-3"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-            >
-              <PhoneOff className="w-8 h-8 text-destructive" />
-            </motion.div>
-            <h3 className="font-bold text-lg text-destructive mb-2">Visitante Desconectado!</h3>
-            <p className="text-sm text-foreground">
-              A chamada foi encerrada pelo morador.
-            </p>
-          </motion.div>
-        );
-      
       default:
+        return null;
         return null;
     }
   };
