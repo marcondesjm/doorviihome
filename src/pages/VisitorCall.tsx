@@ -165,6 +165,11 @@ const VisitorCall = () => {
         } else if (callData.status === 'answered') {
           setCallStatus('answered');
         }
+
+        // Check for owner text message on initial load
+        if (callData.owner_text_message) {
+          setOwnerTextMessage(callData.owner_text_message);
+        }
         // Don't set 'ended' status on initial load - treat as new session
       } else {
         // No active call found - start fresh at waiting
