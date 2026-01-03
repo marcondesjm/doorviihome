@@ -300,7 +300,7 @@ export const Header = () => {
                   <Settings className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-popover">
+              <DropdownMenuContent align="end" className="w-64 bg-popover max-h-[70vh] overflow-y-auto">
                 {isAdmin && (
                   <>
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
