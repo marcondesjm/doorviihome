@@ -752,7 +752,7 @@ const VisitorCall = () => {
                     ) : (
                       <Bell className={`w-6 h-6 ${callStatus === 'ringing' ? 'animate-bounce' : ''}`} />
                     )}
-                    {callStatus === 'ringing' ? 'Aguardando...' : (callStatus === 'answered' || callStatus === 'audio_message') ? 'Aguarde... Indo até vc :)' : 'Tocar Campainha'}
+                    {callStatus === 'ringing' ? 'Aguardando...' : (callStatus === 'answered' || callStatus === 'audio_message') ? 'Aguarde, estou indo até você' : 'Tocar Campainha'}
                   </Button>
                 </motion.div>
 
