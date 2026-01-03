@@ -481,17 +481,15 @@ const VisitorCall = () => {
               <CheckCircle className="w-8 h-8 text-green-500" />
             )}
           </motion.div>
-          <h3 className={`font-bold text-lg mb-2 ${isRinging ? 'text-amber-500' : 'text-green-500'}`}>
-            {isRinging ? "Campainha tocada!" : "Visitante conectado!"}
+          <h3 className={`font-bold text-lg ${isRinging ? 'text-amber-500' : 'text-green-500'}`}>
+            {isRinging ? "Campainha tocada!" : "Visitante Conectado!"}
           </h3>
-          <div className="flex items-center justify-center gap-2 text-foreground">
-            <User className="w-4 h-4" />
-            <p className="text-sm">
-              {isRinging 
-                ? "Aguardando resposta do morador..." 
-                : "Você está conectado. Toque a campainha para avisar o morador."}
-            </p>
-          </div>
+          {isRinging && (
+            <div className="flex items-center justify-center gap-2 text-foreground mt-2">
+              <User className="w-4 h-4" />
+              <p className="text-sm">Aguardando resposta do morador...</p>
+            </div>
+          )}
         </motion.div>
       );
     }
