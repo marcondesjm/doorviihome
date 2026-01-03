@@ -56,6 +56,7 @@ const VisitorCall = () => {
   const [showNotAnsweredDialog, setShowNotAnsweredDialog] = useState(false);
   const [showMessageSentDialog, setShowMessageSentDialog] = useState(false);
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
+  const [emergencyCountdown, setEmergencyCountdown] = useState(5);
   const [emergencyMessage, setEmergencyMessage] = useState('Tentei entrar em contato com você via DoorVi - QR Code. Por favor, responda-me');
   const audioRef = useRef<HTMLAudioElement>(null);
   const ringingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -428,16 +429,25 @@ const VisitorCall = () => {
   const handleTryAgain = () => {
     setShowNotAnsweredDialog(false);
     setShowEmergencyContact(false);
+    setEmergencyCountdown(5);
     setCallStatus('waiting');
   };
 
-  // Auto-show emergency contact after 5 seconds when dialog opens
+  // Auto-show emergency contact after 5 seconds when dialog opens with countdown
   useEffect(() => {
     if (showNotAnsweredDialog && !showEmergencyContact) {
-      const timer = setTimeout(() => {
-        setShowEmergencyContact(true);
-      }, 5000);
-      return () => clearTimeout(timer);
+      setEmergencyCountdown(5);
+      const interval = setInterval(() => {
+        setEmergencyCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setShowEmergencyContact(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
     }
   }, [showNotAnsweredDialog, showEmergencyContact]);
 
@@ -994,6 +1004,20 @@ const VisitorCall = () => {
             <AlertDialogDescription className="text-center">
               O morador não atendeu. Por favor, tente novamente ou entre em contato por outro meio.
             </AlertDialogDescription>
+            
+            {/* Countdown timer */}
+            {!showEmergencyContact && emergencyCountdown > 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center justify-center gap-2 py-2"
+              >
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Opções de contato em <span className="font-bold text-foreground">{emergencyCountdown}s</span>
+                </span>
+              </motion.div>
+            )}
             <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
               <AlertDialogAction 
                 onClick={handleTryAgain}
