@@ -738,15 +738,21 @@ const VisitorCall = () => {
                   <Button
                     size="lg"
                     className={`w-full font-semibold text-lg py-6 ${
-                      callStatus === 'ringing' 
-                        ? 'bg-amber-600 hover:bg-amber-700' 
-                        : 'bg-amber-500 hover:bg-amber-600'
+                      callStatus === 'answered'
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : callStatus === 'ringing' 
+                          ? 'bg-amber-600 hover:bg-amber-700' 
+                          : 'bg-amber-500 hover:bg-amber-600'
                     } text-white`}
                     onClick={handleRingDoorbell}
                     disabled={callStatus === 'ringing' || callStatus === 'answered'}
                   >
-                    <Bell className={`w-6 h-6 ${callStatus === 'ringing' ? 'animate-bounce' : ''}`} />
-                    {callStatus === 'ringing' ? 'Aguardando...' : callStatus === 'answered' ? 'Atendido!' : 'Tocar Campainha'}
+                    {callStatus === 'answered' ? (
+                      <CheckCircle className="w-6 h-6" />
+                    ) : (
+                      <Bell className={`w-6 h-6 ${callStatus === 'ringing' ? 'animate-bounce' : ''}`} />
+                    )}
+                    {callStatus === 'ringing' ? 'Aguardando...' : callStatus === 'answered' ? 'Atendido permanecer' : 'Tocar Campainha'}
                   </Button>
                 </motion.div>
 
