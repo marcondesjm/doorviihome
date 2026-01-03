@@ -1,5 +1,5 @@
-// Service Worker for Push Notifications - Maximum Priority Version
-const SW_VERSION = '3.0.0';
+// Service Worker for Push Notifications - Mobile Optimized
+const SW_VERSION = '3.1.0';
 
 self.addEventListener('install', (event) => {
   console.log('Service Worker v' + SW_VERSION + ' installed');
@@ -12,12 +12,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  console.log('Push event received:', event);
+  console.log('[SW] Push event received:', event);
   
   // Default notification data
   let data = {
-    title: '🔔 Porteiro Virtual',
-    body: 'Você tem uma nova notificação',
+    title: '🔔 Visitante na Porta',
+    body: 'Alguém está chamando na sua campainha',
     icon: '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     data: {},
@@ -27,52 +27,53 @@ self.addEventListener('push', (event) => {
     try {
       const pushData = event.data.json();
       data = { ...data, ...pushData };
-      console.log('Push data parsed:', data);
+      console.log('[SW] Push data parsed:', data);
     } catch (e) {
-      console.error('Error parsing push data:', e);
+      console.error('[SW] Error parsing push data:', e);
       try {
         data.body = event.data.text();
       } catch (e2) {
-        console.error('Error parsing push data as text:', e2);
+        console.error('[SW] Error parsing push data as text:', e2);
       }
     }
   }
 
-  // Maximum priority notification options for background delivery
+  // Maximum priority notification options for mobile delivery
   const options = {
     body: data.body,
     icon: data.icon || '/pwa-192x192.png',
     badge: data.badge || '/pwa-192x192.png',
-    // Very strong vibration pattern - long pulses for urgency
-    vibrate: [500, 200, 500, 200, 500, 200, 500, 200, 500],
+    // Strong vibration pattern for mobile
+    vibrate: [300, 100, 300, 100, 300, 100, 300],
     data: data.data || {},
     // CRITICAL: Keep notification visible until user interacts
     requireInteraction: true,
-    // CRITICAL: Re-notify even with same tag
+    // CRITICAL: Re-notify even with same tag - unique tag per notification
     renotify: true,
-    // Fixed tag to ensure proper grouping
-    tag: 'doorbell-urgent',
+    tag: 'doorbell-' + Date.now(),
     // Action buttons
     actions: [
-      { action: 'open', title: '🔓 Atender' },
+      { action: 'open', title: '📞 Atender' },
       { action: 'dismiss', title: '❌ Ignorar' },
     ],
     // Timestamp for sorting
     timestamp: Date.now(),
+    // Silent false to ensure sound plays
+    silent: false,
   };
 
-  console.log('Showing notification with options:', options);
+  console.log('[SW] Showing notification with options:', options);
 
-  // Show the notification
-  const notificationPromise = self.registration.showNotification(data.title, options)
-    .then(() => {
-      console.log('Notification shown successfully');
-    })
-    .catch((err) => {
-      console.error('Error showing notification:', err);
-    });
-
-  event.waitUntil(notificationPromise);
+  // Show the notification - use waitUntil to keep SW alive
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+      .then(() => {
+        console.log('[SW] Notification shown successfully');
+      })
+      .catch((err) => {
+        console.error('[SW] Error showing notification:', err);
+      })
+  );
 });
 
 self.addEventListener('notificationclick', (event) => {
