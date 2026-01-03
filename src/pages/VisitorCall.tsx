@@ -435,9 +435,11 @@ const VisitorCall = () => {
 
   // Status display component
   const StatusDisplay = () => {
+    console.log('StatusDisplay render - callStatus:', callStatus, 'visitorAlwaysConnected:', visitorAlwaysConnected);
     // If visitor_always_connected is enabled, show the connected status
     if (visitorAlwaysConnected && (callStatus === 'waiting' || callStatus === 'ringing')) {
       const isRinging = callStatus === 'ringing';
+      console.log('isRinging:', isRinging);
       
       return (
         <motion.div
