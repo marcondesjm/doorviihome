@@ -179,7 +179,10 @@ const VisitorCall = () => {
             }
           } else if (updatedCall.status === 'ended') {
             setCallStatus('ended');
-            toast.info('A chamada foi encerrada.');
+            toast.info('O morador encerrou a chamada.');
+            if ('vibrate' in navigator) {
+              navigator.vibrate([500, 200, 500, 200, 500]);
+            }
           }
         }
       )
