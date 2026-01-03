@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle, Send } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
