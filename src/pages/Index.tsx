@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, MessageCircle } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -1429,6 +1429,23 @@ const Index = () => {
                           />
                         );
                       })()}
+                    </motion.div>
+                  )}
+
+                  {/* Visitor Text Message */}
+                  {visitorTextMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="w-full bg-white/20 rounded-xl p-3"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <MessageCircle className="w-4 h-4" />
+                        <span className="text-sm font-medium">Mensagem do visitante</span>
+                      </div>
+                      <p className="text-sm text-left bg-white/10 rounded-lg p-2">
+                        {visitorTextMessage}
+                      </p>
                     </motion.div>
                   )}
                   
