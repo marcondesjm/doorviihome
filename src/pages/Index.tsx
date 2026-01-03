@@ -1541,13 +1541,8 @@ const Index = () => {
                         <Textarea
                           placeholder="Digite sua resposta..."
                           value={ownerTextReply}
-                          onChange={(e) => {
-                            setOwnerTextReply(e.target.value);
-                            // Auto-expand textarea
-                            e.target.style.height = 'auto';
-                            e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
-                          }}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 mb-2 min-h-[80px] max-h-[200px] overflow-y-auto resize-none"
+                          onChange={(e) => setOwnerTextReply(e.target.value)}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 mb-2"
                           rows={3}
                         />
                         <Button
