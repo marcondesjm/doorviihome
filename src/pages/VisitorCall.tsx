@@ -508,27 +508,74 @@ const VisitorCall = () => {
                     variant="ghost"
                     size="sm"
                     className="h-10 w-10 rounded-full flex-shrink-0"
-                    onClick={() => {
-                      if (audioRef.current) {
-                        if (currentPlayingIndex === index) {
-                          audioRef.current.pause();
-                          setCurrentPlayingIndex(null);
-                        } else {
-                          audioRef.current.src = message.url;
-                          audioRef.current.load();
-                          const playPromise = audioRef.current.play();
-                          if (playPromise !== undefined) {
-                            playPromise
-                              .then(() => {
-                                setCurrentPlayingIndex(index);
-                                console.log('Audio playing successfully');
-                              })
-                              .catch(error => {
-                                console.error('Error playing audio:', error);
-                                toast.error('Toque para ouvir o áudio');
-                              });
+                    onClick={async () => {
+                      console.log('[Audio] Button clicked, index:', index, 'currentPlayingIndex:', currentPlayingIndex);
+                      
+                      if (currentPlayingIndex === index && audioRef.current) {
+                        console.log('[Audio] Pausing current audio');
+                        audioRef.current.pause();
+                        setCurrentPlayingIndex(null);
+                        return;
+                      }
+                      
+                      try {
+                        // Create a new Audio element for better mobile compatibility
+                        const audio = new Audio();
+                        audio.preload = 'auto';
+                        audio.crossOrigin = 'anonymous';
+                        
+                        // Set up event handlers before setting src
+                        audio.oncanplaythrough = async () => {
+                          console.log('[Audio] Can play through, starting playback');
+                          try {
+                            await audio.play();
+                            console.log('[Audio] Playback started successfully');
+                            setCurrentPlayingIndex(index);
+                            
+                            // Update the ref to control this audio
+                            if (audioRef.current) {
+                              audioRef.current.pause();
+                            }
+                            (audioRef as any).current = audio;
+                          } catch (playError) {
+                            console.error('[Audio] Play error:', playError);
+                            toast.error('Toque novamente para ouvir');
                           }
-                        }
+                        };
+                        
+                        audio.onended = () => {
+                          console.log('[Audio] Playback ended');
+                          setCurrentPlayingIndex(null);
+                        };
+                        
+                        audio.onerror = (e) => {
+                          console.error('[Audio] Error loading audio:', e);
+                          toast.error('Erro ao carregar áudio');
+                          setCurrentPlayingIndex(null);
+                        };
+                        
+                        // Set source and load
+                        console.log('[Audio] Loading audio from:', message.url);
+                        audio.src = message.url;
+                        audio.load();
+                        
+                        // For some mobile browsers, we need to call play immediately
+                        // after user interaction, even before canplaythrough
+                        setTimeout(async () => {
+                          if (audio.readyState >= 2) {
+                            try {
+                              await audio.play();
+                              setCurrentPlayingIndex(index);
+                              (audioRef as any).current = audio;
+                            } catch (e) {
+                              console.log('[Audio] Waiting for canplaythrough...');
+                            }
+                          }
+                        }, 100);
+                        
+                      } catch (error) {
+                        console.error('[Audio] Error:', error);
+                        toast.error('Erro ao reproduzir áudio');
                       }
                     }}
                   >
