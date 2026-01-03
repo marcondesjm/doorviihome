@@ -290,6 +290,12 @@ const Index = () => {
           // Handle visitor audio response
           if (payload.new.status === 'visitor_audio_response' && payload.new.visitor_audio_url) {
             setVisitorAudioResponse(payload.new.visitor_audio_url);
+            setDoorbellPropertyName(payload.new.property_name || 'Propriedade');
+            setCurrentDoorbellRoomName(payload.new.room_name || null);
+            
+            // Show the doorbell alert with the audio/video response
+            setDoorbellRinging(true);
+            setDoorbellAnswered(true); // Show as answered so we see the media
             
             // Play notification sound
             try {
@@ -304,8 +310,27 @@ const Index = () => {
               gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
               osc.start(ctx.currentTime);
               osc.stop(ctx.currentTime + 0.2);
+              
+              // Play a second notification beep
+              setTimeout(() => {
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.frequency.value = 784; // G5
+                osc2.type = 'sine';
+                gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc2.start(ctx.currentTime);
+                osc2.stop(ctx.currentTime + 0.2);
+              }, 150);
             } catch (e) {
               console.log('Audio not supported');
+            }
+            
+            // Vibrate phone if supported
+            if ('vibrate' in navigator) {
+              navigator.vibrate([300, 100, 300]);
             }
             
             const isVideo = isVideoUrl(payload.new.visitor_audio_url);
