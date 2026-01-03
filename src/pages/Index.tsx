@@ -1453,8 +1453,89 @@ const Index = () => {
                   )}
                   
                   <div className="flex flex-col gap-3 w-full">
+                    {/* Text Reply Option (show when visitor sent a message) */}
+                    {visitorTextMessage && !showTextReply && !showAudioRecorder && (
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="bg-white text-emerald-600 hover:bg-white/90 w-full"
+                        onClick={() => setShowTextReply(true)}
+                      >
+                        <MessageCircle className="w-5 h-5 mr-2" />
+                        Responder mensagem
+                      </Button>
+                    )}
+
+                    {/* Text Reply Input */}
+                    {showTextReply && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white/10 rounded-xl p-4"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Responder ao visitante</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-white/70 hover:text-white hover:bg-white/20 h-7 px-2"
+                            onClick={() => {
+                              setShowTextReply(false);
+                              setOwnerTextReply('');
+                            }}
+                          >
+                            Fechar
+                          </Button>
+                        </div>
+                        <Textarea
+                          placeholder="Digite sua resposta..."
+                          value={ownerTextReply}
+                          onChange={(e) => setOwnerTextReply(e.target.value)}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50 mb-2"
+                          rows={3}
+                        />
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="w-full bg-white text-emerald-600 hover:bg-white/90"
+                          disabled={!ownerTextReply.trim()}
+                          onClick={async () => {
+                            if (!ownerTextReply.trim()) return;
+                            
+                            const roomName = currentDoorbellRoomName || activeCall?.room_name;
+                            if (!roomName) {
+                              toast({ title: "Erro", description: "Chamada não encontrada" });
+                              return;
+                            }
+
+                            try {
+                              const { error } = await supabase
+                                .from('video_calls')
+                                .update({ owner_text_message: ownerTextReply.trim() })
+                                .eq('room_name', roomName);
+
+                              if (error) throw error;
+
+                              toast({
+                                title: "Mensagem enviada!",
+                                description: "O visitante receberá sua resposta",
+                              });
+                              setShowTextReply(false);
+                              setOwnerTextReply('');
+                            } catch (error) {
+                              console.error('Error sending text reply:', error);
+                              toast({ title: "Erro", description: "Falha ao enviar mensagem" });
+                            }
+                          }}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar resposta
+                        </Button>
+                      </motion.div>
+                    )}
+
                     {/* Audio Message Option */}
-                    {!showAudioRecorder && (
+                    {!showAudioRecorder && !showTextReply && (
                       <Button
                         variant="secondary"
                         size="lg"
