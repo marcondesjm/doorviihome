@@ -515,8 +515,19 @@ const VisitorCall = () => {
                           setCurrentPlayingIndex(null);
                         } else {
                           audioRef.current.src = message.url;
-                          audioRef.current.play();
-                          setCurrentPlayingIndex(index);
+                          audioRef.current.load();
+                          const playPromise = audioRef.current.play();
+                          if (playPromise !== undefined) {
+                            playPromise
+                              .then(() => {
+                                setCurrentPlayingIndex(index);
+                                console.log('Audio playing successfully');
+                              })
+                              .catch(error => {
+                                console.error('Error playing audio:', error);
+                                toast.error('Toque para ouvir o áudio');
+                              });
+                          }
                         }
                       }
                     }}
@@ -551,6 +562,12 @@ const VisitorCall = () => {
             <audio 
               ref={audioRef}
               onEnded={() => setCurrentPlayingIndex(null)}
+              onError={(e) => {
+                console.error('Audio error:', e);
+                toast.error('Erro ao carregar áudio');
+              }}
+              preload="auto"
+              playsInline
               className="hidden"
             />
 
