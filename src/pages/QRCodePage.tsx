@@ -385,25 +385,17 @@ const QRCodePage = () => {
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
       } else {
         // Classic model download
-        const padding = 60;
+        const padding = 40;
         const qrSize = customization.size;
+        // Calculate width based on number of delivery icons
+        const iconWidth = 55;
+        const iconGap = 12;
+        const minWidthForIcons = deliveryIcons.length > 0 
+          ? (deliveryIcons.length * (iconWidth + iconGap)) + padding * 2 + 40
+          : 0;
         const deliveryHeight = deliveryIcons.length > 0 ? 140 : 0;
-        canvas.width = Math.max(qrSize + padding * 2, 420);
-        canvas.height = qrSize + 320 + deliveryHeight;
-        
-        // Create a new image for QR with white background
-        const qrCanvas = document.createElement('canvas');
-        const qrCtx = qrCanvas.getContext('2d');
-        qrCanvas.width = qrSize + 32;
-        qrCanvas.height = qrSize + 32;
-        
-        if (qrCtx) {
-          // Draw white background for QR
-          qrCtx.fillStyle = '#ffffff';
-          qrCtx.beginPath();
-          qrCtx.roundRect(0, 0, qrCanvas.width, qrCanvas.height, 16);
-          qrCtx.fill();
-        }
+        canvas.width = Math.max(qrSize + padding * 2, 450, minWidthForIcons);
+        canvas.height = qrSize + 340 + deliveryHeight;
         
         img.onload = async () => {
           if (!ctx) return;
@@ -491,28 +483,33 @@ const QRCodePage = () => {
             ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
             
             // Load and draw delivery icons
+            const iconWidth = 55;
+            const iconHeight = 44;
+            const iconGap = 12;
+            const totalWidth = deliveryIcons.length * (iconWidth + iconGap) - iconGap;
+            const startX = (canvas.width - totalWidth) / 2;
+            
             const iconPromises = deliveryIcons.map((icon, index) => {
               return new Promise<void>((resolve) => {
                 const iconImg = new Image();
                 iconImg.crossOrigin = 'anonymous';
                 iconImg.onload = () => {
-                  const iconWidth = 50;
-                  const iconHeight = 40;
-                  const totalWidth = deliveryIcons.length * (iconWidth + 20) - 20;
-                  const startX = (canvas.width - totalWidth) / 2;
-                  const iconX = startX + index * (iconWidth + 20);
+                  const iconX = startX + index * (iconWidth + iconGap);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
                   ctx.beginPath();
-                  ctx.roundRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10, 8);
+                  ctx.roundRect(iconX, deliveryY + 38, iconWidth, iconHeight + 8, 8);
                   ctx.fill();
                   ctx.strokeStyle = '#e2e8f0';
                   ctx.beginPath();
-                  ctx.roundRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10, 8);
+                  ctx.roundRect(iconX, deliveryY + 38, iconWidth, iconHeight + 8, 8);
                   ctx.stroke();
                   
-                  ctx.drawImage(iconImg, iconX, deliveryY + 45, iconWidth, iconHeight);
+                  // Center the icon image inside the container
+                  const imgWidth = iconWidth - 10;
+                  const imgHeight = iconHeight - 4;
+                  ctx.drawImage(iconImg, iconX + 5, deliveryY + 42, imgWidth, imgHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
