@@ -365,7 +365,7 @@ const QRCodePage = () => {
           
           logoImg.onload = () => {
             // Draw white background for center logo
-            const centerLogoSize = 72;
+            const centerLogoSize = 122;
             const centerX = canvas.width / 2 - centerLogoSize / 2;
             const centerY = qrY + qrSize / 2 - centerLogoSize / 2;
             ctx.fillStyle = '#ffffff';
