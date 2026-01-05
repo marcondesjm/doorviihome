@@ -534,142 +534,258 @@ const QRCodePage = () => {
 
     const svgData = new XMLSerializer().serializeToString(svg);
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>QR Code - ${selectedProperty?.name || 'Propriedade'}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: A4; margin: 20mm; }
-          body { 
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 40px;
-            background: ${customization.bgColor};
-            color: ${customization.fgColor};
-          }
-          .container {
-            text-align: center;
-            max-width: 500px;
-            padding: 50px;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
-          }
-          .logo { font-size: 64px; margin-bottom: 20px; }
-          h1 { font-size: 24px; margin-bottom: 10px; line-height: 1.3; }
-          .subtitle { font-size: 20px; color: #666; margin-bottom: 20px; }
-          .qr-container { 
-            background: ${customization.bgColor}; 
-            padding: 20px; 
-            border-radius: 16px; 
-            display: inline-block;
-            margin-bottom: 20px;
-          }
-          .qr-container svg {
-            width: ${customization.size}px;
-            height: ${customization.size}px;
-          }
-          .instruction { 
-            font-size: 14px; 
-            color: #666; 
-            margin-top: 16px;
-            padding: 16px;
-            background: #fef3c7;
-            border: 2px solid #fbbf24;
-            border-radius: 12px;
-          }
-          .camera-icon { font-size: 24px; margin-bottom: 8px; }
-          .expires { font-size: 12px; color: #999; margin-top: 16px; }
-          .address { font-size: 14px; color: #888; margin-top: 8px; }
-          .delivery-section {
-            margin-top: 24px;
-            padding: 20px;
-            background: linear-gradient(to bottom right, #eff6ff, #f1f5f9);
-            border: 2px solid #bfdbfe;
-            border-radius: 16px;
-          }
-          .delivery-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 16px;
-            color: #1e40af;
-            font-weight: 600;
-            font-size: 16px;
-          }
-          .delivery-icons-grid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
-          }
-          .delivery-icon-card {
-            background: white;
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-          }
-          .delivery-icon-card img {
-            height: 50px;
-            width: auto;
-            object-fit: contain;
-          }
-          @media print {
-            body { padding: 0; background: white; }
-            .container { box-shadow: none; max-width: 100%; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="logo">${customization.logoText}</div>
-          <h1>${customization.title}</h1>
-          <p class="subtitle">${customization.subtitle}</p>
-          ${selectedProperty?.address ? `<p class="address">${selectedProperty.address}</p>` : ''}
-          <div class="qr-container">
-            ${svgData}
-          </div>
-          <div class="instruction">
-            <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
-            <div class="camera-icon">📱</div>
-            <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
-          </div>
-          ${deliveryIcons.length > 0 ? `
-          <div class="delivery-section">
-            <div class="delivery-header">
-              <span>📦</span>
-              <span>Entregas:</span>
+    if (selectedModel === 'simple') {
+      // Simple model print
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>QR Code - ${selectedProperty?.name || 'Propriedade'}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            @page { size: A4; margin: 20mm; }
+            body { 
+              font-family: system-ui, -apple-system, sans-serif;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              padding: 40px;
+              background: white;
+            }
+            .container {
+              text-align: center;
+              max-width: 400px;
+              padding: 40px;
+              background: ${simpleCustomization.primaryColor};
+              border-radius: 24px;
+            }
+            .header-text {
+              color: white;
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 24px;
+              letter-spacing: 1px;
+            }
+            .qr-container { 
+              background: #f3f4f6; 
+              padding: 20px; 
+              border-radius: 16px; 
+              display: inline-block;
+              margin-bottom: 24px;
+              position: relative;
+            }
+            .qr-container svg {
+              width: ${simpleCustomization.qrSize}px;
+              height: ${simpleCustomization.qrSize}px;
+            }
+            .center-logo {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: white;
+              padding: 4px;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .center-logo img {
+              width: 56px;
+              height: 56px;
+              object-fit: contain;
+            }
+            .footer-text {
+              color: white;
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 16px;
+              letter-spacing: 1px;
+            }
+            .brand-container {
+              background: white;
+              padding: 8px 24px;
+              border-radius: 8px;
+              display: inline-block;
+              margin-bottom: 8px;
+            }
+            .brand-container img {
+              height: 36px;
+              object-fit: contain;
+            }
+            .website-url {
+              color: rgba(255,255,255,0.8);
+              font-size: 14px;
+            }
+            @media print {
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header-text">${simpleCustomization.headerText}</div>
+            <div class="qr-container">
+              ${svgData}
+              <div class="center-logo">
+                <img src="${doorviiLogo}" alt="DoorVii" />
+              </div>
             </div>
-            <div class="delivery-icons-grid">
-              ${deliveryIcons.map(icon => `
-                <div class="delivery-icon-card">
-                  <img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" />
-                </div>
-              `).join('')}
+            <div class="footer-text">${simpleCustomization.footerText}</div>
+            <div class="brand-container">
+              <img src="${doorviiLogoFull}" alt="DoorVii" />
             </div>
+            <div class="website-url">${simpleCustomization.websiteUrl}</div>
           </div>
-          ` : ''}
-          <p class="expires">✓ Código permanente</p>
-        </div>
-        <script>
-          window.onload = () => {
-            setTimeout(() => {
-              window.print();
-            }, 500);
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+    } else {
+      // Classic model print
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>QR Code - ${selectedProperty?.name || 'Propriedade'}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            @page { size: A4; margin: 20mm; }
+            body { 
+              font-family: system-ui, -apple-system, sans-serif;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              padding: 40px;
+              background: ${customization.bgColor};
+              color: ${customization.fgColor};
+            }
+            .container {
+              text-align: center;
+              max-width: 500px;
+              padding: 50px;
+              background: white;
+              border-radius: 24px;
+              box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+            }
+            .logo { font-size: 64px; margin-bottom: 20px; }
+            h1 { font-size: 24px; margin-bottom: 10px; line-height: 1.3; }
+            .subtitle { font-size: 20px; color: #666; margin-bottom: 20px; }
+            .qr-container { 
+              background: ${customization.bgColor}; 
+              padding: 20px; 
+              border-radius: 16px; 
+              display: inline-block;
+              margin-bottom: 20px;
+            }
+            .qr-container svg {
+              width: ${customization.size}px;
+              height: ${customization.size}px;
+            }
+            .instruction { 
+              font-size: 14px; 
+              color: #666; 
+              margin-top: 16px;
+              padding: 16px;
+              background: #fef3c7;
+              border: 2px solid #fbbf24;
+              border-radius: 12px;
+            }
+            .camera-icon { font-size: 24px; margin-bottom: 8px; }
+            .expires { font-size: 12px; color: #999; margin-top: 16px; }
+            .address { font-size: 14px; color: #888; margin-top: 8px; }
+            .delivery-section {
+              margin-top: 24px;
+              padding: 20px;
+              background: linear-gradient(to bottom right, #eff6ff, #f1f5f9);
+              border: 2px solid #bfdbfe;
+              border-radius: 16px;
+            }
+            .delivery-header {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              margin-bottom: 16px;
+              color: #1e40af;
+              font-weight: 600;
+              font-size: 16px;
+            }
+            .delivery-icons-grid {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 24px;
+              flex-wrap: wrap;
+            }
+            .delivery-icon-card {
+              background: white;
+              border-radius: 12px;
+              padding: 12px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              border: 1px solid #e2e8f0;
+            }
+            .delivery-icon-card img {
+              height: 50px;
+              width: auto;
+              object-fit: contain;
+            }
+            @media print {
+              body { padding: 0; background: white; }
+              .container { box-shadow: none; max-width: 100%; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">${customization.logoText}</div>
+            <h1>${customization.title}</h1>
+            <p class="subtitle">${customization.subtitle}</p>
+            ${selectedProperty?.address ? `<p class="address">${selectedProperty.address}</p>` : ''}
+            <div class="qr-container">
+              ${svgData}
+            </div>
+            <div class="instruction">
+              <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
+              <div class="camera-icon">📱</div>
+              <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
+            </div>
+            ${deliveryIcons.length > 0 ? `
+            <div class="delivery-section">
+              <div class="delivery-header">
+                <span>📦</span>
+                <span>Entregas:</span>
+              </div>
+              <div class="delivery-icons-grid">
+                ${deliveryIcons.map(icon => `
+                  <div class="delivery-icon-card">
+                    <img src="${icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url}" alt="${icon.name}" />
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+            <p class="expires">✓ Código permanente</p>
+          </div>
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+    }
     printWindow.document.close();
   };
 
