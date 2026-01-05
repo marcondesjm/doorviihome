@@ -217,9 +217,9 @@ export const IncomingCall = ({
         </AnimatePresence>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-col items-center gap-3">
           {isActive ? (
-            <>
+            <div className="flex justify-center gap-4">
               <motion.div whileTap={{ scale: 0.95 }}>
                 <Button
                   variant="glass"
@@ -250,47 +250,53 @@ export const IncomingCall = ({
                   {isSpeakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
                 </Button>
               </motion.div>
-            </>
+            </div>
           ) : (
             <>
+              {/* Botão principal Atender */}
               <motion.div 
                 whileTap={{ scale: 0.95 }}
-                animate={{ x: [-1, 1, -1] }}
-                transition={{ repeat: Infinity, duration: 0.2 }}
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+                className="w-full"
               >
                 <Button 
-                  variant="endCall" 
-                  size="icon" 
-                  onClick={onDecline}
-                  className="w-14 h-14 rounded-full"
+                  variant="outline" 
+                  onClick={onAnswer}
+                  className="w-full h-12 rounded-full bg-card text-primary border-primary/30 hover:bg-primary/10 gap-2 text-base font-semibold"
                 >
-                  <PhoneOff className="w-6 h-6" />
+                  <Phone className="w-5 h-5" />
+                  Atender
                 </Button>
               </motion.div>
+
+              {/* Botão WhatsApp */}
               <motion.div 
                 whileTap={{ scale: 0.95 }}
+                className="w-full"
               >
                 <Button 
-                  variant="glass"
-                  size="icon" 
+                  variant="ghost"
                   onClick={handleWhatsApp}
-                  className="w-12 h-12 rounded-full bg-[#25D366]/20 text-[#25D366] border-[#25D366]/30 hover:bg-[#25D366]/30"
+                  className="w-full h-10 rounded-full text-[#25D366] hover:bg-[#25D366]/10 gap-2"
                 >
                   <WhatsAppIcon className="w-5 h-5" />
+                  Enviar mensagem
                 </Button>
               </motion.div>
+
+              {/* Botão Não Atender */}
               <motion.div 
                 whileTap={{ scale: 0.95 }}
-                animate={{ scale: [1, 1.08, 1] }}
-                transition={{ repeat: Infinity, duration: 1 }}
+                className="w-full"
               >
                 <Button 
-                  variant="call" 
-                  size="icon" 
-                  onClick={onAnswer}
-                  className="w-14 h-14 rounded-full"
+                  variant="ghost"
+                  onClick={onDecline}
+                  className="w-full h-10 rounded-full text-destructive hover:bg-destructive/10 gap-2"
                 >
-                  <Phone className="w-6 h-6" />
+                  <PhoneOff className="w-5 h-5" />
+                  Não atender
                 </Button>
               </motion.div>
             </>
@@ -298,30 +304,13 @@ export const IncomingCall = ({
         </div>
 
         {!isActive && (
-          <>
-            <motion.p 
-              className="text-xs text-muted-foreground mt-4"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              Toque para atender ou recusar
-            </motion.p>
-            
-            <motion.div 
-              className="mt-4"
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDecline}
-                className="text-muted-foreground hover:text-foreground gap-2"
-              >
-                <X className="w-4 h-4" />
-                Fechar
-              </Button>
-            </motion.div>
-          </>
+          <motion.p 
+            className="text-xs text-muted-foreground mt-4"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+          >
+            Toque para atender ou recusar
+          </motion.p>
         )}
       </motion.div>
     </motion.div>
