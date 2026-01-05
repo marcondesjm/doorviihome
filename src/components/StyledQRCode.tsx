@@ -126,9 +126,16 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
         {/* Delivery Icons Section */}
         {showDeliveryIcons && deliveryIcons.length > 0 && (
           <div className="bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 rounded-xl p-3 mb-4 shadow-md overflow-hidden">
-            <div className="flex items-center justify-center gap-2 mb-3 text-blue-800 font-semibold text-sm">
-              <span>📦</span>
-              <span>Entregas:</span>
+            <div className="flex flex-col items-center gap-2 mb-3">
+              <img 
+                src="/doorvii-logo-entregas.png" 
+                alt="DoorVii" 
+                className="h-6 w-auto object-contain"
+              />
+              <div className="flex items-center justify-center gap-2 text-blue-800 font-semibold text-sm">
+                <span>📦</span>
+                <span>Entregas:</span>
+              </div>
             </div>
             <div className="flex flex-wrap justify-center gap-2">
               {deliveryIcons.map((icon) => {
