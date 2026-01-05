@@ -56,11 +56,11 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
               includeMargin={false}
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white rounded-lg p-1.5 shadow-lg">
+              <div className="bg-white rounded-md p-1 shadow-lg">
                 <img 
                   src={doorviiLogo} 
                   alt="DoorVii" 
-                  className="w-10 h-10 object-contain"
+                  className="w-14 h-14 object-contain"
                 />
               </div>
             </div>
