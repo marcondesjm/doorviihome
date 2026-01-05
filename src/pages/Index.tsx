@@ -666,9 +666,13 @@ const Index = () => {
   };
 
   const proceedWithAnswer = async () => {
+    // FIRST: Answer the call immediately to show green "answered" state
     answerCall();
     
-    // Create video call in database for real-time sync
+    // Wait a frame to ensure state is updated and UI shows green panel
+    await new Promise(resolve => requestAnimationFrame(() => resolve(undefined)));
+    
+    // Create video call in database for real-time sync (in background)
     const newCall = await createCall(callState.propertyId, callState.propertyName || 'Propriedade');
     
     if (!newCall) {
@@ -677,11 +681,11 @@ const Index = () => {
         description: "Não foi possível criar a chamada. Tente novamente.",
         variant: "destructive",
       });
-      declineCall();
+      endCall();
       return;
     }
     
-    // Show green "answered" state for 2 seconds before showing QR code
+    // Keep showing green "answered" state for 2 seconds before showing QR code
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Show QR code for visitor to scan (Meet link will be created when user clicks to start video)
