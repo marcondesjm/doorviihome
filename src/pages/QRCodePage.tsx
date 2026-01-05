@@ -258,129 +258,203 @@ const QRCodePage = () => {
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
-      // Calculate canvas size based on customization.size
-      const padding = 60;
-      const qrSize = customization.size;
-      const deliveryHeight = deliveryIcons.length > 0 ? 120 : 0;
-      canvas.width = Math.max(qrSize + padding * 2, 400);
-      canvas.height = qrSize + 280 + deliveryHeight;
-      
-      img.onload = async () => {
-        if (!ctx) return;
+      if (selectedModel === 'simple') {
+        // Simple model download
+        const padding = 40;
+        const qrSize = simpleCustomization.qrSize;
+        canvas.width = Math.max(qrSize + padding * 2, 350);
+        canvas.height = qrSize + 280;
         
-        // Fill background
-        ctx.fillStyle = customization.bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw logo
-        ctx.font = '48px system-ui';
-        ctx.textAlign = 'center';
-        ctx.fillText(customization.logoText, canvas.width / 2, 55);
-        
-        // Draw title
-        ctx.fillStyle = customization.fgColor;
-        ctx.font = 'bold 18px system-ui';
-        const titleLines = customization.title.split(' ');
-        let titleY = 95;
-        if (customization.title.length > 30) {
-          const midPoint = Math.ceil(titleLines.length / 2);
-          const line1 = titleLines.slice(0, midPoint).join(' ');
-          const line2 = titleLines.slice(midPoint).join(' ');
-          ctx.fillText(line1, canvas.width / 2, titleY);
-          ctx.fillText(line2, canvas.width / 2, titleY + 22);
-          titleY += 22;
-        } else {
-          ctx.fillText(customization.title, canvas.width / 2, titleY);
-        }
-        
-        // Draw subtitle
-        ctx.font = '16px system-ui';
-        ctx.fillStyle = '#666';
-        ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 25);
-        
-        // Draw QR code centered
-        const qrX = (canvas.width - qrSize) / 2;
-        const qrY = titleY + 50;
-        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
-        
-        // Draw warning box
-        const warningY = qrY + qrSize + 20;
-        ctx.fillStyle = '#fef3c7';
-        ctx.fillRect(padding / 2, warningY, canvas.width - padding, 55);
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(padding / 2, warningY, canvas.width - padding, 55);
-        
-        ctx.fillStyle = '#92400e';
-        ctx.font = 'bold 12px system-ui';
-        ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 22);
-        ctx.fillStyle = '#b45309';
-        ctx.font = '12px system-ui';
-        ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 42);
-        
-        // Draw delivery icons section if exists
-        if (deliveryIcons.length > 0) {
-          const deliveryY = warningY + 75;
+        img.onload = async () => {
+          if (!ctx) return;
           
-          // Draw delivery section background
-          ctx.fillStyle = '#eff6ff';
-          ctx.fillRect(padding / 2, deliveryY, canvas.width - padding, 90);
-          ctx.strokeStyle = '#bfdbfe';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(padding / 2, deliveryY, canvas.width - padding, 90);
+          // Fill background with primary color
+          ctx.fillStyle = simpleCustomization.primaryColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          ctx.fillStyle = '#1e40af';
-          ctx.font = 'bold 14px system-ui';
-          ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+          // Draw header text
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 20px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText(simpleCustomization.headerText, canvas.width / 2, 45);
           
-          // Load and draw delivery icons
-          const iconPromises = deliveryIcons.map((icon, index) => {
-            return new Promise<void>((resolve) => {
-              const iconImg = new Image();
-              iconImg.crossOrigin = 'anonymous';
-              iconImg.onload = () => {
-                const iconWidth = 50;
-                const iconHeight = 40;
-                const totalWidth = deliveryIcons.length * (iconWidth + 20) - 20;
-                const startX = (canvas.width - totalWidth) / 2;
-                const iconX = startX + index * (iconWidth + 20);
-                
-                // Draw white background for icon
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
-                ctx.strokeStyle = '#e2e8f0';
-                ctx.strokeRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
-                
-                ctx.drawImage(iconImg, iconX, deliveryY + 45, iconWidth, iconHeight);
-                resolve();
-              };
-              iconImg.onerror = () => resolve();
-              iconImg.src = icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url;
-            });
+          // Draw QR code container background
+          const qrContainerSize = qrSize + 32;
+          const qrContainerX = (canvas.width - qrContainerSize) / 2;
+          const qrContainerY = 70;
+          ctx.fillStyle = '#f3f4f6';
+          ctx.beginPath();
+          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 16);
+          ctx.fill();
+          
+          // Draw QR code centered
+          const qrX = (canvas.width - qrSize) / 2;
+          const qrY = qrContainerY + 16;
+          ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+          
+          // Draw footer text
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 18px system-ui';
+          const footerY = qrContainerY + qrContainerSize + 40;
+          ctx.fillText(simpleCustomization.footerText, canvas.width / 2, footerY);
+          
+          // Draw brand background
+          const brandBgWidth = 150;
+          const brandBgHeight = 35;
+          const brandY = footerY + 20;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.roundRect((canvas.width - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8);
+          ctx.fill();
+          
+          // Draw brand text
+          ctx.fillStyle = simpleCustomization.primaryColor;
+          ctx.font = 'bold 18px system-ui';
+          ctx.fillText('DoorVii', canvas.width / 2, brandY + 24);
+          
+          // Draw website URL
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.font = '14px system-ui';
+          ctx.fillText(simpleCustomization.websiteUrl, canvas.width / 2, brandY + 60);
+          
+          // Download
+          const link = document.createElement('a');
+          link.download = `qrcode-simples-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          
+          toast({
+            title: "QR Code baixado!",
+            description: "A imagem foi salva no seu dispositivo.",
           });
+        };
+        
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+      } else {
+        // Classic model download
+        const padding = 60;
+        const qrSize = customization.size;
+        const deliveryHeight = deliveryIcons.length > 0 ? 120 : 0;
+        canvas.width = Math.max(qrSize + padding * 2, 400);
+        canvas.height = qrSize + 280 + deliveryHeight;
+        
+        img.onload = async () => {
+          if (!ctx) return;
           
-          await Promise.all(iconPromises);
-        }
+          // Fill background
+          ctx.fillStyle = customization.bgColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw logo
+          ctx.font = '48px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText(customization.logoText, canvas.width / 2, 55);
+          
+          // Draw title
+          ctx.fillStyle = customization.fgColor;
+          ctx.font = 'bold 18px system-ui';
+          const titleLines = customization.title.split(' ');
+          let titleY = 95;
+          if (customization.title.length > 30) {
+            const midPoint = Math.ceil(titleLines.length / 2);
+            const line1 = titleLines.slice(0, midPoint).join(' ');
+            const line2 = titleLines.slice(midPoint).join(' ');
+            ctx.fillText(line1, canvas.width / 2, titleY);
+            ctx.fillText(line2, canvas.width / 2, titleY + 22);
+            titleY += 22;
+          } else {
+            ctx.fillText(customization.title, canvas.width / 2, titleY);
+          }
+          
+          // Draw subtitle
+          ctx.font = '16px system-ui';
+          ctx.fillStyle = '#666';
+          ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 25);
+          
+          // Draw QR code centered
+          const qrX = (canvas.width - qrSize) / 2;
+          const qrY = titleY + 50;
+          ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+          
+          // Draw warning box
+          const warningY = qrY + qrSize + 20;
+          ctx.fillStyle = '#fef3c7';
+          ctx.fillRect(padding / 2, warningY, canvas.width - padding, 55);
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(padding / 2, warningY, canvas.width - padding, 55);
+          
+          ctx.fillStyle = '#92400e';
+          ctx.font = 'bold 12px system-ui';
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 22);
+          ctx.fillStyle = '#b45309';
+          ctx.font = '12px system-ui';
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 42);
+          
+          // Draw delivery icons section if exists
+          if (deliveryIcons.length > 0) {
+            const deliveryY = warningY + 75;
+            
+            // Draw delivery section background
+            ctx.fillStyle = '#eff6ff';
+            ctx.fillRect(padding / 2, deliveryY, canvas.width - padding, 90);
+            ctx.strokeStyle = '#bfdbfe';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(padding / 2, deliveryY, canvas.width - padding, 90);
+            
+            ctx.fillStyle = '#1e40af';
+            ctx.font = 'bold 14px system-ui';
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+            
+            // Load and draw delivery icons
+            const iconPromises = deliveryIcons.map((icon, index) => {
+              return new Promise<void>((resolve) => {
+                const iconImg = new Image();
+                iconImg.crossOrigin = 'anonymous';
+                iconImg.onload = () => {
+                  const iconWidth = 50;
+                  const iconHeight = 40;
+                  const totalWidth = deliveryIcons.length * (iconWidth + 20) - 20;
+                  const startX = (canvas.width - totalWidth) / 2;
+                  const iconX = startX + index * (iconWidth + 20);
+                  
+                  // Draw white background for icon
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                  ctx.strokeStyle = '#e2e8f0';
+                  ctx.strokeRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                  
+                  ctx.drawImage(iconImg, iconX, deliveryY + 45, iconWidth, iconHeight);
+                  resolve();
+                };
+                iconImg.onerror = () => resolve();
+                iconImg.src = icon.url.startsWith('/') ? window.location.origin + icon.url : icon.url;
+              });
+            });
+            
+            await Promise.all(iconPromises);
+          }
+          
+          // Draw permanent code text
+          const codeY = deliveryIcons.length > 0 ? warningY + 180 : warningY + 75;
+          ctx.fillStyle = '#888';
+          ctx.font = '12px system-ui';
+          ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
+          
+          // Download
+          const link = document.createElement('a');
+          link.download = `qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          
+          toast({
+            title: "QR Code baixado!",
+            description: "A imagem foi salva no seu dispositivo.",
+          });
+        };
         
-        // Draw permanent code text
-        const codeY = deliveryIcons.length > 0 ? warningY + 180 : warningY + 75;
-        ctx.fillStyle = '#888';
-        ctx.font = '12px system-ui';
-        ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
-        
-        // Download
-        const link = document.createElement('a');
-        link.download = `qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        toast({
-          title: "QR Code baixado!",
-          description: "A imagem foi salva no seu dispositivo.",
-        });
-      };
-      
-      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+      }
     } catch (e) {
       console.error('Erro ao baixar:', e);
       toast({
