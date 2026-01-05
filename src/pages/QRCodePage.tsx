@@ -1296,6 +1296,9 @@ const QRCodePage = () => {
                       O visitante só precisa apontar a câmera do celular para escanear - 
                       não é necessário instalar nenhum aplicativo.
                     </p>
+                    <p className="text-sm text-primary mt-2 font-medium">
+                      Se desejar a etiqueta pronta em acrílico ou adesivo, contrate-nos pelo WhatsApp.
+                    </p>
                   </div>
                 </div>
               </CardContent>
