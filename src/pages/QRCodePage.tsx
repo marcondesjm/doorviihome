@@ -17,7 +17,8 @@ import {
   Plus,
   X,
   Trash2,
-  Upload
+  Upload,
+  Layout
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,7 @@ import { useProperties } from "@/hooks/useProperties";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
 import { useDeliveryIcons } from "@/hooks/useDeliveryIcons";
 import { defaultDeliveryIcons, DeliveryIcon } from "@/components/StyledQRCode";
+import { StyledQRCodeSimple, QRSimpleCustomization, defaultSimpleCustomization } from "@/components/StyledQRCodeSimple";
 import { 
   Select,
   SelectContent,
@@ -38,6 +40,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+type QRCodeModelType = "classic" | "simple";
 
 interface QRCustomization {
   title: string;
@@ -79,6 +83,7 @@ const QRCodePage = () => {
   const { deliveryIcons, addIcon, removeIcon } = useDeliveryIcons();
   
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState<QRCodeModelType>("classic");
   
   const latestAccessCode = accessCodes?.[0];
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
@@ -103,6 +108,12 @@ const QRCodePage = () => {
   const [newIconUrl, setNewIconUrl] = useState("");
   const [showAddIcon, setShowAddIcon] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Simple model customization
+  const [simpleCustomization, setSimpleCustomization] = useState<QRSimpleCustomization>({
+    ...defaultSimpleCustomization,
+    websiteUrl: window.location.origin.replace('https://', '').replace('http://', ''),
+  });
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -586,64 +597,73 @@ const QRCodePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div 
-                  className="rounded-2xl p-6 text-center transition-all duration-300"
-                  style={{ backgroundColor: customization.bgColor }}
-                >
-                  <div className="text-4xl mb-2">{customization.logoText}</div>
-                  <p className="font-bold text-xl mb-1" style={{ color: customization.fgColor }}>
-                    {customization.title}
-                  </p>
-                  <p className="text-sm mb-4 opacity-70" style={{ color: customization.fgColor }}>
-                    {customization.subtitle}
-                  </p>
-                  
-                  <div className="inline-block p-4 bg-white rounded-2xl shadow-lg" ref={qrRef}>
-                    <QRCodeSVG
-                      value={visitorUrl}
-                      size={customization.size}
-                      bgColor={customization.bgColor}
-                      fgColor={customization.fgColor}
-                      level="H"
-                      includeMargin={false}
+                {selectedModel === "classic" ? (
+                  <div 
+                    className="rounded-2xl p-6 text-center transition-all duration-300"
+                    style={{ backgroundColor: customization.bgColor }}
+                  >
+                    <div className="text-4xl mb-2">{customization.logoText}</div>
+                    <p className="font-bold text-xl mb-1" style={{ color: customization.fgColor }}>
+                      {customization.title}
+                    </p>
+                    <p className="text-sm mb-4 opacity-70" style={{ color: customization.fgColor }}>
+                      {customization.subtitle}
+                    </p>
+                    
+                    <div className="inline-block p-4 bg-white rounded-2xl shadow-lg" ref={qrRef}>
+                      <QRCodeSVG
+                        value={visitorUrl}
+                        size={customization.size}
+                        bgColor={customization.bgColor}
+                        fgColor={customization.fgColor}
+                        level="H"
+                        includeMargin={false}
+                      />
+                    </div>
+                    
+                    <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                      <p className="text-xs text-amber-800 font-medium mb-2">
+                        ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
+                      </p>
+                      <div className="flex items-center justify-center gap-2 text-sm text-amber-700">
+                        <Camera className="w-4 h-4" />
+                        <span>Escaneie o QR Code Usando a Câmera ou um App</span>
+                      </div>
+                    </div>
+                    
+                    {/* Delivery Icons */}
+                    {deliveryIcons.length > 0 && (
+                      <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 shadow-lg">
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                          <Package className="w-5 h-5 text-blue-600" />
+                          <p className="text-base font-semibold text-blue-800">Entregas:</p>
+                        </div>
+                        <div className="flex items-center justify-center gap-8 flex-wrap">
+                          {deliveryIcons.map((icon) => (
+                            <div key={icon.id} className="bg-white rounded-xl p-3 shadow-md border border-slate-200 hover:shadow-lg transition-shadow">
+                              <img 
+                                src={icon.url} 
+                                alt={icon.name} 
+                                className="h-14 w-auto object-contain" 
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
+                      ✓ Código permanente
+                    </p>
+                  </div>
+                ) : (
+                  <div ref={qrRef}>
+                    <StyledQRCodeSimple 
+                      url={visitorUrl}
+                      customization={simpleCustomization}
                     />
                   </div>
-                  
-                  <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                    <p className="text-xs text-amber-800 font-medium mb-2">
-                      ⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-sm text-amber-700">
-                      <Camera className="w-4 h-4" />
-                      <span>Escaneie o QR Code Usando a Câmera ou um App</span>
-                    </div>
-                  </div>
-                  
-                  {/* Delivery Icons */}
-                  {deliveryIcons.length > 0 && (
-                    <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 shadow-lg">
-                      <div className="flex items-center justify-center gap-2 mb-4">
-                        <Package className="w-5 h-5 text-blue-600" />
-                        <p className="text-base font-semibold text-blue-800">Entregas:</p>
-                      </div>
-                      <div className="flex items-center justify-center gap-8 flex-wrap">
-                        {deliveryIcons.map((icon) => (
-                          <div key={icon.id} className="bg-white rounded-xl p-3 shadow-md border border-slate-200 hover:shadow-lg transition-shadow">
-                            <img 
-                              src={icon.url} 
-                              alt={icon.name} 
-                              className="h-14 w-auto object-contain" 
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
-                    ✓ Código permanente
-                  </p>
-                </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="grid grid-cols-2 gap-3 mt-6">
@@ -714,7 +734,53 @@ const QRCodePage = () => {
               </CardContent>
             </Card>
 
-            {/* Customization Tabs */}
+            {/* Model Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layout className="w-5 h-5" />
+                  Modelo do QR Code
+                </CardTitle>
+                <CardDescription>
+                  Escolha o estilo visual do seu QR Code
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setSelectedModel("classic")}
+                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                      selectedModel === "classic" 
+                        ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-2xl mb-2">🔔</div>
+                    <div className="font-semibold">Clássico</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Com avisos, ícones de entregas e personalizações avançadas
+                    </p>
+                  </button>
+                  <button
+                    onClick={() => setSelectedModel("simple")}
+                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                      selectedModel === "simple" 
+                        ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="text-2xl mb-2">📹</div>
+                    <div className="font-semibold">Simples</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Design minimalista com foco em chamada de vídeo
+                    </p>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Customization Tabs - Only for Classic */}
+            {selectedModel === "classic" ? (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -873,8 +939,128 @@ const QRCodePage = () => {
                 </Tabs>
               </CardContent>
             </Card>
+            ) : (
+            /* Simple Model Customization */
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="w-5 h-5" />
+                  Personalização
+                </CardTitle>
+                <CardDescription>
+                  Customize o visual do modelo simples
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="headerText">Texto superior</Label>
+                  <Input
+                    id="headerText"
+                    value={simpleCustomization.headerText}
+                    onChange={(e) => setSimpleCustomization({ ...simpleCustomization, headerText: e.target.value })}
+                    placeholder="ESCANEIE PARA ME LIGAR"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="footerText">Texto inferior</Label>
+                  <Input
+                    id="footerText"
+                    value={simpleCustomization.footerText}
+                    onChange={(e) => setSimpleCustomization({ ...simpleCustomization, footerText: e.target.value })}
+                    placeholder="CHAMADA DE VÍDEO GRATUITA"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="brandText">Nome da marca</Label>
+                  <Input
+                    id="brandText"
+                    value={simpleCustomization.brandText}
+                    onChange={(e) => setSimpleCustomization({ ...simpleCustomization, brandText: e.target.value })}
+                    placeholder="DoorVi"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="websiteUrl">URL do site</Label>
+                  <Input
+                    id="websiteUrl"
+                    value={simpleCustomization.websiteUrl}
+                    onChange={(e) => setSimpleCustomization({ ...simpleCustomization, websiteUrl: e.target.value })}
+                    placeholder="www.seusite.com.br"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Cor principal</Label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={simpleCustomization.primaryColor}
+                      onChange={(e) => setSimpleCustomization({ ...simpleCustomization, primaryColor: e.target.value })}
+                      className="w-10 h-10 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={simpleCustomization.primaryColor}
+                      onChange={(e) => setSimpleCustomization({ ...simpleCustomization, primaryColor: e.target.value })}
+                      className="flex-1 font-mono"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 mt-2">
+                    {[
+                      { name: "Azul", color: "#2563eb" },
+                      { name: "Verde", color: "#16a34a" },
+                      { name: "Roxo", color: "#7c3aed" },
+                      { name: "Vermelho", color: "#dc2626" },
+                    ].map((preset) => (
+                      <button
+                        key={preset.name}
+                        onClick={() => setSimpleCustomization({ ...simpleCustomization, primaryColor: preset.color })}
+                        className={`p-2 rounded-lg border-2 transition-all ${
+                          simpleCustomization.primaryColor === preset.color 
+                            ? 'border-primary ring-2 ring-primary/20' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        style={{ backgroundColor: preset.color }}
+                      >
+                        <span className="text-xs font-medium text-white drop-shadow">
+                          {preset.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Tamanho do QR Code</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { name: "Pequeno", value: 150 },
+                      { name: "Médio", value: 200 },
+                      { name: "Grande", value: 280 },
+                    ].map((preset) => (
+                      <button
+                        key={preset.name}
+                        onClick={() => setSimpleCustomization({ ...simpleCustomization, qrSize: preset.value })}
+                        className={`p-3 rounded-lg border-2 transition-all ${
+                          simpleCustomization.qrSize === preset.value 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="text-lg font-bold">{preset.value}px</div>
+                        <div className="text-xs text-muted-foreground">{preset.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            )}
 
-            {/* Delivery Icons Management */}
+            {/* Delivery Icons Management - Only for Classic */}
+            {selectedModel === "classic" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1004,6 +1190,7 @@ const QRCodePage = () => {
                 )}
               </CardContent>
             </Card>
+            )}
 
             {/* Tips Card */}
             <Card className="bg-primary/5 border-primary/20">
