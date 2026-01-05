@@ -390,7 +390,7 @@ const QRCodePage = () => {
         // Calculate rows for delivery icons (max 4 per row)
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-        const deliveryHeight = deliveryIcons.length > 0 ? 70 + (iconRows * 65) : 0;
+        const deliveryHeight = deliveryIcons.length > 0 ? 110 + (iconRows * 65) : 0;
         canvas.width = Math.max(qrSize + padding * 2, 450);
         canvas.height = qrSize + 340 + deliveryHeight;
         
@@ -465,7 +465,7 @@ const QRCodePage = () => {
             const deliveryY = warningY + 80;
             const iconsPerRow = 4;
             const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const sectionHeight = 50 + (iconRows * 60);
+            const sectionHeight = 90 + (iconRows * 60);
             
             // Draw delivery section background
             ctx.fillStyle = '#eff6ff';
