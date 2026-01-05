@@ -1,6 +1,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { forwardRef } from "react";
 import doorviiLogo from "@/assets/doorvii-logo.png";
+import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
 
 export interface QRSimpleCustomization {
   headerText: string;
@@ -74,9 +75,9 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
         {/* Brand Logo */}
         <div className="flex items-center justify-center mt-4 bg-white rounded-lg px-4 py-2 mx-auto">
           <img 
-            src={doorviiLogo} 
+            src={doorviiLogoFull} 
             alt="DoorVii" 
-            className="h-8 object-contain"
+            className="h-10 object-contain"
           />
         </div>
 
