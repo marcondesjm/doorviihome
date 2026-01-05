@@ -170,12 +170,6 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
           </div>
         )}
 
-        {/* Permanent Code Indicator */}
-        {showPermanentCode && (
-          <p className="text-xs" style={{ color: customization.fgColor, opacity: 0.8 }}>
-            ✓ Código permanente
-          </p>
-        )}
 
         {/* Security Notice */}
         <div className="mt-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
