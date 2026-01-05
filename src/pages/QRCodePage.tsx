@@ -387,14 +387,11 @@ const QRCodePage = () => {
         // Classic model download
         const padding = 40;
         const qrSize = customization.size;
-        // Calculate width based on number of delivery icons
-        const iconWidth = 55;
-        const iconGap = 12;
-        const minWidthForIcons = deliveryIcons.length > 0 
-          ? (deliveryIcons.length * (iconWidth + iconGap)) + padding * 2 + 40
-          : 0;
-        const deliveryHeight = deliveryIcons.length > 0 ? 140 : 0;
-        canvas.width = Math.max(qrSize + padding * 2, 450, minWidthForIcons);
+        // Calculate rows for delivery icons (max 4 per row)
+        const iconsPerRow = 4;
+        const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
+        const deliveryHeight = deliveryIcons.length > 0 ? 70 + (iconRows * 65) : 0;
+        canvas.width = Math.max(qrSize + padding * 2, 450);
         canvas.height = qrSize + 340 + deliveryHeight;
         
         img.onload = async () => {
@@ -466,50 +463,58 @@ const QRCodePage = () => {
           // Draw delivery icons section if exists
           if (deliveryIcons.length > 0) {
             const deliveryY = warningY + 80;
+            const iconsPerRow = 4;
+            const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
+            const sectionHeight = 50 + (iconRows * 60);
             
             // Draw delivery section background
             ctx.fillStyle = '#eff6ff';
             ctx.beginPath();
-            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, 100, 12);
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
             ctx.fill();
             ctx.strokeStyle = '#bfdbfe';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, 100, 12);
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
             ctx.stroke();
             
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
             ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
             
-            // Load and draw delivery icons
+            // Load and draw delivery icons in rows
             const iconWidth = 55;
             const iconHeight = 44;
-            const iconGap = 12;
-            const totalWidth = deliveryIcons.length * (iconWidth + iconGap) - iconGap;
-            const startX = (canvas.width - totalWidth) / 2;
+            const iconGap = 10;
             
             const iconPromises = deliveryIcons.map((icon, index) => {
               return new Promise<void>((resolve) => {
                 const iconImg = new Image();
                 iconImg.crossOrigin = 'anonymous';
                 iconImg.onload = () => {
-                  const iconX = startX + index * (iconWidth + iconGap);
+                  const row = Math.floor(index / iconsPerRow);
+                  const col = index % iconsPerRow;
+                  const iconsInThisRow = Math.min(iconsPerRow, deliveryIcons.length - row * iconsPerRow);
+                  const rowWidth = iconsInThisRow * (iconWidth + iconGap) - iconGap;
+                  const rowStartX = (canvas.width - rowWidth) / 2;
+                  
+                  const iconX = rowStartX + col * (iconWidth + iconGap);
+                  const iconY = deliveryY + 38 + (row * 58);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
                   ctx.beginPath();
-                  ctx.roundRect(iconX, deliveryY + 38, iconWidth, iconHeight + 8, 8);
+                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8, 8);
                   ctx.fill();
                   ctx.strokeStyle = '#e2e8f0';
                   ctx.beginPath();
-                  ctx.roundRect(iconX, deliveryY + 38, iconWidth, iconHeight + 8, 8);
+                  ctx.roundRect(iconX, iconY, iconWidth, iconHeight + 8, 8);
                   ctx.stroke();
                   
                   // Center the icon image inside the container
                   const imgWidth = iconWidth - 10;
                   const imgHeight = iconHeight - 4;
-                  ctx.drawImage(iconImg, iconX + 5, deliveryY + 42, imgWidth, imgHeight);
+                  ctx.drawImage(iconImg, iconX + 5, iconY + 4, imgWidth, imgHeight);
                   resolve();
                 };
                 iconImg.onerror = () => resolve();
@@ -521,7 +526,9 @@ const QRCodePage = () => {
           }
           
           // Draw permanent code text
-          const codeY = deliveryIcons.length > 0 ? warningY + 200 : warningY + 85;
+          const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / 4) : 0;
+          const sectionHeight = deliveryIcons.length > 0 ? 50 + (iconRows * 60) : 0;
+          const codeY = deliveryIcons.length > 0 ? warningY + 100 + sectionHeight : warningY + 85;
           ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
           ctx.font = '12px system-ui';
           ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
