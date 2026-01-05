@@ -435,18 +435,8 @@ const VisitorCall = () => {
     };
   }, []);
 
-  // Auto-ring doorbell when visitor connects (scans QR code)
-  useEffect(() => {
-    if (roomName && callStatus === 'waiting' && !hasAutoRung) {
-      console.log('Auto-ringing doorbell on visitor connect');
-      setHasAutoRung(true);
-      // Small delay to ensure everything is loaded
-      const timer = setTimeout(() => {
-        handleRingDoorbell();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [roomName, callStatus, hasAutoRung]);
+  // Auto-ring is disabled - visitor must manually press doorbell button
+  // This ensures the visitor always sees the doorbell button first
 
   const handleTryAgain = () => {
     setShowNotAnsweredDialog(false);
