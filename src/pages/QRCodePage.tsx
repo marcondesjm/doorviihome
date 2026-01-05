@@ -387,23 +387,37 @@ const QRCodePage = () => {
         // Classic model download
         const padding = 60;
         const qrSize = customization.size;
-        const deliveryHeight = deliveryIcons.length > 0 ? 120 : 0;
-        canvas.width = Math.max(qrSize + padding * 2, 400);
-        canvas.height = qrSize + 280 + deliveryHeight;
+        const deliveryHeight = deliveryIcons.length > 0 ? 140 : 0;
+        canvas.width = Math.max(qrSize + padding * 2, 420);
+        canvas.height = qrSize + 320 + deliveryHeight;
+        
+        // Create a new image for QR with white background
+        const qrCanvas = document.createElement('canvas');
+        const qrCtx = qrCanvas.getContext('2d');
+        qrCanvas.width = qrSize + 32;
+        qrCanvas.height = qrSize + 32;
+        
+        if (qrCtx) {
+          // Draw white background for QR
+          qrCtx.fillStyle = '#ffffff';
+          qrCtx.beginPath();
+          qrCtx.roundRect(0, 0, qrCanvas.width, qrCanvas.height, 16);
+          qrCtx.fill();
+        }
         
         img.onload = async () => {
           if (!ctx) return;
           
-          // Fill background
+          // Fill background with blue
           ctx.fillStyle = customization.bgColor;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Draw logo
+          // Draw logo emoji
           ctx.font = '48px system-ui';
           ctx.textAlign = 'center';
           ctx.fillText(customization.logoText, canvas.width / 2, 55);
           
-          // Draw title
+          // Draw title in white
           ctx.fillStyle = customization.fgColor;
           ctx.font = 'bold 18px system-ui';
           const titleLines = customization.title.split(' ');
@@ -419,41 +433,58 @@ const QRCodePage = () => {
             ctx.fillText(customization.title, canvas.width / 2, titleY);
           }
           
-          // Draw subtitle
+          // Draw subtitle in white with opacity
           ctx.font = '16px system-ui';
-          ctx.fillStyle = '#666';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
           ctx.fillText(customization.subtitle, canvas.width / 2, titleY + 25);
           
-          // Draw QR code centered
+          // Draw white rounded container for QR code
+          const qrContainerSize = qrSize + 32;
+          const qrContainerX = (canvas.width - qrContainerSize) / 2;
+          const qrContainerY = titleY + 50;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 16);
+          ctx.fill();
+          
+          // Draw QR code centered in white container
           const qrX = (canvas.width - qrSize) / 2;
-          const qrY = titleY + 50;
+          const qrY = qrContainerY + 16;
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
           // Draw warning box
-          const warningY = qrY + qrSize + 20;
+          const warningY = qrContainerY + qrContainerSize + 20;
           ctx.fillStyle = '#fef3c7';
-          ctx.fillRect(padding / 2, warningY, canvas.width - padding, 55);
+          ctx.beginPath();
+          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 60, 12);
+          ctx.fill();
           ctx.strokeStyle = '#fbbf24';
           ctx.lineWidth = 2;
-          ctx.strokeRect(padding / 2, warningY, canvas.width - padding, 55);
+          ctx.beginPath();
+          ctx.roundRect(padding / 2, warningY, canvas.width - padding, 60, 12);
+          ctx.stroke();
           
           ctx.fillStyle = '#92400e';
           ctx.font = 'bold 12px system-ui';
-          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 22);
+          ctx.fillText('⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.', canvas.width / 2, warningY + 25);
           ctx.fillStyle = '#b45309';
           ctx.font = '12px system-ui';
-          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 42);
+          ctx.fillText('📱 Escaneie o QR Code Usando a Câmera ou um App', canvas.width / 2, warningY + 45);
           
           // Draw delivery icons section if exists
           if (deliveryIcons.length > 0) {
-            const deliveryY = warningY + 75;
+            const deliveryY = warningY + 80;
             
             // Draw delivery section background
             ctx.fillStyle = '#eff6ff';
-            ctx.fillRect(padding / 2, deliveryY, canvas.width - padding, 90);
+            ctx.beginPath();
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, 100, 12);
+            ctx.fill();
             ctx.strokeStyle = '#bfdbfe';
             ctx.lineWidth = 2;
-            ctx.strokeRect(padding / 2, deliveryY, canvas.width - padding, 90);
+            ctx.beginPath();
+            ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, 100, 12);
+            ctx.stroke();
             
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
@@ -473,9 +504,13 @@ const QRCodePage = () => {
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
-                  ctx.fillRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                  ctx.beginPath();
+                  ctx.roundRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10, 8);
+                  ctx.fill();
                   ctx.strokeStyle = '#e2e8f0';
-                  ctx.strokeRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10);
+                  ctx.beginPath();
+                  ctx.roundRect(iconX - 5, deliveryY + 40, iconWidth + 10, iconHeight + 10, 8);
+                  ctx.stroke();
                   
                   ctx.drawImage(iconImg, iconX, deliveryY + 45, iconWidth, iconHeight);
                   resolve();
@@ -489,8 +524,8 @@ const QRCodePage = () => {
           }
           
           // Draw permanent code text
-          const codeY = deliveryIcons.length > 0 ? warningY + 180 : warningY + 75;
-          ctx.fillStyle = '#888';
+          const codeY = deliveryIcons.length > 0 ? warningY + 200 : warningY + 85;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
           ctx.font = '12px system-ui';
           ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
           
