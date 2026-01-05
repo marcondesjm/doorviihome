@@ -111,7 +111,7 @@ export const IncomingCall = ({
         exit={{ scale: 0.9, y: 20 }}
         className={`relative w-full max-w-xs rounded-3xl p-6 text-center ${
           isActive 
-            ? "glass" 
+            ? "bg-gradient-to-b from-emerald-500 to-green-600" 
             : "bg-gradient-to-b from-amber-500 to-orange-500"
         }`}
         style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
@@ -127,30 +127,11 @@ export const IncomingCall = ({
           </motion.div>
         )}
 
-        {/* Avatar - Only when active */}
+        {/* Phone Icon - When active */}
         {isActive && (
-          <motion.div
-            className="relative w-20 h-20 mx-auto mb-4"
-          >
-            {isVideoOff ? (
-              <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center border-4 border-muted">
-                <VideoOff className="w-8 h-8 text-muted-foreground" />
-              </div>
-            ) : imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={callerName}
-                className="w-20 h-20 rounded-full object-cover border-4 border-success/50"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center border-4 border-success/50">
-                <Bell className="w-8 h-8 text-primary" />
-              </div>
-            )}
-            
-            {/* Online indicator */}
-            <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-card bg-success" />
-          </motion.div>
+          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-white/20 border-2 border-white/40">
+            <Phone className="w-8 h-8 text-white" />
+          </div>
         )}
 
         {/* Content */}
@@ -163,13 +144,8 @@ export const IncomingCall = ({
               exit={{ opacity: 0, y: 10 }}
               className="mb-6"
             >
-              <h2 className="text-lg font-bold text-success mb-1">Chamada em andamento</h2>
-              <motion.p 
-                className="text-2xl font-mono font-bold text-foreground"
-                key={callDuration}
-              >
-                {formatDuration(callDuration)}
-              </motion.p>
+              <h2 className="text-xl font-bold text-white mb-1">Chamada atendida!</h2>
+              <p className="text-sm text-white/80">{propertyName}</p>
             </motion.div>
           ) : (
             <motion.div
@@ -209,38 +185,36 @@ export const IncomingCall = ({
         {/* Action Buttons */}
         <div className="flex flex-col items-center gap-3">
           {isActive ? (
-            <div className="flex justify-center gap-4">
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="glass"
-                  size="icon"
-                  onClick={() => setIsMuted(!isMuted)}
-                  className={`w-12 h-12 rounded-full ${isMuted ? "bg-destructive/20 text-destructive border-destructive/30" : ""}`}
+            <>
+              {/* Botão Enviar áudio */}
+              <motion.div 
+                whileTap={{ scale: 0.95 }}
+                className="w-full"
+              >
+                <Button 
+                  variant="outline" 
+                  onClick={handleWhatsApp}
+                  className="w-full h-12 rounded-full bg-white text-emerald-600 border-white hover:bg-white/90 gap-2 text-base font-semibold"
                 >
-                  {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  <Mic className="w-5 h-5" />
+                  Enviar áudio
                 </Button>
               </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="endCall"
-                  size="icon"
+
+              {/* Botão Encerrar */}
+              <motion.div 
+                whileTap={{ scale: 0.95 }}
+                className="w-full"
+              >
+                <Button 
+                  variant="ghost"
                   onClick={onDecline}
-                  className="w-14 h-14 rounded-full"
+                  className="w-full h-10 rounded-full text-white hover:bg-white/20"
                 >
-                  <PhoneOff className="w-6 h-6" />
+                  Encerrar
                 </Button>
               </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="glass"
-                  size="icon"
-                  onClick={() => setIsSpeakerOn(!isSpeakerOn)}
-                  className={`w-12 h-12 rounded-full ${!isSpeakerOn ? "bg-warning/20 text-warning border-warning/30" : ""}`}
-                >
-                  {isSpeakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-                </Button>
-              </motion.div>
-            </div>
+            </>
           ) : (
             <>
               {/* Botão principal Atender */}
