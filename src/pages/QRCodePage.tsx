@@ -578,14 +578,6 @@ const QRCodePage = () => {
             await Promise.all(iconPromises);
           }
           
-          // Draw permanent code text
-          const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / 4) : 0;
-          const sectionHeight = deliveryIcons.length > 0 ? 50 + (iconRows * 60) : 0;
-          const codeY = deliveryIcons.length > 0 ? warningY + 100 + sectionHeight : warningY + 85;
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.font = '12px system-ui';
-          ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
-          
           // Download
           const link = document.createElement('a');
           link.download = `qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
@@ -855,11 +847,6 @@ const QRCodePage = () => {
               max-width: 45px;
               object-fit: contain;
             }
-            .permanent-code {
-              color: ${customization.fgColor};
-              opacity: 0.8;
-              font-size: 12px;
-            }
             @media print {
               body { padding: 0; }
               .container { max-width: 100%; }
@@ -898,7 +885,6 @@ const QRCodePage = () => {
               </div>
             </div>
             ` : ''}
-            <p class="permanent-code">✓ Código permanente</p>
           </div>
           <script>
             window.onload = () => {
