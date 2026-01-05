@@ -21,8 +21,8 @@ export interface DeliveryIcon {
 export const defaultCustomization: QRCustomization = {
   title: "ESCANEIE O QR CODE",
   subtitle: "PARA ENTRAR EM CONTATO",
-  fgColor: "#1a1a2e",
-  bgColor: "#f8fafc",
+  fgColor: "#ffffff",
+  bgColor: "#2563eb",
   logoText: "🔔",
   size: 200,
   iconSize: 'medium',
@@ -82,7 +82,10 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
         >
           {customization.title}
         </h2>
-        <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground mb-4`}>
+        <p 
+          className={`${compact ? 'text-xs' : 'text-sm'} mb-4`}
+          style={{ color: customization.fgColor, opacity: 0.9 }}
+        >
           {customization.subtitle}
         </p>
 
@@ -162,7 +165,7 @@ export const StyledQRCode = forwardRef<HTMLDivElement, StyledQRCodeProps>(({
 
         {/* Permanent Code Indicator */}
         {showPermanentCode && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs" style={{ color: customization.fgColor, opacity: 0.8 }}>
             ✓ Código permanente
           </p>
         )}
