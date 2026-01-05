@@ -270,7 +270,7 @@ export const IncomingCall = ({
                 </Button>
               </motion.div>
 
-              {/* Botão WhatsApp */}
+              {/* Botão Enviar áudio (WhatsApp) */}
               <motion.div 
                 whileTap={{ scale: 0.95 }}
                 className="w-full"
@@ -278,10 +278,10 @@ export const IncomingCall = ({
                 <Button 
                   variant="ghost"
                   onClick={handleWhatsApp}
-                  className="w-full h-10 rounded-full text-[#25D366] hover:bg-[#25D366]/10 gap-2"
+                  className="w-full h-10 rounded-full hover:bg-card/20 gap-2"
                 >
-                  <WhatsAppIcon className="w-5 h-5" />
-                  Enviar mensagem
+                  <Mic className="w-5 h-5" />
+                  Enviar áudio
                 </Button>
               </motion.div>
 
@@ -293,7 +293,7 @@ export const IncomingCall = ({
                 <Button 
                   variant="ghost"
                   onClick={onDecline}
-                  className="w-full h-10 rounded-full text-destructive hover:bg-destructive/10 gap-2"
+                  className="w-full h-10 rounded-full hover:bg-card/20 gap-2"
                 >
                   <PhoneOff className="w-5 h-5" />
                   Não atender
