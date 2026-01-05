@@ -199,7 +199,7 @@ export const PropertyCard = ({
 
           {/* Live View Button */}
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
-            <Button variant="default" size="sm" onClick={onViewLive} className="gap-2">
+            <Button variant="default" size="sm" onClick={() => navigate(`/qrcode/${id}`)} className="gap-2">
               <Bell className="w-4 h-4" />
               Conectar na campainha
             </Button>
