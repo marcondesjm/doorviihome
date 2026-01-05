@@ -81,7 +81,7 @@ const QRCodePage = () => {
   const { propertyId: urlPropertyId } = useParams<{ propertyId: string }>();
   
   const { data: properties, isLoading: propertiesLoading } = useProperties();
-  const { data: accessCodes } = useAccessCodes();
+  const { data: accessCodes, isLoading: accessCodesLoading } = useAccessCodes();
   const generateCode = useGenerateAccessCode();
   const { deliveryIcons, addIcon, removeIcon } = useDeliveryIcons();
   
@@ -964,10 +964,12 @@ const QRCodePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {generateCode.isPending ? (
+                {(generateCode.isPending || accessCodesLoading || !latestAccessCode) ? (
                   <div className="flex flex-col items-center justify-center py-16">
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4" />
-                    <p className="text-muted-foreground">Gerando QR Code...</p>
+                    <p className="text-muted-foreground">
+                      {accessCodesLoading ? "Carregando..." : generateCode.isPending ? "Gerando QR Code..." : "Aguarde..."}
+                    </p>
                   </div>
                 ) : selectedModel === "classic" ? (
                   <div 
