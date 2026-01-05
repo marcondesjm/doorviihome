@@ -90,10 +90,9 @@ const QRCodePage = () => {
   
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
   
-  // Find access code for the selected property
-  const latestAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId) 
-    || accessCodes?.find(code => code.property_id === selectedProperty?.id)
-    || accessCodes?.[0];
+  // Find access code for the selected property - only use code that belongs to the selected property
+  const propertyAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId);
+  const hasCodeForProperty = !!propertyAccessCode;
   
   // Set property from URL parameter or default to first property
   useEffect(() => {
@@ -225,8 +224,8 @@ const QRCodePage = () => {
   }, [selectedProperty]);
 
   // Generate the visitor URL
-  const visitorUrl = latestAccessCode 
-    ? `${window.location.origin}/call/${encodeURIComponent(latestAccessCode.code)}?property=${encodeURIComponent(selectedProperty?.name || 'Propriedade')}`
+  const visitorUrl = propertyAccessCode 
+    ? `${window.location.origin}/call/${encodeURIComponent(propertyAccessCode.code)}?property=${encodeURIComponent(selectedProperty?.name || 'Propriedade')}`
     : `${window.location.origin}/call/demo?property=Demo`;
 
   const handleGenerateCode = async () => {
@@ -964,7 +963,7 @@ const QRCodePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {(generateCode.isPending || accessCodesLoading || !latestAccessCode) ? (
+                {(generateCode.isPending || accessCodesLoading || !propertyAccessCode) ? (
                   <div className="flex flex-col items-center justify-center py-16">
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4" />
                     <p className="text-muted-foreground">
@@ -1107,30 +1106,29 @@ const QRCodePage = () => {
                 </div>
 
 
-                <Button 
-                  onClick={handleGenerateCode} 
-                  disabled={generateCode.isPending}
-                  className="w-full"
-                >
-                  <RefreshCw className={`w-4 h-4 ${generateCode.isPending ? 'animate-spin' : ''}`} />
-                  {generateCode.isPending ? 'Gerando...' : 'Gerar Novo Código'}
-                </Button>
+                {!hasCodeForProperty && (
+                  <Button 
+                    onClick={handleGenerateCode} 
+                    disabled={generateCode.isPending}
+                    className="w-full"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${generateCode.isPending ? 'animate-spin' : ''}`} />
+                    {generateCode.isPending ? 'Gerando...' : 'Gerar Código Permanente'}
+                  </Button>
+                )}
 
-                {latestAccessCode && (
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Código atual</p>
-                    <p className="font-mono font-bold text-lg">{latestAccessCode.code}</p>
-                    {latestAccessCode.property_id !== selectedPropertyId && latestAccessCode.property_id !== selectedProperty?.id && (
-                      <p className="text-xs text-amber-500 mt-2">
-                        ⚠️ Gere um novo código para esta propriedade
-                      </p>
-                    )}
+                {propertyAccessCode && (
+                  <div className="bg-green-500/10 rounded-lg p-3 text-center border border-green-500/30">
+                    <p className="text-xs text-green-600 dark:text-green-400 mb-1 flex items-center justify-center gap-1">
+                      <Check className="w-3 h-3" /> Código permanente ativo
+                    </p>
+                    <p className="font-mono font-bold text-lg">{propertyAccessCode.code}</p>
                   </div>
                 )}
-                {!latestAccessCode && (
+                {!propertyAccessCode && !generateCode.isPending && (
                   <div className="bg-amber-500/10 rounded-lg p-3 text-center border border-amber-500/30">
                     <p className="text-sm text-amber-500">
-                      ⚠️ Gere um código para ativar o QR Code
+                      ⚠️ Gere um código permanente para esta propriedade
                     </p>
                   </div>
                 )}
