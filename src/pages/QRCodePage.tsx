@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import doorviiLogo from "@/assets/doorvii-logo.png";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { 
@@ -292,41 +293,92 @@ const QRCodePage = () => {
           const qrY = qrContainerY + 16;
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
-          // Draw footer text
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 18px system-ui';
-          const footerY = qrContainerY + qrContainerSize + 40;
-          ctx.fillText(simpleCustomization.footerText, canvas.width / 2, footerY);
+          // Draw logo in center of QR code
+          const logoImg = new Image();
+          logoImg.crossOrigin = 'anonymous';
           
-          // Draw brand background
-          const brandBgWidth = 150;
-          const brandBgHeight = 35;
-          const brandY = footerY + 20;
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.roundRect((canvas.width - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8);
-          ctx.fill();
+          const finishDownload = () => {
+            // Draw footer text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px system-ui';
+            const footerY = qrContainerY + qrContainerSize + 40;
+            ctx.fillText(simpleCustomization.footerText, canvas.width / 2, footerY);
+            
+            // Draw brand background
+            const brandBgWidth = 180;
+            const brandBgHeight = 40;
+            const brandY = footerY + 20;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect((canvas.width - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8);
+            ctx.fill();
+            
+            // Draw logo in brand area
+            const brandLogoImg = new Image();
+            brandLogoImg.crossOrigin = 'anonymous';
+            brandLogoImg.onload = () => {
+              const logoHeight = 30;
+              const logoWidth = (brandLogoImg.width / brandLogoImg.height) * logoHeight;
+              ctx.drawImage(brandLogoImg, (canvas.width - logoWidth) / 2, brandY + 5, logoWidth, logoHeight);
+              
+              // Draw website URL
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.font = '14px system-ui';
+              ctx.fillText(simpleCustomization.websiteUrl, canvas.width / 2, brandY + 60);
+              
+              // Download
+              const link = document.createElement('a');
+              link.download = `qrcode-simples-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              
+              toast({
+                title: "QR Code baixado!",
+                description: "A imagem foi salva no seu dispositivo.",
+              });
+            };
+            brandLogoImg.onerror = () => {
+              // Fallback to text if logo fails
+              ctx.fillStyle = simpleCustomization.primaryColor;
+              ctx.font = 'bold 18px system-ui';
+              ctx.fillText('DoorVii', canvas.width / 2, brandY + 28);
+              
+              // Draw website URL
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.font = '14px system-ui';
+              ctx.fillText(simpleCustomization.websiteUrl, canvas.width / 2, brandY + 60);
+              
+              // Download
+              const link = document.createElement('a');
+              link.download = `qrcode-simples-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              
+              toast({
+                title: "QR Code baixado!",
+                description: "A imagem foi salva no seu dispositivo.",
+              });
+            };
+            // Use the imported logo path
+            brandLogoImg.src = doorviiLogo;
+          };
           
-          // Draw brand text
-          ctx.fillStyle = simpleCustomization.primaryColor;
-          ctx.font = 'bold 18px system-ui';
-          ctx.fillText('DoorVii', canvas.width / 2, brandY + 24);
-          
-          // Draw website URL
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.font = '14px system-ui';
-          ctx.fillText(simpleCustomization.websiteUrl, canvas.width / 2, brandY + 60);
-          
-          // Download
-          const link = document.createElement('a');
-          link.download = `qrcode-simples-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          
-          toast({
-            title: "QR Code baixado!",
-            description: "A imagem foi salva no seu dispositivo.",
-          });
+          logoImg.onload = () => {
+            // Draw white background for center logo
+            const centerLogoSize = 40;
+            const centerX = canvas.width / 2 - centerLogoSize / 2;
+            const centerY = qrY + qrSize / 2 - centerLogoSize / 2;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 5, centerY - 5, centerLogoSize + 10, centerLogoSize + 10, 8);
+            ctx.fill();
+            ctx.drawImage(logoImg, centerX, centerY, centerLogoSize, centerLogoSize);
+            finishDownload();
+          };
+          logoImg.onerror = () => {
+            finishDownload();
+          };
+          logoImg.src = doorviiLogo;
         };
         
         img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
