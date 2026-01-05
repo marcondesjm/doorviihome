@@ -964,7 +964,12 @@ const QRCodePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {selectedModel === "classic" ? (
+                {generateCode.isPending ? (
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4" />
+                    <p className="text-muted-foreground">Gerando QR Code...</p>
+                  </div>
+                ) : selectedModel === "classic" ? (
                   <div 
                     className="rounded-2xl p-6 text-center transition-all duration-300"
                     style={{ backgroundColor: customization.bgColor }}
@@ -982,7 +987,7 @@ const QRCodePage = () => {
                         value={visitorUrl}
                         size={customization.size}
                         bgColor="#ffffff"
-                        fgColor="#1a1a2e"
+                        fgColor="#000000"
                         level="H"
                         includeMargin={false}
                       />
