@@ -102,6 +102,7 @@ export const IncomingCall = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
       onClick={() => isActive && setShowControls(true)}
     >
@@ -109,47 +110,96 @@ export const IncomingCall = ({
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        className={`relative w-full max-w-xs rounded-3xl p-6 text-center ${
-          isActive 
-            ? "bg-gradient-to-b from-emerald-500 to-green-600" 
-            : "bg-gradient-to-b from-amber-500 to-orange-500"
-        }`}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="relative w-full max-w-xs rounded-3xl p-6 text-center overflow-hidden"
         style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
       >
-        {/* Bell Icon - Only when ringing */}
-        {!isActive && (
-          <motion.div
-            animate={{ rotate: [-10, 10, -10] }}
-            transition={{ repeat: Infinity, duration: 0.5 }}
-            className="w-16 h-16 mx-auto mb-4 flex items-center justify-center"
-          >
-            <Bell className="w-10 h-10 text-white" />
-          </motion.div>
-        )}
+        {/* Animated Background */}
+        <motion.div
+          className="absolute inset-0 -z-10"
+          initial={false}
+          animate={{
+            background: isActive 
+              ? "linear-gradient(to bottom, rgb(16, 185, 129), rgb(22, 163, 74))" 
+              : "linear-gradient(to bottom, rgb(245, 158, 11), rgb(249, 115, 22))"
+          }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        />
 
-        {/* Phone Icon - When active */}
-        {isActive && (
-          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-white/20 border-2 border-white/40">
-            <Phone className="w-8 h-8 text-white" />
-          </div>
-        )}
+        {/* Icon Container with smooth transition */}
+        <div className="w-16 h-16 mx-auto mb-4 relative">
+          <AnimatePresence mode="wait">
+            {!isActive ? (
+              <motion.div
+                key="bell"
+                initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1, 
+                  rotate: [-10, 10, -10] 
+                }}
+                exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
+                transition={{ 
+                  opacity: { duration: 0.2 },
+                  scale: { duration: 0.3, ease: "backOut" },
+                  rotate: { repeat: Infinity, duration: 0.5 }
+                }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                <Bell className="w-10 h-10 text-white" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="phone"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ 
+                  duration: 0.4, 
+                  ease: "backOut",
+                  delay: 0.1
+                }}
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-white/20 border-2 border-white/40"
+              >
+                <Phone className="w-8 h-8 text-white" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Content */}
         <AnimatePresence mode="wait">
           {isActive ? (
             <motion.div
               key="active"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               className="mb-6"
             >
-              <h2 className="text-xl font-bold text-white mb-1">Chamada atendida!</h2>
-              <p className="text-sm text-white/80 mb-1">{propertyName}</p>
+              <motion.h2 
+                className="text-xl font-bold text-white mb-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                Chamada atendida!
+              </motion.h2>
+              <motion.p 
+                className="text-sm text-white/80 mb-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {propertyName}
+              </motion.p>
               {callDuration > 0 && (
                 <motion.p 
                   className="text-lg font-mono font-bold text-white/90"
-                  key={callDuration}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
                 >
                   {formatDuration(callDuration)}
                 </motion.p>
@@ -158,9 +208,10 @@ export const IncomingCall = ({
           ) : (
             <motion.div
               key="ringing"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               className="mb-6"
             >
               {visitorTextMessage ? (
