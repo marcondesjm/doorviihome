@@ -55,8 +55,8 @@ interface QRCustomization {
 }
 
 const colorPresets = [
-  { name: "Padrão", fg: "#1a1a2e", bg: "#f8fafc" },
-  { name: "Azul", fg: "#1e40af", bg: "#dbeafe" },
+  { name: "Azul", fg: "#ffffff", bg: "#2563eb" },
+  { name: "Azul Claro", fg: "#1e40af", bg: "#dbeafe" },
   { name: "Verde", fg: "#166534", bg: "#dcfce7" },
   { name: "Roxo", fg: "#6b21a8", bg: "#f3e8ff" },
   { name: "Laranja", fg: "#c2410c", bg: "#ffedd5" },
@@ -104,8 +104,8 @@ const QRCodePage = () => {
   const [customization, setCustomization] = useState<QRCustomization>({
     title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
     subtitle: selectedProperty?.name || "Minha Propriedade",
-    fgColor: "#1a1a2e",
-    bgColor: "#f8fafc",
+    fgColor: "#ffffff",
+    bgColor: "#2563eb",
     logoText: "🔔",
     size: 200,
   });
@@ -861,8 +861,8 @@ const QRCodePage = () => {
                       <QRCodeSVG
                         value={visitorUrl}
                         size={customization.size}
-                        bgColor={customization.bgColor}
-                        fgColor={customization.fgColor}
+                        bgColor="#ffffff"
+                        fgColor="#1a1a2e"
                         level="H"
                         includeMargin={false}
                       />
