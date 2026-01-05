@@ -421,12 +421,6 @@ export const VideoCallQRCode = ({
           ctx.font = `bold ${Math.round(18 * scale)}px system-ui`;
           ctx.fillText('📹 SORRIA, VOCÊ ESTÁ SENDO FILMADO', canvas.width / 2, securityY + Math.round(30 * scale));
           
-          // Permanent code text
-          const codeY = canvas.height - Math.round(20 * scale);
-          ctx.fillStyle = '#888';
-          ctx.font = `${Math.round(18 * scale)}px system-ui`;
-          ctx.fillText('✓ Código permanente', canvas.width / 2, codeY);
-          
           resolve(canvas);
         };
         
