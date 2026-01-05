@@ -441,7 +441,21 @@ const QRCodePage = () => {
           const qrY = qrContainerY + 16;
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
-          // Draw warning box
+          // Draw camera logo in center of QR code
+          const cameraImg = new Image();
+          cameraImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve) => {
+            cameraImg.onload = () => {
+              const cameraSize = 64;
+              const cameraX = (canvas.width - cameraSize) / 2;
+              const cameraY = qrY + (qrSize - cameraSize) / 2;
+              ctx.drawImage(cameraImg, cameraX, cameraY, cameraSize, cameraSize);
+              resolve();
+            };
+            cameraImg.onerror = () => resolve();
+            cameraImg.src = window.location.origin + '/doorvii-camera.png';
+          });
+          
           const warningY = qrContainerY + qrContainerSize + 20;
           ctx.fillStyle = '#fef3c7';
           ctx.beginPath();
@@ -753,11 +767,22 @@ const QRCodePage = () => {
               display: inline-block;
               margin-bottom: 20px;
               box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+              position: relative;
             }
             .qr-wrapper svg {
               width: ${customization.size}px;
               height: ${customization.size}px;
               display: block;
+            }
+            .center-camera {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 64px;
+              height: 64px;
+              object-fit: contain;
+              border-radius: 8px;
             }
             .instruction { 
               font-size: 12px; 
@@ -828,6 +853,7 @@ const QRCodePage = () => {
             <p class="subtitle">${customization.subtitle}</p>
             <div class="qr-wrapper">
               ${svgData}
+              <img src="${window.location.origin}/doorvii-camera.png" alt="DoorVii Camera" class="center-camera" />
             </div>
             <div class="instruction">
               <p class="warning">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
@@ -936,7 +962,7 @@ const QRCodePage = () => {
                       {customization.subtitle}
                     </p>
                     
-                    <div className="inline-block p-4 bg-white rounded-2xl shadow-lg" ref={qrRef}>
+                    <div className="inline-block p-4 bg-white rounded-2xl shadow-lg relative" ref={qrRef}>
                       <QRCodeSVG
                         value={visitorUrl}
                         size={customization.size}
@@ -945,6 +971,13 @@ const QRCodePage = () => {
                         level="H"
                         includeMargin={false}
                       />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img 
+                          src="/doorvii-camera.png" 
+                          alt="DoorVii Camera" 
+                          className="w-16 h-16 object-contain rounded-lg"
+                        />
+                      </div>
                     </div>
                     
                     <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
