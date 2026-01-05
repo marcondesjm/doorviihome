@@ -20,7 +20,9 @@ import {
   X,
   Trash2,
   Upload,
-  Layout
+  Layout,
+  ChevronUp,
+  ChevronDown
 } from "lucide-react";
 import { IncomingCall } from "@/components/IncomingCall";
 import { useDoorbellListener } from "@/hooks/useDoorbellListener";
@@ -85,7 +87,7 @@ const QRCodePage = () => {
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: accessCodes, isLoading: accessCodesLoading } = useAccessCodes();
   const generateCode = useGenerateAccessCode();
-  const { deliveryIcons, addIcon, removeIcon } = useDeliveryIcons();
+  const { deliveryIcons, addIcon, removeIcon, hideDefaultIcon, hiddenDefaults, restoreAllDefaults, moveIconUp, moveIconDown } = useDeliveryIcons();
   const { doorbellState, dismissDoorbell } = useDoorbellListener();
   
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
@@ -191,13 +193,14 @@ const QRCodePage = () => {
   };
 
   const handleRemoveDeliveryIcon = async (id: string) => {
-    // Check if it's a default icon (cannot be removed)
     const isDefaultIcon = defaultDeliveryIcons.some(icon => icon.id === id);
+    
     if (isDefaultIcon) {
+      // Hide the default icon instead of showing error
+      hideDefaultIcon(id);
       toast({
-        title: "Não é possível remover",
-        description: "Este é um ícone padrão do sistema",
-        variant: "destructive",
+        title: "Ícone ocultado",
+        description: "O ícone padrão foi ocultado. Use 'Restaurar padrões' para trazer de volta.",
       });
       return;
     }
@@ -1465,30 +1468,63 @@ const QRCodePage = () => {
               <CardContent className="space-y-4">
                 {/* Current Icons */}
                 <div className="space-y-2">
-                  {deliveryIcons.map((icon) => (
-                    <div 
-                      key={icon.id} 
-                      className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 group"
-                    >
-                      <img 
-                        src={icon.url} 
-                        alt={icon.name} 
-                        className="h-8 w-auto object-contain" 
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect fill="%23ccc" width="32" height="32"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="10">?</text></svg>';
-                        }}
-                      />
-                      <span className="flex-1 text-sm font-medium">{icon.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                  {deliveryIcons.map((icon, index) => {
+                    const isDefaultIcon = defaultDeliveryIcons.some(d => d.id === icon.id);
+                    const isFirst = index === 0;
+                    const isLast = index === deliveryIcons.length - 1;
+                    
+                    return (
+                      <div 
+                        key={icon.id} 
+                        className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 group"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
+                        {/* Reorder buttons */}
+                        <div className="flex flex-col gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 text-muted-foreground hover:text-primary disabled:opacity-30"
+                            onClick={() => moveIconUp(icon.id)}
+                            disabled={isFirst}
+                          >
+                            <ChevronUp className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 text-muted-foreground hover:text-primary disabled:opacity-30"
+                            onClick={() => moveIconDown(icon.id)}
+                            disabled={isLast}
+                          >
+                            <ChevronDown className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        
+                        <img 
+                          src={icon.url} 
+                          alt={icon.name} 
+                          className="h-8 w-auto object-contain" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect fill="%23ccc" width="32" height="32"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dominant-baseline="middle" font-size="10">?</text></svg>';
+                          }}
+                        />
+                        <span className="flex-1 text-sm font-medium">{icon.name}</span>
+                        <div className="flex items-center gap-1">
+                          {isDefaultIcon && (
+                            <span className="text-xs text-muted-foreground mr-1">Padrão</span>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleRemoveDeliveryIcon(icon.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
                   
                   {deliveryIcons.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">
@@ -1496,6 +1532,24 @@ const QRCodePage = () => {
                     </p>
                   )}
                 </div>
+                
+                {/* Restore defaults button */}
+                {hiddenDefaults.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-muted-foreground"
+                    onClick={() => {
+                      restoreAllDefaults();
+                      toast({
+                        title: "Padrões restaurados",
+                        description: "Os ícones padrão foram restaurados",
+                      });
+                    }}
+                  >
+                    Restaurar ícones padrão ({hiddenDefaults.length} oculto{hiddenDefaults.length > 1 ? 's' : ''})
+                  </Button>
+                )}
 
                 {/* Add New Icon */}
                 {showAddIcon ? (
