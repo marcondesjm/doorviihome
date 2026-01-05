@@ -85,8 +85,12 @@ const QRCodePage = () => {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState<QRCodeModelType>("classic");
   
-  const latestAccessCode = accessCodes?.[0];
   const selectedProperty = properties?.find(p => p.id === selectedPropertyId) || properties?.[0];
+  
+  // Find access code for the selected property
+  const latestAccessCode = accessCodes?.find(code => code.property_id === selectedPropertyId) 
+    || accessCodes?.find(code => code.property_id === selectedProperty?.id)
+    || accessCodes?.[0];
   
   // Set default property when loaded
   useEffect(() => {
@@ -729,6 +733,18 @@ const QRCodePage = () => {
                   <div className="bg-muted/50 rounded-lg p-3 text-center">
                     <p className="text-xs text-muted-foreground mb-1">Código atual</p>
                     <p className="font-mono font-bold text-lg">{latestAccessCode.code}</p>
+                    {latestAccessCode.property_id !== selectedPropertyId && latestAccessCode.property_id !== selectedProperty?.id && (
+                      <p className="text-xs text-amber-500 mt-2">
+                        ⚠️ Gere um novo código para esta propriedade
+                      </p>
+                    )}
+                  </div>
+                )}
+                {!latestAccessCode && (
+                  <div className="bg-amber-500/10 rounded-lg p-3 text-center border border-amber-500/30">
+                    <p className="text-sm text-amber-500">
+                      ⚠️ Gere um código para ativar o QR Code
+                    </p>
                   </div>
                 )}
               </CardContent>
