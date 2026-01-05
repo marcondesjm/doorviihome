@@ -739,34 +739,86 @@ const VisitorCall = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-destructive/20 border border-destructive/50 rounded-xl p-5 mb-6"
+            className="bg-gradient-to-b from-destructive/20 to-destructive/5 border border-destructive/30 rounded-xl p-6 mb-6"
           >
+            {/* Animated icon */}
             <motion.div 
-              className="flex items-center justify-center gap-2 mb-3"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
+              className="flex items-center justify-center mb-4"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
             >
-              <Phone className="w-8 h-8 text-destructive" />
+              <div className="relative">
+                <motion.div
+                  className="absolute inset-0 bg-destructive/20 rounded-full blur-xl"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <div className="relative w-16 h-16 rounded-full bg-destructive/20 border-2 border-destructive flex items-center justify-center">
+                  <PhoneOff className="w-8 h-8 text-destructive" />
+                </div>
+              </div>
             </motion.div>
-            <h3 className="font-bold text-lg text-destructive mb-2">Chamada encerrada</h3>
-            <p className="text-sm text-foreground mb-4">
-              O morador encerrou a chamada. Obrigado pela visita!
-            </p>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => {
-                setCallStatus('waiting');
-                setAudioMessages([]);
-                setMeetLink(null);
-                setNotified(false);
-              }}
+            
+            {/* Title and message */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              <Bell className="w-5 h-5 mr-2" />
-              Tocar campainha novamente
-            </Button>
+              <h3 className="font-bold text-xl text-destructive mb-2">Chamada Encerrada</h3>
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                O morador finalizou a chamada.
+                <br />
+                <span className="text-foreground font-medium">Obrigado pela visita!</span>
+              </p>
+            </motion.div>
+            
+            {/* Action buttons */}
+            <motion.div 
+              className="space-y-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Button
+                variant="default"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  setCallStatus('waiting');
+                  setAudioMessages([]);
+                  setMeetLink(null);
+                  setNotified(false);
+                  setHasAutoRung(false);
+                }}
+              >
+                <Bell className="w-5 h-5 mr-2" />
+                Tocar campainha novamente
+              </Button>
+              
+              {ownerPhone && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full gap-2 text-green-600 border-green-600/50 hover:bg-green-600/10"
+                  onClick={handleWhatsApp}
+                >
+                  <WhatsAppIcon className="w-5 h-5" />
+                  Enviar mensagem via WhatsApp
+                </Button>
+              )}
+            </motion.div>
+            
+            {/* Footer message */}
+            <motion.p 
+              className="text-xs text-muted-foreground mt-4 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              Você pode tocar a campainha novamente ou entrar em contato pelo WhatsApp
+            </motion.p>
           </motion.div>
         );
       
