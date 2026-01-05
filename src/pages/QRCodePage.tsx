@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import doorviiLogo from "@/assets/doorvii-logo.png";
 import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { 
   Copy, 
@@ -22,6 +22,8 @@ import {
   Upload,
   Layout
 } from "lucide-react";
+import { IncomingCall } from "@/components/IncomingCall";
+import { useDoorbellListener } from "@/hooks/useDoorbellListener";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -84,6 +86,7 @@ const QRCodePage = () => {
   const { data: accessCodes, isLoading: accessCodesLoading } = useAccessCodes();
   const generateCode = useGenerateAccessCode();
   const { deliveryIcons, addIcon, removeIcon } = useDeliveryIcons();
+  const { doorbellState, dismissDoorbell } = useDoorbellListener();
   
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState<QRCodeModelType>("classic");
@@ -918,6 +921,21 @@ const QRCodePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Incoming Call Notification */}
+      <AnimatePresence>
+        {doorbellState.isRinging && (
+          <IncomingCall
+            callerName="Visitante"
+            propertyName={doorbellState.propertyName}
+            onAnswer={() => {
+              dismissDoorbell();
+              navigate('/dashboard');
+            }}
+            onDecline={dismissDoorbell}
+            visitorTextMessage={doorbellState.visitorTextMessage}
+          />
+        )}
+      </AnimatePresence>
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
