@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import doorviiLogo from "@/assets/doorvii-logo.png";
+import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { 
@@ -360,7 +361,7 @@ const QRCodePage = () => {
               });
             };
             // Use the imported logo path
-            brandLogoImg.src = doorviiLogo;
+            brandLogoImg.src = doorviiLogoFull;
           };
           
           logoImg.onload = () => {
