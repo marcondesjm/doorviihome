@@ -478,9 +478,23 @@ const QRCodePage = () => {
             ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
             ctx.stroke();
             
+            // Draw DoorVii logo above entregas
+            const doorviiLogoForDownload = new Image();
+            doorviiLogoForDownload.crossOrigin = 'anonymous';
+            await new Promise<void>((resolve) => {
+              doorviiLogoForDownload.onload = () => {
+                const logoHeight = 20;
+                const logoWidth = (doorviiLogoForDownload.width / doorviiLogoForDownload.height) * logoHeight;
+                ctx.drawImage(doorviiLogoForDownload, (canvas.width - logoWidth) / 2, deliveryY + 8, logoWidth, logoHeight);
+                resolve();
+              };
+              doorviiLogoForDownload.onerror = () => resolve();
+              doorviiLogoForDownload.src = window.location.origin + '/doorvii-logo-entregas.png';
+            });
+            
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 45);
             
             // Load and draw delivery icons in rows
             const iconWidth = 55;
@@ -499,7 +513,7 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 38 + (row * 58);
+                  const iconY = deliveryY + 58 + (row * 58);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
@@ -816,9 +830,12 @@ const QRCodePage = () => {
             </div>
             ${deliveryIcons.length > 0 ? `
             <div class="delivery-section">
-              <div class="delivery-header">
-                <span>📦</span>
-                <span>Entregas:</span>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <img src="${window.location.origin}/doorvii-logo-entregas.png" alt="DoorVii" style="height: 20px; object-fit: contain;" />
+                <div class="delivery-header" style="margin-bottom: 0;">
+                  <span>📦</span>
+                  <span>Entregas:</span>
+                </div>
               </div>
               <div class="delivery-icons-grid">
                 ${deliveryIcons.map(icon => `
