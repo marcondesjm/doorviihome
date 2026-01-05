@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
-import { Eye, EyeOff, Home, Mail, Lock, User, Phone } from 'lucide-react';
+import { Eye, EyeOff, Home, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { PhoneInput } from '@/components/PhoneInput';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter pelo menos 6 caracteres');
@@ -194,34 +195,11 @@ export default function Auth() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="phone">WhatsApp</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="(XX) XXXXX-XXXX"
-                      value={phone}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '');
-                        let formatted = value;
-                        if (value.length >= 2) {
-                          formatted = `(${value.slice(0, 2)}`;
-                          if (value.length > 2) {
-                            formatted += `) ${value.slice(2, 7)}`;
-                            if (value.length > 7) {
-                              formatted += `-${value.slice(7, 11)}`;
-                            }
-                          }
-                        }
-                        setPhone(formatted);
-                      }}
-                      className="pl-10"
-                      maxLength={15}
-                    />
-                  </div>
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
-                  )}
+                  <PhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    error={errors.phone}
+                  />
                 </div>
               </>
             )}
