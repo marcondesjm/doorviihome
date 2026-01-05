@@ -352,6 +352,8 @@ export type Database = {
           meet_link: string | null
           owner_id: string
           owner_joined: boolean | null
+          owner_status_message: string | null
+          owner_text_message: string | null
           property_id: string | null
           property_name: string
           room_name: string
@@ -368,6 +370,8 @@ export type Database = {
           meet_link?: string | null
           owner_id: string
           owner_joined?: boolean | null
+          owner_status_message?: string | null
+          owner_text_message?: string | null
           property_id?: string | null
           property_name: string
           room_name: string
@@ -384,6 +388,8 @@ export type Database = {
           meet_link?: string | null
           owner_id?: string
           owner_joined?: boolean | null
+          owner_status_message?: string | null
+          owner_text_message?: string | null
           property_id?: string | null
           property_name?: string
           room_name?: string
