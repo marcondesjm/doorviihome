@@ -1266,16 +1266,16 @@ const Index = () => {
         </motion.div>
       </main>
 
-      {/* Incoming Call Modal - Only when ringing */}
+      {/* Incoming Call Modal - When ringing or active */}
       <AnimatePresence>
-        {callState.isRinging && !showGoogleMeet && !showVideoCallQR && (
+        {(callState.isRinging || callState.isActive) && !showGoogleMeet && !showVideoCallQR && (
           <IncomingCall
             callerName={callState.callerName}
             propertyName={callState.propertyName || "Sua Propriedade"}
             onAnswer={handleAnswer}
             onDecline={handleDecline}
-            isActive={false}
-            callDuration={0}
+            isActive={callState.isActive}
+            callDuration={callState.callDuration}
             formatDuration={formatDuration}
             ownerPhone={ownerPhone || undefined}
             visitorTextMessage={visitorTextMessage}
