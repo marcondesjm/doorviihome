@@ -145,7 +145,15 @@ export const IncomingCall = ({
               className="mb-6"
             >
               <h2 className="text-xl font-bold text-white mb-1">Chamada atendida!</h2>
-              <p className="text-sm text-white/80">{propertyName}</p>
+              <p className="text-sm text-white/80 mb-1">{propertyName}</p>
+              {callDuration > 0 && (
+                <motion.p 
+                  className="text-lg font-mono font-bold text-white/90"
+                  key={callDuration}
+                >
+                  {formatDuration(callDuration)}
+                </motion.p>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -186,6 +194,30 @@ export const IncomingCall = ({
         <div className="flex flex-col items-center gap-3">
           {isActive ? (
             <>
+              {/* Controles de áudio */}
+              <div className="flex justify-center gap-3 mb-2">
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMuted(!isMuted)}
+                    className={`w-10 h-10 rounded-full ${isMuted ? "bg-white/30 text-white" : "bg-white/10 text-white/80 hover:bg-white/20"}`}
+                  >
+                    {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  </Button>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsSpeakerOn(!isSpeakerOn)}
+                    className={`w-10 h-10 rounded-full ${!isSpeakerOn ? "bg-white/30 text-white" : "bg-white/10 text-white/80 hover:bg-white/20"}`}
+                  >
+                    {isSpeakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                  </Button>
+                </motion.div>
+              </div>
+
               {/* Botão Enviar áudio */}
               <motion.div 
                 whileTap={{ scale: 0.95 }}
