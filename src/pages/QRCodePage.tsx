@@ -937,9 +937,16 @@ const QRCodePage = () => {
                     {/* Delivery Icons */}
                     {deliveryIcons.length > 0 && (
                       <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 shadow-lg">
-                        <div className="flex items-center justify-center gap-2 mb-4">
-                          <Package className="w-5 h-5 text-blue-600" />
-                          <p className="text-base font-semibold text-blue-800">Entregas:</p>
+                        <div className="flex flex-col items-center gap-2 mb-4">
+                          <img 
+                            src="/doorvii-logo-entregas.png" 
+                            alt="DoorVii" 
+                            className="h-6 w-auto object-contain"
+                          />
+                          <div className="flex items-center justify-center gap-2">
+                            <Package className="w-5 h-5 text-blue-600" />
+                            <p className="text-base font-semibold text-blue-800">Entregas:</p>
+                          </div>
                         </div>
                         <div className="flex items-center justify-center gap-8 flex-wrap">
                           {deliveryIcons.map((icon) => (
