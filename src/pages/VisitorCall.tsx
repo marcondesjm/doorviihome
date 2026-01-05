@@ -158,12 +158,11 @@ const VisitorCall = () => {
             }
             return prev;
           });
-        } else if (callData.status === 'doorbell_ringing') {
-          setCallStatus('ringing');
-          // Timeout will be started by the useEffect that manages ringing timeout
         } else if (callData.status === 'answered') {
           setCallStatus('answered');
         }
+        // For 'doorbell_ringing', 'pending' or other statuses, keep 'waiting' 
+        // so visitor sees the button and can ring again
         // Don't set 'ended' status on initial load - treat as new session
       } else {
         // No active call found - start fresh at waiting
