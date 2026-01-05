@@ -116,12 +116,12 @@ export const PropertyCard = ({
           {/* Status Badge */}
           <div className="absolute top-3 left-3">
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-              isOnline 
+              visitorAlwaysConnected 
                 ? "bg-success/20 text-success border border-success/30" 
                 : "bg-muted/80 text-muted-foreground border border-border"
             }`}>
-              <span className={`w-2 h-2 rounded-full ${isOnline ? "bg-success animate-pulse-soft" : "bg-muted-foreground"}`} />
-              {isOnline ? "Online" : "Offline"}
+              <span className={`w-2 h-2 rounded-full ${visitorAlwaysConnected ? "bg-success animate-pulse-soft" : "bg-muted-foreground"}`} />
+              {visitorAlwaysConnected ? "Online" : "Offline"}
             </div>
           </div>
 
