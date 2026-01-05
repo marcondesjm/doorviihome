@@ -1,6 +1,6 @@
 import { QRCodeSVG } from "qrcode.react";
 import { forwardRef } from "react";
-import { Video } from "lucide-react";
+import doorviiLogo from "@/assets/doorvii-logo.png";
 
 export interface QRSimpleCustomization {
   headerText: string;
@@ -54,14 +54,13 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
               level="H"
               includeMargin={false}
             />
-            {/* Center Logo */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-gray-800 rounded-lg p-2 shadow-lg">
-                <div className="text-white text-xs font-bold mb-0.5">DoorVii</div>
-                <Video className="w-6 h-6 text-white mx-auto" />
-                <div className="text-white text-[8px] font-medium mt-0.5 leading-tight">
-                  CHAMADA DE<br />VIDEO
-                </div>
+              <div className="bg-white rounded-lg p-1.5 shadow-lg">
+                <img 
+                  src={doorviiLogo} 
+                  alt="DoorVii" 
+                  className="w-10 h-10 object-contain"
+                />
               </div>
             </div>
           </div>
@@ -73,13 +72,13 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
         </p>
 
         {/* Brand Logo */}
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/40">
-            <span className="text-white font-bold text-sm">D</span>
-          </div>
-          <span className="text-white font-bold text-xl tracking-wide">
-            {customization.brandText}
-          </span>
+        <div className="flex items-center justify-center mt-4">
+          <img 
+            src={doorviiLogo} 
+            alt="DoorVii" 
+            className="h-10 object-contain"
+            style={{ filter: "brightness(0) invert(1)" }}
+          />
         </div>
 
         {/* Website URL */}
