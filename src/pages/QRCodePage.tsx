@@ -976,12 +976,14 @@ const QRCodePage = () => {
                         level="H"
                         includeMargin={false}
                       />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <img 
-                          src="/doorvii-camera.png" 
-                          alt="DoorVii Camera" 
-                          className="w-16 h-16 object-contain rounded-lg"
-                        />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="bg-white p-1 rounded-lg">
+                          <img 
+                            src="/doorvii-camera.png" 
+                            alt="DoorVii Camera" 
+                            className="w-14 h-14 object-contain"
+                          />
+                        </div>
                       </div>
                     </div>
                     
