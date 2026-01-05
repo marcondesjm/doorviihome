@@ -64,6 +64,11 @@ const App = () => (
                 <QRCodePage />
               </ProtectedRoute>
             } />
+            <Route path="/qrcode/:propertyId" element={
+              <ProtectedRoute>
+                <QRCodePage />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Index />

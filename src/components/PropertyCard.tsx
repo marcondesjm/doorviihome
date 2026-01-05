@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck } from "lucide-react";
+import { Home, Bell, MoreVertical, Pencil, Camera, Trash2, UserCheck, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +56,7 @@ export const PropertyCard = ({
   onUpdate,
   onDelete,
 }: PropertyCardProps) => {
+  const navigate = useNavigate();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editName, setEditName] = useState(name);
@@ -151,6 +153,15 @@ export const PropertyCard = ({
                 }}>
                   <Camera className="w-4 h-4 mr-2" />
                   Alterar foto
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/qrcode/${id}`);
+                  }}
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  Ver QR Code
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={(e) => {
