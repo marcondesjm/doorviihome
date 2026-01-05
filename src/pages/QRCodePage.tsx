@@ -1082,10 +1082,10 @@ const QRCodePage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Home className="w-5 h-5" />
-                  Propriedade & Código
+                  Propriedade
                 </CardTitle>
                 <CardDescription>
-                  Selecione a propriedade e gere um novo código de acesso
+                  Selecione a propriedade para gerar o QR Code
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1104,34 +1104,6 @@ const QRCodePage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-
-                {!hasCodeForProperty && (
-                  <Button 
-                    onClick={handleGenerateCode} 
-                    disabled={generateCode.isPending}
-                    className="w-full"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${generateCode.isPending ? 'animate-spin' : ''}`} />
-                    {generateCode.isPending ? 'Gerando...' : 'Gerar Código Permanente'}
-                  </Button>
-                )}
-
-                {propertyAccessCode && (
-                  <div className="bg-green-500/10 rounded-lg p-3 text-center border border-green-500/30">
-                    <p className="text-xs text-green-600 dark:text-green-400 mb-1 flex items-center justify-center gap-1">
-                      <Check className="w-3 h-3" /> Código permanente ativo
-                    </p>
-                    <p className="font-mono font-bold text-lg">{propertyAccessCode.code}</p>
-                  </div>
-                )}
-                {!propertyAccessCode && !generateCode.isPending && (
-                  <div className="bg-amber-500/10 rounded-lg p-3 text-center border border-amber-500/30">
-                    <p className="text-sm text-amber-500">
-                      ⚠️ Gere um código permanente para esta propriedade
-                    </p>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
