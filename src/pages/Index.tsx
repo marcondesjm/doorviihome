@@ -681,6 +681,9 @@ const Index = () => {
       return;
     }
     
+    // Show green "answered" state for 2 seconds before showing QR code
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     // Show QR code for visitor to scan (Meet link will be created when user clicks to start video)
     setShowVideoCallQR(true);
     
