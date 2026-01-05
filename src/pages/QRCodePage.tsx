@@ -483,9 +483,9 @@ const QRCodePage = () => {
             doorviiLogoForDownload.crossOrigin = 'anonymous';
             await new Promise<void>((resolve) => {
               doorviiLogoForDownload.onload = () => {
-                const logoHeight = 20;
+                const logoHeight = 35;
                 const logoWidth = (doorviiLogoForDownload.width / doorviiLogoForDownload.height) * logoHeight;
-                ctx.drawImage(doorviiLogoForDownload, (canvas.width - logoWidth) / 2, deliveryY + 8, logoWidth, logoHeight);
+                ctx.drawImage(doorviiLogoForDownload, (canvas.width - logoWidth) / 2, deliveryY + 10, logoWidth, logoHeight);
                 resolve();
               };
               doorviiLogoForDownload.onerror = () => resolve();
@@ -494,7 +494,7 @@ const QRCodePage = () => {
             
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 45);
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 60);
             
             // Load and draw delivery icons in rows
             const iconWidth = 55;
@@ -513,7 +513,7 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 58 + (row * 58);
+                  const iconY = deliveryY + 75 + (row * 58);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
@@ -831,7 +831,7 @@ const QRCodePage = () => {
             ${deliveryIcons.length > 0 ? `
             <div class="delivery-section">
               <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px;">
-                <img src="${window.location.origin}/doorvii-logo-entregas.png" alt="DoorVii" style="height: 20px; object-fit: contain;" />
+                <img src="${window.location.origin}/doorvii-logo-entregas.png" alt="DoorVii" style="height: 35px; object-fit: contain;" />
                 <div class="delivery-header" style="margin-bottom: 0;">
                   <span>📦</span>
                   <span>Entregas:</span>
@@ -958,7 +958,7 @@ const QRCodePage = () => {
                           <img 
                             src="/doorvii-logo-entregas.png" 
                             alt="DoorVii" 
-                            className="h-6 w-auto object-contain"
+                            className="h-10 w-auto object-contain"
                           />
                           <div className="flex items-center justify-center gap-2">
                             <Package className="w-5 h-5 text-blue-600" />
