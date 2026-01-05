@@ -492,9 +492,14 @@ const QRCodePage = () => {
               doorviiLogoForDownload.src = window.location.origin + '/doorvii-logo-entregas.png';
             });
             
+            // Draw website URL below logo
+            ctx.fillStyle = '#2563eb';
+            ctx.font = '11px system-ui';
+            ctx.fillText('www.doorvii.com.br', canvas.width / 2, deliveryY + 50);
+            
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 60);
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 72);
             
             // Load and draw delivery icons in rows
             const iconWidth = 55;
@@ -513,7 +518,7 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 75 + (row * 58);
+                  const iconY = deliveryY + 90 + (row * 58);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
@@ -830,9 +835,10 @@ const QRCodePage = () => {
             </div>
             ${deliveryIcons.length > 0 ? `
             <div class="delivery-section">
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 12px;">
                 <img src="${window.location.origin}/doorvii-logo-entregas.png" alt="DoorVii" style="height: 35px; object-fit: contain;" />
-                <div class="delivery-header" style="margin-bottom: 0;">
+                <span style="font-size: 11px; color: #2563eb;">www.doorvii.com.br</span>
+                <div class="delivery-header" style="margin-bottom: 0; margin-top: 4px;">
                   <span>📦</span>
                   <span>Entregas:</span>
                 </div>
@@ -954,12 +960,13 @@ const QRCodePage = () => {
                     {/* Delivery Icons */}
                     {deliveryIcons.length > 0 && (
                       <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 shadow-lg">
-                        <div className="flex flex-col items-center gap-2 mb-4">
+                        <div className="flex flex-col items-center gap-1 mb-4">
                           <img 
                             src="/doorvii-logo-entregas.png" 
                             alt="DoorVii" 
                             className="h-10 w-auto object-contain"
                           />
+                          <p className="text-xs text-blue-600">www.doorvii.com.br</p>
                           <div className="flex items-center justify-center gap-2">
                             <Package className="w-5 h-5 text-blue-600" />
                             <p className="text-base font-semibold text-blue-800">Entregas:</p>
