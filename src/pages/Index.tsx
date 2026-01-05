@@ -634,14 +634,34 @@ const Index = () => {
   };
 
   // Close the doorbell interface completely
-  const handleCloseDoorbell = () => {
+  const handleCloseDoorbell = async () => {
+    // First, update the call status to 'ended' using the correct room name
+    // This ensures the visitor is notified in real-time
+    if (currentDoorbellRoomName) {
+      try {
+        await supabase
+          .from('video_calls')
+          .update({ 
+            status: 'ended',
+            ended_at: new Date().toISOString()
+          })
+          .eq('room_name', currentDoorbellRoomName);
+        console.log('Call ended, visitor notified via room:', currentDoorbellRoomName);
+      } catch (error) {
+        console.error('Error ending call:', error);
+      }
+    }
+    
     setDoorbellRinging(false);
     setDoorbellAnswered(false);
     setShowAudioRecorder(false);
     setCurrentDoorbellRoomName(null);
+    setVisitorAudioResponse(null);
+    setVisitorTextMessage(null);
+    
     if (activeCall) {
       endCall();
-      endVideoCall(); // Update status to 'ended' in database for visitor notification
+      endVideoCall();
     }
   };
 
@@ -773,7 +793,25 @@ const Index = () => {
     setMeetLink(null);
     setWaitingForApproval(false);
     setVisitorTextMessage(null);
+    
+    // Notify visitor via the correct room name
+    if (currentDoorbellRoomName) {
+      try {
+        await supabase
+          .from('video_calls')
+          .update({ 
+            status: 'ended',
+            ended_at: new Date().toISOString()
+          })
+          .eq('room_name', currentDoorbellRoomName);
+        console.log('Decline: visitor notified via room:', currentDoorbellRoomName);
+      } catch (error) {
+        console.error('Error updating call status:', error);
+      }
+    }
+    
     await endVideoCall();
+    setCurrentDoorbellRoomName(null);
     
     if (callState.isActive && callState.propertyId && properties) {
       const property = properties.find(p => p.id === callState.propertyId);
@@ -796,12 +834,30 @@ const Index = () => {
     });
   };
 
-  const handleMeetCallEnd = () => {
+  const handleMeetCallEnd = async () => {
     setShowGoogleMeet(false);
     setMeetLink(null);
     setWaitingForApproval(false);
+    
+    // Notify visitor via the correct room name
+    if (currentDoorbellRoomName) {
+      try {
+        await supabase
+          .from('video_calls')
+          .update({ 
+            status: 'ended',
+            ended_at: new Date().toISOString()
+          })
+          .eq('room_name', currentDoorbellRoomName);
+        console.log('Meet ended: visitor notified via room:', currentDoorbellRoomName);
+      } catch (error) {
+        console.error('Error updating call status:', error);
+      }
+    }
+    
     endCall();
     endVideoCall();
+    setCurrentDoorbellRoomName(null);
     
     if (callState.propertyId && properties) {
       const property = properties.find(p => p.id === callState.propertyId);
