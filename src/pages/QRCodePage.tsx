@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useProperties } from "@/hooks/useProperties";
 import { useGenerateAccessCode, useAccessCodes } from "@/hooks/useAccessCodes";
@@ -78,6 +78,7 @@ const QRCodePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const qrRef = useRef<HTMLDivElement>(null);
+  const { propertyId: urlPropertyId } = useParams<{ propertyId: string }>();
   
   const { data: properties, isLoading: propertiesLoading } = useProperties();
   const { data: accessCodes } = useAccessCodes();
@@ -94,12 +95,16 @@ const QRCodePage = () => {
     || accessCodes?.find(code => code.property_id === selectedProperty?.id)
     || accessCodes?.[0];
   
-  // Set default property when loaded
+  // Set property from URL parameter or default to first property
   useEffect(() => {
-    if (properties && properties.length > 0 && !selectedPropertyId) {
-      setSelectedPropertyId(properties[0].id);
+    if (properties && properties.length > 0) {
+      if (urlPropertyId && properties.some(p => p.id === urlPropertyId)) {
+        setSelectedPropertyId(urlPropertyId);
+      } else if (!selectedPropertyId) {
+        setSelectedPropertyId(properties[0].id);
+      }
     }
-  }, [properties, selectedPropertyId]);
+  }, [properties, selectedPropertyId, urlPropertyId]);
   
   const [customization, setCustomization] = useState<QRCustomization>({
     title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
