@@ -105,6 +105,16 @@ const QRCodePage = () => {
       }
     }
   }, [properties, selectedPropertyId, urlPropertyId]);
+
+  // Auto-generate access code if property doesn't have one
+  useEffect(() => {
+    if (selectedPropertyId && accessCodes !== undefined) {
+      const hasCode = accessCodes?.some(code => code.property_id === selectedPropertyId);
+      if (!hasCode && !generateCode.isPending) {
+        generateCode.mutateAsync({ propertyId: selectedPropertyId });
+      }
+    }
+  }, [selectedPropertyId, accessCodes]);
   
   const [customization, setCustomization] = useState<QRCustomization>({
     title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
