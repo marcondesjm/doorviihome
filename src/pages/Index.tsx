@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X } from "lucide-react";
+import { Bell, Phone, Video, Home, QrCode, Users, Mic, Volume2, X, ChevronDown } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -1198,40 +1198,69 @@ const Index = () => {
                 Simular Chamada
               </Button>
               
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={async () => {
-                  const demoRoomName = 'demo-' + Date.now();
-                  const propertyName = properties?.[0]?.name || 'Propriedade Demo';
-                  const demoMeetLink = 'https://meet.google.com/demo-test';
-                  
-                  const { error } = await supabase
-                    .from('video_calls')
-                    .insert({
-                      room_name: demoRoomName,
-                      property_name: propertyName,
-                      owner_id: user?.id,
-                      status: 'pending',
-                    });
-                  
-                  if (error) {
-                    toast({ title: "Erro ao criar chamada de teste", variant: "destructive" });
-                    return;
-                  }
-                  
-                  const url = `/call/${demoRoomName}?property=${encodeURIComponent(propertyName)}&meet=${encodeURIComponent(demoMeetLink)}`;
-                  window.open(url, '_blank');
-                  
-                  toast({
-                    title: "Teste iniciado",
-                    description: "Clique em 'Tocar Campainha' na nova aba para testar",
-                  });
-                }}
-              >
-                <Phone className="w-5 h-5" />
-                Testar Campainha Visitante
-              </Button>
+              {/* Dropdown para selecionar propriedade */}
+              <div className="relative group">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="gap-2"
+                >
+                  <Phone className="w-5 h-5" />
+                  Testar Campainha Visitante
+                  <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                </Button>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[220px] bg-card border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="py-2">
+                    <p className="px-4 py-2 text-xs text-muted-foreground font-medium uppercase tracking-wide border-b border-border mb-1">
+                      Selecione a propriedade
+                    </p>
+                    {properties && properties.length > 0 ? (
+                      properties.map((property) => (
+                        <button
+                          key={property.id}
+                          className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent transition-colors flex items-center gap-2"
+                          onClick={async () => {
+                            const demoRoomName = 'demo-' + Date.now();
+                            const demoMeetLink = 'https://meet.google.com/demo-test';
+                            
+                            const { error } = await supabase
+                              .from('video_calls')
+                              .insert({
+                                room_name: demoRoomName,
+                                property_id: property.id,
+                                property_name: property.name,
+                                owner_id: user?.id,
+                                status: 'pending',
+                              });
+                            
+                            if (error) {
+                              toast({ title: "Erro ao criar chamada de teste", variant: "destructive" });
+                              return;
+                            }
+                            
+                            const url = `/call/${demoRoomName}?property=${encodeURIComponent(property.name)}&meet=${encodeURIComponent(demoMeetLink)}`;
+                            window.open(url, '_blank');
+                            
+                            toast({
+                              title: "Teste iniciado",
+                              description: `Testando campainha de ${property.name}`,
+                            });
+                          }}
+                        >
+                          <Home className="w-4 h-4 text-muted-foreground" />
+                          {property.name}
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-4 py-3 text-sm text-muted-foreground">
+                        Nenhuma propriedade criada
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.section>
         </motion.div>
