@@ -365,12 +365,12 @@ const QRCodePage = () => {
           
           logoImg.onload = () => {
             // Draw white background for center logo
-            const centerLogoSize = 40;
+            const centerLogoSize = 56;
             const centerX = canvas.width / 2 - centerLogoSize / 2;
             const centerY = qrY + qrSize / 2 - centerLogoSize / 2;
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.roundRect(centerX - 5, centerY - 5, centerLogoSize + 10, centerLogoSize + 10, 8);
+            ctx.roundRect(centerX - 4, centerY - 4, centerLogoSize + 8, centerLogoSize + 8, 6);
             ctx.fill();
             ctx.drawImage(logoImg, centerX, centerY, centerLogoSize, centerLogoSize);
             finishDownload();
