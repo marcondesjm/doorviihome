@@ -687,7 +687,7 @@ const QRCodePage = () => {
         </html>
       `);
     } else {
-      // Classic model print
+      // Classic model print - matching download style
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
@@ -704,49 +704,59 @@ const QRCodePage = () => {
               justify-content: center;
               min-height: 100vh;
               padding: 40px;
-              background: ${customization.bgColor};
-              color: ${customization.fgColor};
+              background: white;
             }
             .container {
               text-align: center;
-              max-width: 500px;
-              padding: 50px;
-              background: white;
+              max-width: 450px;
+              padding: 40px;
+              background: ${customization.bgColor};
               border-radius: 24px;
-              box-shadow: 0 4px 30px rgba(0,0,0,0.1);
             }
-            .logo { font-size: 64px; margin-bottom: 20px; }
-            h1 { font-size: 24px; margin-bottom: 10px; line-height: 1.3; }
-            .subtitle { font-size: 20px; color: #666; margin-bottom: 20px; }
-            .qr-container { 
-              background: ${customization.bgColor}; 
-              padding: 20px; 
+            .logo { font-size: 48px; margin-bottom: 16px; }
+            h1 { 
+              font-size: 20px; 
+              margin-bottom: 8px; 
+              line-height: 1.3; 
+              color: ${customization.fgColor};
+              font-weight: bold;
+            }
+            .subtitle { 
+              font-size: 16px; 
+              color: ${customization.fgColor}; 
+              opacity: 0.9;
+              margin-bottom: 20px; 
+            }
+            .qr-wrapper { 
+              background: white; 
+              padding: 16px; 
               border-radius: 16px; 
               display: inline-block;
               margin-bottom: 20px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             }
-            .qr-container svg {
+            .qr-wrapper svg {
               width: ${customization.size}px;
               height: ${customization.size}px;
+              display: block;
             }
             .instruction { 
-              font-size: 14px; 
-              color: #666; 
-              margin-top: 16px;
+              font-size: 12px; 
               padding: 16px;
               background: #fef3c7;
               border: 2px solid #fbbf24;
               border-radius: 12px;
+              margin-bottom: 20px;
             }
-            .camera-icon { font-size: 24px; margin-bottom: 8px; }
-            .expires { font-size: 12px; color: #999; margin-top: 16px; }
-            .address { font-size: 14px; color: #888; margin-top: 8px; }
+            .instruction p { margin-bottom: 8px; }
+            .instruction .warning { color: #92400e; font-weight: 600; }
+            .instruction .hint { color: #b45309; }
             .delivery-section {
-              margin-top: 24px;
               padding: 20px;
-              background: linear-gradient(to bottom right, #eff6ff, #f1f5f9);
+              background: #eff6ff;
               border: 2px solid #bfdbfe;
-              border-radius: 16px;
+              border-radius: 12px;
+              margin-bottom: 16px;
             }
             .delivery-header {
               display: flex;
@@ -756,30 +766,39 @@ const QRCodePage = () => {
               margin-bottom: 16px;
               color: #1e40af;
               font-weight: 600;
-              font-size: 16px;
+              font-size: 14px;
             }
             .delivery-icons-grid {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 24px;
-              flex-wrap: wrap;
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 10px;
+              justify-items: center;
             }
             .delivery-icon-card {
               background: white;
-              border-radius: 12px;
-              padding: 12px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              border-radius: 8px;
+              padding: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
               border: 1px solid #e2e8f0;
+              width: 55px;
+              height: 52px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
             }
             .delivery-icon-card img {
-              height: 50px;
-              width: auto;
+              max-height: 40px;
+              max-width: 45px;
               object-fit: contain;
             }
+            .permanent-code {
+              color: ${customization.fgColor};
+              opacity: 0.8;
+              font-size: 12px;
+            }
             @media print {
-              body { padding: 0; background: white; }
-              .container { box-shadow: none; max-width: 100%; }
+              body { padding: 0; }
+              .container { max-width: 100%; }
             }
           </style>
         </head>
@@ -788,14 +807,12 @@ const QRCodePage = () => {
             <div class="logo">${customization.logoText}</div>
             <h1>${customization.title}</h1>
             <p class="subtitle">${customization.subtitle}</p>
-            ${selectedProperty?.address ? `<p class="address">${selectedProperty.address}</p>` : ''}
-            <div class="qr-container">
+            <div class="qr-wrapper">
               ${svgData}
             </div>
             <div class="instruction">
-              <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
-              <div class="camera-icon">📱</div>
-              <p style="color: #b45309;">Escaneie o QR Code Usando a Câmera ou um App</p>
+              <p class="warning">⚠️ Por favor, não bata ou soe a campainha física. Use a do Aplicativo.</p>
+              <p class="hint">📱 Escaneie o QR Code Usando a Câmera ou um App</p>
             </div>
             ${deliveryIcons.length > 0 ? `
             <div class="delivery-section">
@@ -812,7 +829,7 @@ const QRCodePage = () => {
               </div>
             </div>
             ` : ''}
-            <p class="expires">✓ Código permanente</p>
+            <p class="permanent-code">✓ Código permanente</p>
           </div>
           <script>
             window.onload = () => {
