@@ -70,7 +70,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
 
           {/* Brand Logo */}
           <div className="flex items-center justify-center mt-2 bg-white rounded-lg px-4 py-2 mx-auto w-fit">
-            <img src={doorviiBrandLogo} alt="DoorVii" className="h-10 object-contain" />
+            <img src={doorviiBrandLogo} alt="DoorVii" className="h-14 object-contain" />
           </div>
 
           {/* Website URL */}
