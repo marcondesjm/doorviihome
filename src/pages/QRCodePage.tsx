@@ -338,16 +338,24 @@ const QRCodePage = () => {
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
           
-          // Draw QR code container (white background)
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 12 * scale);
-          ctx.fill();
-          
-          // Draw QR code centered
-          const qrX = (cardWidth - qrSize) / 2;
-          const qrY = qrContainerY + 12 * scale;
-          ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+        // Draw QR code container (white background)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 12 * scale);
+        ctx.fill();
+        
+        // Draw decorative cut at the top of QR container
+        const cutWidth = 48 * scale;
+        const cutHeight = 16 * scale;
+        ctx.fillStyle = simpleCustomization.primaryColor;
+        ctx.beginPath();
+        ctx.ellipse(cardWidth / 2, qrContainerY - cutHeight / 2 + 8 * scale, cutWidth / 2, cutHeight / 2, 0, 0, Math.PI);
+        ctx.fill();
+        
+        // Draw QR code centered
+        const qrX = (cardWidth - qrSize) / 2;
+        const qrY = qrContainerY + 12 * scale;
+        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
           // Draw logo in center of QR code
           const logoImg = new Image();
@@ -717,6 +725,14 @@ const QRCodePage = () => {
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 12 * scale);
+        ctx.fill();
+        
+        // Draw decorative cut at the top of QR container
+        const cutWidth = 48 * scale;
+        const cutHeight = 16 * scale;
+        ctx.fillStyle = simpleCustomization.primaryColor;
+        ctx.beginPath();
+        ctx.ellipse(cardWidth / 2, qrContainerY - cutHeight / 2 + 8 * scale, cutWidth / 2, cutHeight / 2, 0, 0, Math.PI);
         ctx.fill();
         
         // Draw QR code centered
