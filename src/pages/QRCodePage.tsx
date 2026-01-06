@@ -642,6 +642,7 @@ const QRCodePage = () => {
           // Draw logo at bottom (custom or default DoorVii)
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
+          let logoEndY = warningY + 90;
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
               const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
@@ -650,11 +651,18 @@ const QRCodePage = () => {
                 ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / 4) * 70) + 25
                 : warningY + 90;
               ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
+              logoEndY = logoY + logoHeight;
               resolve();
             };
             logoImg.onerror = () => resolve();
             logoImg.src = customization.customLogoUrl || doorviiLogoWhite;
           });
+          
+          // Draw website URL
+          ctx.fillStyle = customization.fgColor;
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('www.doorvii.com.br', canvas.width / 2, logoEndY + 25);
           
           // Download
           const link = document.createElement('a');
@@ -986,6 +994,7 @@ const QRCodePage = () => {
           // Draw logo at bottom (custom or default DoorVii)
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
+          let logoEndY = warningY + 90;
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
               const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
@@ -994,11 +1003,18 @@ const QRCodePage = () => {
                 ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70) + 25
                 : warningY + 90;
               ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
+              logoEndY = logoY + logoHeight;
               resolve();
             };
             logoImg.onerror = () => resolve();
             logoImg.src = customization.customLogoUrl || doorviiLogoWhite;
           });
+          
+          // Draw website URL
+          ctx.fillStyle = customization.fgColor;
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('www.doorvii.com.br', canvas.width / 2, logoEndY + 25);
           
           // Create PDF
           const pdf = new jsPDF({
@@ -1313,6 +1329,7 @@ const QRCodePage = () => {
                 ? `<img src="${customization.customLogoUrl}" alt="Logo" style="height: ${customization.customLogoSize}px;" />`
                 : `<img src="${doorviiLogoWhite}" alt="DoorVii" style="height: 48px; filter: brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%);" />`
               }
+              <p style="margin-top: 8px; font-size: 14px; font-weight: 600; color: ${customization.fgColor};">www.doorvii.com.br</p>
             </div>
           </div>
           <script>
@@ -1488,6 +1505,11 @@ const QRCodePage = () => {
                         />
                       )}
                     </div>
+                    
+                    {/* Website URL */}
+                    <p className="mt-2 text-sm font-medium" style={{ color: customization.fgColor }}>
+                      www.doorvii.com.br
+                    </p>
                     
                     <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
                       ✓ Código permanente
