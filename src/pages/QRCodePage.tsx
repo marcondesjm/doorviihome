@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import doorviiLogo from "@/assets/doorvii-logo.png";
 import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
 import doorviiBrandLogo from "@/assets/doorvii-logo-nobg.png";
+import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { 
@@ -23,7 +24,8 @@ import {
   Upload,
   Layout,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  FileText
 } from "lucide-react";
 import { IncomingCall } from "@/components/IncomingCall";
 import { useDoorbellListener } from "@/hooks/useDoorbellListener";
@@ -653,6 +655,212 @@ const QRCodePage = () => {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    if (!qrRef.current) return;
+
+    try {
+      const svg = qrRef.current.querySelector('svg');
+      if (!svg) return;
+
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      // Card dimensions in cm for PDF (7cm x 11cm)
+      const cardWidthCm = 7;
+      const cardHeightCm = 11;
+      
+      // Canvas dimensions in pixels (high resolution for PDF)
+      const cardWidth = 265 * 2; // 2x for better quality
+      const cardHeight = 416 * 2;
+      const borderRadius = 48;
+      const qrSize = 280;
+      
+      canvas.width = cardWidth;
+      canvas.height = cardHeight;
+      
+      img.onload = async () => {
+        if (!ctx) return;
+        
+        // Scale for high resolution
+        ctx.scale(2, 2);
+        
+        // Clear canvas with transparency
+        ctx.clearRect(0, 0, cardWidth / 2, cardHeight / 2);
+        
+        // Draw rounded rectangle background
+        ctx.fillStyle = simpleCustomization.primaryColor;
+        ctx.beginPath();
+        ctx.roundRect(0, 0, cardWidth / 2, cardHeight / 2, borderRadius / 2);
+        ctx.fill();
+        
+        // Draw darker header banner
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(0, 0, cardWidth / 2, 60, [borderRadius / 2, borderRadius / 2, 0, 0]);
+        ctx.clip();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        ctx.fillRect(0, 0, cardWidth / 2, 60);
+        ctx.restore();
+        
+        // Draw header text with shadow
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px system-ui';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.fillText(simpleCustomization.headerText, cardWidth / 4, 28);
+        
+        // Draw subheader
+        ctx.font = '11px system-ui';
+        ctx.fillText('ENTRAR EM CONTATO', cardWidth / 4, 46);
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Draw QR code container background
+        const qrContainerSize = qrSize / 2 + 16;
+        const qrContainerX = (cardWidth / 2 - qrContainerSize) / 2;
+        const qrContainerY = 70;
+        ctx.fillStyle = '#f3f4f6';
+        ctx.beginPath();
+        ctx.roundRect(qrContainerX, qrContainerY, qrContainerSize, qrContainerSize, 12);
+        ctx.fill();
+        
+        // Draw QR code centered
+        const qrX = (cardWidth / 2 - qrSize / 2) / 2;
+        const qrY = qrContainerY + 8;
+        ctx.drawImage(img, qrX, qrY, qrSize / 2, qrSize / 2);
+        
+        // Draw logo in center of QR code
+        const logoImg = new Image();
+        logoImg.crossOrigin = 'anonymous';
+        
+        const finishPDF = () => {
+          // Draw footer text with shadow
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 13px system-ui';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+          const footerY = qrContainerY + qrContainerSize + 28;
+          ctx.fillText(simpleCustomization.footerText, cardWidth / 4, footerY);
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          
+          // Draw white line separator
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.fillRect(20, footerY + 12, cardWidth / 2 - 40, 2);
+          
+          // Draw brand background with logo
+          const brandBgWidth = 160;
+          const brandBgHeight = 36;
+          const brandY = footerY + 28;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.roundRect((cardWidth / 2 - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8);
+          ctx.fill();
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 6;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 3;
+          ctx.beginPath();
+          ctx.roundRect((cardWidth / 2 - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          
+          // Draw logo in brand area
+          const brandLogoImg = new Image();
+          brandLogoImg.crossOrigin = 'anonymous';
+          brandLogoImg.onload = () => {
+            const logoHeight = 28;
+            const logoWidth = (brandLogoImg.width / brandLogoImg.height) * logoHeight;
+            ctx.drawImage(brandLogoImg, (cardWidth / 2 - logoWidth) / 2, brandY + 4, logoWidth, logoHeight);
+            
+            // Draw website URL
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 13px system-ui';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 3;
+            ctx.fillText(simpleCustomization.websiteUrl, cardWidth / 4, brandY + brandBgHeight + 24);
+            ctx.shadowBlur = 0;
+            
+            // Create PDF
+            const pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'cm',
+              format: [cardWidthCm, cardHeightCm]
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, 0, cardWidthCm, cardHeightCm);
+            pdf.save(`qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.pdf`);
+            
+            toast({
+              title: "PDF baixado!",
+              description: "O arquivo PDF foi salvo no seu dispositivo.",
+            });
+          };
+          brandLogoImg.onerror = () => {
+            ctx.fillStyle = simpleCustomization.primaryColor;
+            ctx.font = 'bold 16px system-ui';
+            ctx.fillText('DoorVii', cardWidth / 4, brandY + 24);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 13px system-ui';
+            ctx.fillText(simpleCustomization.websiteUrl, cardWidth / 4, brandY + brandBgHeight + 24);
+            
+            const pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'cm',
+              format: [cardWidthCm, cardHeightCm]
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, 0, cardWidthCm, cardHeightCm);
+            pdf.save(`qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.pdf`);
+            
+            toast({
+              title: "PDF baixado!",
+              description: "O arquivo PDF foi salvo no seu dispositivo.",
+            });
+          };
+          brandLogoImg.src = doorviiBrandLogo;
+        };
+        
+        logoImg.onload = () => {
+          const centerLogoSize = 40;
+          const centerX = cardWidth / 4 - centerLogoSize / 2;
+          const centerY = qrY + qrSize / 4 - centerLogoSize / 2;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.roundRect(centerX - 2, centerY - 2, centerLogoSize + 4, centerLogoSize + 4, 4);
+          ctx.fill();
+          ctx.drawImage(logoImg, centerX, centerY, centerLogoSize, centerLogoSize);
+          finishPDF();
+        };
+        logoImg.onerror = () => {
+          finishPDF();
+        };
+        logoImg.src = doorviiLogo;
+      };
+      
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({
+        title: "Erro ao baixar PDF",
+        description: "Não foi possível gerar o PDF.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -1114,13 +1322,17 @@ const QRCodePage = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-3 mt-6">
+                <div className="grid grid-cols-3 gap-2 mt-6">
                   <Button onClick={handleDownload} className="w-full" size="lg">
-                    <Download className="w-5 h-5" />
-                    Baixar PNG
+                    <Download className="w-4 h-4" />
+                    PNG
                   </Button>
-                  <Button onClick={handlePrint} variant="secondary" className="w-full" size="lg">
-                    <Printer className="w-5 h-5" />
+                  <Button onClick={handleDownloadPDF} variant="secondary" className="w-full" size="lg">
+                    <FileText className="w-4 h-4" />
+                    PDF
+                  </Button>
+                  <Button onClick={handlePrint} variant="outline" className="w-full" size="lg">
+                    <Printer className="w-4 h-4" />
                     Imprimir
                   </Button>
                 </div>
