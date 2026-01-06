@@ -42,14 +42,21 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
           </h2>
         </div>
 
-        {/* QR Code Container - Centered */}
+        {/* QR Code Container - Centered with decorative cut */}
         <div className="flex-1 flex items-center justify-center px-4">
-          <div className="bg-white rounded-xl p-3 inline-block shadow-lg">
-            <div className="relative">
-              <QRCodeSVG value={url} size={150} bgColor="#ffffff" fgColor="#1f2937" level="H" includeMargin={false} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white rounded-md p-1 shadow-lg">
-                  <img src={doorviiLogo} alt="DoorVii" className="w-10 h-10 object-contain" />
+          <div className="relative">
+            {/* Decorative cut at the top */}
+            <div 
+              className="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4 rounded-b-full"
+              style={{ backgroundColor: customization.primaryColor }}
+            />
+            <div className="bg-white rounded-xl p-3 inline-block shadow-lg">
+              <div className="relative">
+                <QRCodeSVG value={url} size={150} bgColor="#ffffff" fgColor="#1f2937" level="H" includeMargin={false} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white rounded-md p-1 shadow-lg">
+                    <img src={doorviiLogo} alt="DoorVii" className="w-10 h-10 object-contain" />
+                  </div>
                 </div>
               </div>
             </div>
