@@ -615,10 +615,10 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
-              const logoHeight = 30;
+              const logoHeight = 50;
               const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
               const logoY = deliveryIcons.length > 0 
-                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / 4) * 70) + 20
+                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / 4) * 70) + 25
                 : warningY + 90;
               ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
               resolve();
@@ -959,10 +959,10 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
-              const logoHeight = 30;
+              const logoHeight = 50;
               const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
               const logoY = deliveryIcons.length > 0 
-                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70) + 20
+                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70) + 25
                 : warningY + 90;
               ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
               resolve();
@@ -1279,8 +1279,8 @@ const QRCodePage = () => {
               </div>
             </div>
             ` : ''}
-            <div style="margin-top: 16px; text-align: center;">
-              <img src="${doorviiLogoWhite}" alt="DoorVii" style="height: 28px; filter: brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%);" />
+            <div style="margin-top: 20px; text-align: center;">
+              <img src="${doorviiLogoWhite}" alt="DoorVii" style="height: 48px; filter: brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%);" />
             </div>
           </div>
           <script>
@@ -1439,11 +1439,11 @@ const QRCodePage = () => {
                     )}
                     
                     {/* DoorVii Logo */}
-                    <div className="mt-4 flex justify-center">
+                    <div className="mt-6 flex justify-center">
                       <img 
                         src={doorviiLogoWhite} 
                         alt="DoorVii" 
-                        className="h-8 object-contain opacity-90"
+                        className="h-16 object-contain"
                         style={{ filter: 'brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%)' }}
                       />
                     </div>
