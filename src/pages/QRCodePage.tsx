@@ -460,7 +460,7 @@ const QRCodePage = () => {
         // Calculate rows for delivery icons (max 4 per row)
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-        const deliveryHeight = deliveryIcons.length > 0 ? 110 + (iconRows * 65) : 0;
+        const deliveryHeight = deliveryIcons.length > 0 ? 120 + (iconRows * 75) : 0;
         canvas.width = Math.max(qrSize + padding * 2, 450);
         canvas.height = qrSize + 340 + deliveryHeight;
         
@@ -549,7 +549,7 @@ const QRCodePage = () => {
             const deliveryY = warningY + 80;
             const iconsPerRow = 4;
             const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const sectionHeight = 90 + (iconRows * 60);
+            const sectionHeight = 100 + (iconRows * 70);
             
             // Draw delivery section background
             ctx.fillStyle = '#eff6ff';
@@ -586,9 +586,9 @@ const QRCodePage = () => {
             ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 72);
             
             // Load and draw delivery icons in rows
-            const iconWidth = 55;
-            const iconHeight = 44;
-            const iconGap = 10;
+            const iconWidth = 65;
+            const iconHeight = 52;
+            const iconGap = 12;
             
             const iconPromises = deliveryIcons.map((icon, index) => {
               return new Promise<void>((resolve) => {
@@ -602,7 +602,7 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 90 + (row * 58);
+                  const iconY = deliveryY + 95 + (row * 68);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
