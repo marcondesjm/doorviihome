@@ -306,16 +306,24 @@ const QRCodePage = () => {
           ctx.roundRect(0, 0, cardWidth, cardHeight, borderRadius);
           ctx.fill();
           
-          // Layout calculations - distribute elements evenly
+          // Layout calculations - properly distributed within card
+          const padding = 16 * scale;
           const headerY = 32 * scale;
           const qrContainerSize = qrSize + 24 * scale;
           const qrContainerX = (cardWidth - qrContainerSize) / 2;
-          const qrContainerY = 50 * scale;
-          const footerTextY = qrContainerY + qrContainerSize + 20 * scale;
+          
+          // Center QR in the available space
+          const topSection = 50 * scale; // Header area
+          const bottomSection = 100 * scale; // Footer + brand + url area
+          const availableMiddle = cardHeight - topSection - bottomSection;
+          const qrContainerY = topSection + (availableMiddle - qrContainerSize) / 2;
+          
+          // Elements below QR - properly spaced
+          const footerTextY = qrContainerY + qrContainerSize + 16 * scale;
           const brandBgWidth = 110 * scale;
           const brandBgHeight = 26 * scale;
-          const brandY = footerTextY + 8 * scale;
-          const urlY = cardHeight - 20 * scale;
+          const brandY = footerTextY + 16 * scale;
+          const urlY = brandY + brandBgHeight + 16 * scale;
           
           // Draw header text
           ctx.fillStyle = '#ffffff';
@@ -678,12 +686,19 @@ const QRCodePage = () => {
         const headerY = 32 * scale;
         const qrContainerSize = qrSize + 24 * scale;
         const qrContainerX = (cardWidth - qrContainerSize) / 2;
-        const qrContainerY = 50 * scale;
-        const footerTextY = qrContainerY + qrContainerSize + 20 * scale;
+        
+        // Center QR in the available space
+        const topSection = 50 * scale; // Header area
+        const bottomSection = 100 * scale; // Footer + brand + url area
+        const availableMiddle = cardHeight - topSection - bottomSection;
+        const qrContainerY = topSection + (availableMiddle - qrContainerSize) / 2;
+        
+        // Elements below QR - properly spaced
+        const footerTextY = qrContainerY + qrContainerSize + 16 * scale;
         const brandBgWidth = 110 * scale;
         const brandBgHeight = 26 * scale;
-        const brandY = footerTextY + 8 * scale;
-        const urlY = cardHeight - 20 * scale;
+        const brandY = footerTextY + 16 * scale;
+        const urlY = brandY + brandBgHeight + 16 * scale;
         
         // Draw header text
         ctx.fillStyle = '#ffffff';
