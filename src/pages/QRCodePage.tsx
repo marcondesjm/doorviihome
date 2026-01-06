@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import doorviiLogo from "@/assets/doorvii-logo.png";
 import doorviiLogoFull from "@/assets/doorvii-logo-full.png";
 import doorviiBrandLogo from "@/assets/doorvii-logo-nobg.png";
+import doorviiLogoWhite from "@/assets/doorvii-logo-white.png";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
@@ -609,6 +610,23 @@ const QRCodePage = () => {
             await Promise.all(iconPromises);
           }
           
+          // Draw DoorVii logo at bottom
+          const logoImg = new Image();
+          logoImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve) => {
+            logoImg.onload = () => {
+              const logoHeight = 30;
+              const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+              const logoY = deliveryIcons.length > 0 
+                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / 4) * 70) + 20
+                : warningY + 90;
+              ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
+              resolve();
+            };
+            logoImg.onerror = () => resolve();
+            logoImg.src = doorviiLogoWhite;
+          });
+          
           // Download
           const link = document.createElement('a');
           link.download = `qrcode-${selectedProperty?.name?.replace(/\s+/g, '-').toLowerCase() || 'propriedade'}.png`;
@@ -936,6 +954,23 @@ const QRCodePage = () => {
             await Promise.all(iconPromises);
           }
           
+          // Draw DoorVii logo at bottom
+          const logoImg = new Image();
+          logoImg.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve) => {
+            logoImg.onload = () => {
+              const logoHeight = 30;
+              const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+              const logoY = deliveryIcons.length > 0 
+                ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70) + 20
+                : warningY + 90;
+              ctx.drawImage(logoImg, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
+              resolve();
+            };
+            logoImg.onerror = () => resolve();
+            logoImg.src = doorviiLogoWhite;
+          });
+          
           // Create PDF
           const pdf = new jsPDF({
             orientation: 'portrait',
@@ -1244,6 +1279,9 @@ const QRCodePage = () => {
               </div>
             </div>
             ` : ''}
+            <div style="margin-top: 16px; text-align: center;">
+              <img src="${doorviiLogoWhite}" alt="DoorVii" style="height: 28px; filter: brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%);" />
+            </div>
           </div>
           <script>
             window.onload = () => {
@@ -1399,6 +1437,16 @@ const QRCodePage = () => {
                         </div>
                       </div>
                     )}
+                    
+                    {/* DoorVii Logo */}
+                    <div className="mt-4 flex justify-center">
+                      <img 
+                        src={doorviiLogoWhite} 
+                        alt="DoorVii" 
+                        className="h-8 object-contain opacity-90"
+                        style={{ filter: 'brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%)' }}
+                      />
+                    </div>
                     
                     <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
                       ✓ Código permanente
