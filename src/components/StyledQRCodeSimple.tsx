@@ -83,7 +83,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
             <p className="text-white font-bold text-sm tracking-wide drop-shadow-md leading-tight">
               {customization.footerText}
             </p>
-            <div className="w-16 h-0.5 bg-white/80 mx-auto mt-2 rounded-full"></div>
+            <div className="w-full h-0.5 bg-white/80 mt-2"></div>
           </div>
 
           {/* Brand Logo */}
