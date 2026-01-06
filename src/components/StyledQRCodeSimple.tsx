@@ -14,7 +14,7 @@ export const defaultSimpleCustomization: QRSimpleCustomization = {
   headerText: "ESCANEIE PARA ME LIGAR",
   footerText: "CHAMADA DE VÍDEO GRATUITA",
   brandText: "DoorVi",
-  websiteUrl: "www.doorvi.com.br",
+  websiteUrl: "www.doorvii.com.br",
   primaryColor: "#2563eb",
   qrSize: 200
 };
