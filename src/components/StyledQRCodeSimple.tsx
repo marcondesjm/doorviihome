@@ -36,7 +36,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
       height: '11cm'
     }}>
         {/* Attention Banner */}
-        <div className="py-2 px-3 bg-[#1e3a5f]">
+        <div className="py-2 px-3" style={{ backgroundColor: customization.primaryColor, filter: 'brightness(0.7)' }}>
           <h2 className="font-bold text-sm uppercase tracking-wider leading-tight text-center text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
             {customization.headerText}
           </h2>
