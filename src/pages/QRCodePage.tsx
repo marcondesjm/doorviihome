@@ -1653,30 +1653,6 @@ const QRCodePage = () => {
                     ))}
                   </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>Tamanho do QR Code</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { name: "Pequeno", value: 150 },
-                      { name: "Médio", value: 200 },
-                      { name: "Grande", value: 280 },
-                    ].map((preset) => (
-                      <button
-                        key={preset.name}
-                        onClick={() => setSimpleCustomization({ ...simpleCustomization, qrSize: preset.value })}
-                        className={`p-3 rounded-lg border-2 transition-all ${
-                          simpleCustomization.qrSize === preset.value 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <div className="text-lg font-bold">{preset.value}px</div>
-                        <div className="text-xs text-muted-foreground">{preset.name}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </CardContent>
             </Card>
             )}
