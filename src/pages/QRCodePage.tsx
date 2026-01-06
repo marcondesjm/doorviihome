@@ -460,7 +460,7 @@ const QRCodePage = () => {
         // Calculate rows for delivery icons (max 4 per row)
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
-        const deliveryHeight = deliveryIcons.length > 0 ? 120 + (iconRows * 75) : 0;
+        const deliveryHeight = deliveryIcons.length > 0 ? 60 + (iconRows * 75) : 0;
         canvas.width = Math.max(qrSize + padding * 2, 450);
         canvas.height = qrSize + 340 + deliveryHeight;
         
@@ -549,7 +549,7 @@ const QRCodePage = () => {
             const deliveryY = warningY + 80;
             const iconsPerRow = 4;
             const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const sectionHeight = 100 + (iconRows * 70);
+            const sectionHeight = 50 + (iconRows * 70);
             
             // Draw delivery section background
             ctx.fillStyle = '#eff6ff';
@@ -562,28 +562,9 @@ const QRCodePage = () => {
             ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
             ctx.stroke();
             
-            // Draw DoorVii logo above entregas
-            const doorviiLogoForDownload = new Image();
-            doorviiLogoForDownload.crossOrigin = 'anonymous';
-            await new Promise<void>((resolve) => {
-              doorviiLogoForDownload.onload = () => {
-                const logoHeight = 35;
-                const logoWidth = (doorviiLogoForDownload.width / doorviiLogoForDownload.height) * logoHeight;
-                ctx.drawImage(doorviiLogoForDownload, (canvas.width - logoWidth) / 2, deliveryY + 10, logoWidth, logoHeight);
-                resolve();
-              };
-              doorviiLogoForDownload.onerror = () => resolve();
-              doorviiLogoForDownload.src = window.location.origin + '/doorvii-logo-entregas.png';
-            });
-            
-            // Draw website URL below logo
-            ctx.fillStyle = '#2563eb';
-            ctx.font = '11px system-ui';
-            ctx.fillText('www.doorvii.com.br', canvas.width / 2, deliveryY + 50);
-            
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 72);
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
             
             // Load and draw delivery icons in rows
             const iconWidth = 65;
@@ -602,7 +583,7 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 95 + (row * 68);
+                  const iconY = deliveryY + 40 + (row * 68);
                   
                   // Draw white background for icon
                   ctx.fillStyle = '#ffffff';
@@ -899,7 +880,7 @@ const QRCodePage = () => {
           if (deliveryIcons.length > 0) {
             const deliveryY = warningY + 80;
             const iconRows = Math.ceil(deliveryIcons.length / iconsPerRow);
-            const sectionHeight = 100 + (iconRows * 70);
+            const sectionHeight = 50 + (iconRows * 70);
             
             ctx.fillStyle = '#eff6ff';
             ctx.beginPath();
@@ -911,26 +892,9 @@ const QRCodePage = () => {
             ctx.roundRect(padding / 2, deliveryY, canvas.width - padding, sectionHeight, 12);
             ctx.stroke();
             
-            const doorviiLogoForDownload = new Image();
-            doorviiLogoForDownload.crossOrigin = 'anonymous';
-            await new Promise<void>((resolve) => {
-              doorviiLogoForDownload.onload = () => {
-                const logoHeight = 35;
-                const logoWidth = (doorviiLogoForDownload.width / doorviiLogoForDownload.height) * logoHeight;
-                ctx.drawImage(doorviiLogoForDownload, (canvas.width - logoWidth) / 2, deliveryY + 10, logoWidth, logoHeight);
-                resolve();
-              };
-              doorviiLogoForDownload.onerror = () => resolve();
-              doorviiLogoForDownload.src = window.location.origin + '/doorvii-logo-entregas.png';
-            });
-            
-            ctx.fillStyle = '#2563eb';
-            ctx.font = '11px system-ui';
-            ctx.fillText('www.doorvii.com.br', canvas.width / 2, deliveryY + 50);
-            
             ctx.fillStyle = '#1e40af';
             ctx.font = 'bold 14px system-ui';
-            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 72);
+            ctx.fillText('📦 Entregas:', canvas.width / 2, deliveryY + 25);
             
             const iconWidth = 65;
             const iconHeight = 52;
@@ -948,7 +912,7 @@ const QRCodePage = () => {
                   const rowStartX = (canvas.width - rowWidth) / 2;
                   
                   const iconX = rowStartX + col * (iconWidth + iconGap);
-                  const iconY = deliveryY + 95 + (row * 68);
+                  const iconY = deliveryY + 40 + (row * 68);
                   
                   ctx.fillStyle = '#ffffff';
                   ctx.beginPath();
@@ -1267,13 +1231,9 @@ const QRCodePage = () => {
             </div>
             ${deliveryIcons.length > 0 ? `
             <div class="delivery-section">
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 12px;">
-                <img src="${window.location.origin}/doorvii-logo-entregas.png" alt="DoorVii" style="height: 35px; object-fit: contain;" />
-                <span style="font-size: 11px; color: #2563eb;">www.doorvii.com.br</span>
-                <div class="delivery-header" style="margin-bottom: 0; margin-top: 4px;">
-                  <span>📦</span>
-                  <span>Entregas:</span>
-                </div>
+              <div class="delivery-header" style="margin-bottom: 12px;">
+                <span>📦</span>
+                <span>Entregas:</span>
               </div>
               <div class="delivery-icons-grid">
                 ${deliveryIcons.map(icon => `
@@ -1422,17 +1382,9 @@ const QRCodePage = () => {
                     {/* Delivery Icons */}
                     {deliveryIcons.length > 0 && (
                       <div className="mt-6 p-5 rounded-xl bg-gradient-to-br from-blue-50 to-slate-100 border-2 border-blue-200 shadow-lg">
-                        <div className="flex flex-col items-center gap-1 mb-4">
-                          <img 
-                            src="/doorvii-logo-entregas.png" 
-                            alt="DoorVii" 
-                            className="h-10 w-auto object-contain"
-                          />
-                          <p className="text-xs text-blue-600">www.doorvii.com.br</p>
-                          <div className="flex items-center justify-center gap-2">
-                            <Package className="w-5 h-5 text-blue-600" />
-                            <p className="text-base font-semibold text-blue-800">Entregas:</p>
-                          </div>
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                          <Package className="w-5 h-5 text-blue-600" />
+                          <p className="text-base font-semibold text-blue-800">Entregas:</p>
                         </div>
                         <div className="flex items-center justify-center gap-8 flex-wrap">
                           {deliveryIcons.map((icon) => (
