@@ -1,7 +1,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { forwardRef } from "react";
 import doorviiLogo from "@/assets/doorvii-logo.png";
-import doorviiBrandLogo from "@/assets/doorvii-brand-logo.png";
+import doorviiBrandLogo from "@/assets/doorvii-brand-logo-transparent.png";
 export interface QRSimpleCustomization {
   headerText: string;
   footerText: string;
