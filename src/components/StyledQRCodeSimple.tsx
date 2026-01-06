@@ -36,7 +36,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
     <div ref={ref} className={`flex flex-col items-center ${className}`}>
       {/* Main Card - Fixed size 7cm x 11cm for printing */}
       <div 
-        className="rounded-2xl overflow-hidden text-center shadow-lg"
+        className="rounded-2xl overflow-hidden text-center shadow-lg flex flex-col"
         style={{ 
           backgroundColor: customization.primaryColor,
           width: '7cm',
@@ -44,34 +44,34 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
         }}
       >
         {/* Attention Banner */}
-        <div className="bg-[#0d1b4a] py-3 px-4">
-          <h2 className="text-white font-bold text-lg sm:text-xl uppercase tracking-wider">
+        <div className="bg-[#0d1b4a] py-2 px-3">
+          <h2 className="text-white font-bold text-sm uppercase tracking-wider leading-tight">
             {customization.headerText}
           </h2>
-          <p className="text-white/90 text-sm uppercase tracking-wide mt-1">
+          <p className="text-white/90 text-xs uppercase tracking-wide mt-0.5">
             ENTRAR EM CONTATO
           </p>
         </div>
 
         {/* Content Area */}
-        <div className="p-6">
+        <div className="p-3 flex flex-col items-center justify-between flex-1">
           {/* QR Code Container */}
-          <div className="bg-gray-100 rounded-2xl p-4 mx-auto inline-block shadow-inner">
+          <div className="bg-gray-100 rounded-xl p-2 inline-block shadow-inner">
             <div className="relative">
               <QRCodeSVG
                 value={url}
-                size={customization.qrSize}
+                size={140}
                 bgColor="#f3f4f6"
                 fgColor="#1f2937"
                 level="H"
                 includeMargin={false}
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white rounded-md p-1 shadow-lg">
+                <div className="bg-white rounded-md p-0.5 shadow-lg">
                   <img 
                     src={doorviiLogo} 
                     alt="DoorVii" 
-                    className="w-14 h-14 object-contain"
+                    className="w-10 h-10 object-contain"
                   />
                 </div>
               </div>
@@ -79,21 +79,21 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
           </div>
 
           {/* Footer Text */}
-          <p className="text-white font-bold text-lg mt-6 tracking-wide drop-shadow-md">
+          <p className="text-white font-bold text-sm mt-2 tracking-wide drop-shadow-md leading-tight">
             {customization.footerText}
           </p>
 
           {/* Brand Logo */}
-          <div className="flex items-center justify-center mt-4 bg-white rounded-lg px-4 py-2 mx-auto w-fit">
+          <div className="flex items-center justify-center mt-2 bg-white rounded-lg px-3 py-1.5 mx-auto w-fit">
             <img 
               src={doorviiLogoFull} 
               alt="DoorVii" 
-              className="h-10 object-contain"
+              className="h-7 object-contain"
             />
           </div>
 
           {/* Website URL */}
-          <p className="text-white/80 text-sm mt-2 font-medium">
+          <p className="text-white/80 text-xs mt-1 font-medium">
             {customization.websiteUrl}
           </p>
         </div>
