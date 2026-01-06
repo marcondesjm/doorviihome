@@ -60,6 +60,8 @@ interface QRCustomization {
   bgColor: string;
   logoText: string;
   size: number;
+  customLogoUrl: string;
+  customLogoSize: number;
 }
 
 const colorPresets = [
@@ -131,12 +133,15 @@ const QRCodePage = () => {
     bgColor: "#2563eb",
     logoText: "🔔",
     size: 200,
+    customLogoUrl: "",
+    customLogoSize: 50,
   });
 
   const [newIconName, setNewIconName] = useState("");
   const [newIconUrl, setNewIconUrl] = useState("");
   const [showAddIcon, setShowAddIcon] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoFileInputRef = useRef<HTMLInputElement>(null);
   
   // Simple model customization
   const [simpleCustomization, setSimpleCustomization] = useState<QRSimpleCustomization>({
@@ -159,6 +164,30 @@ const QRCodePage = () => {
       const reader = new FileReader();
       reader.onload = () => {
         setNewIconUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione uma imagem (PNG, JPG, etc)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCustomization({ ...customization, customLogoUrl: reader.result as string });
+        toast({
+          title: "Logo carregada!",
+          description: "A logo foi adicionada ao QR Code",
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -610,12 +639,12 @@ const QRCodePage = () => {
             await Promise.all(iconPromises);
           }
           
-          // Draw DoorVii logo at bottom
+          // Draw logo at bottom (custom or default DoorVii)
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
-              const logoHeight = 50;
+              const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
               const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
               const logoY = deliveryIcons.length > 0 
                 ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / 4) * 70) + 25
@@ -624,7 +653,7 @@ const QRCodePage = () => {
               resolve();
             };
             logoImg.onerror = () => resolve();
-            logoImg.src = doorviiLogoWhite;
+            logoImg.src = customization.customLogoUrl || doorviiLogoWhite;
           });
           
           // Download
@@ -954,12 +983,12 @@ const QRCodePage = () => {
             await Promise.all(iconPromises);
           }
           
-          // Draw DoorVii logo at bottom
+          // Draw logo at bottom (custom or default DoorVii)
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
           await new Promise<void>((resolve) => {
             logoImg.onload = () => {
-              const logoHeight = 50;
+              const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
               const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
               const logoY = deliveryIcons.length > 0 
                 ? warningY + 80 + 50 + (Math.ceil(deliveryIcons.length / iconsPerRow) * 70) + 25
@@ -968,7 +997,7 @@ const QRCodePage = () => {
               resolve();
             };
             logoImg.onerror = () => resolve();
-            logoImg.src = doorviiLogoWhite;
+            logoImg.src = customization.customLogoUrl || doorviiLogoWhite;
           });
           
           // Create PDF
@@ -1280,7 +1309,10 @@ const QRCodePage = () => {
             </div>
             ` : ''}
             <div style="margin-top: 20px; text-align: center;">
-              <img src="${doorviiLogoWhite}" alt="DoorVii" style="height: 48px; filter: brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%);" />
+              ${customization.customLogoUrl 
+                ? `<img src="${customization.customLogoUrl}" alt="Logo" style="height: ${customization.customLogoSize}px;" />`
+                : `<img src="${doorviiLogoWhite}" alt="DoorVii" style="height: 48px; filter: brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%);" />`
+              }
             </div>
           </div>
           <script>
@@ -1438,14 +1470,23 @@ const QRCodePage = () => {
                       </div>
                     )}
                     
-                    {/* DoorVii Logo */}
+                    {/* Logo - Custom or Default DoorVii */}
                     <div className="mt-6 flex justify-center">
-                      <img 
-                        src={doorviiLogoWhite} 
-                        alt="DoorVii" 
-                        className="h-16 object-contain"
-                        style={{ filter: 'brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%)' }}
-                      />
+                      {customization.customLogoUrl ? (
+                        <img 
+                          src={customization.customLogoUrl} 
+                          alt="Logo personalizada" 
+                          className="object-contain"
+                          style={{ height: `${customization.customLogoSize}px` }}
+                        />
+                      ) : (
+                        <img 
+                          src={doorviiLogoWhite} 
+                          alt="DoorVii" 
+                          className="h-16 object-contain"
+                          style={{ filter: 'brightness(0) saturate(100%) invert(29%) sepia(98%) saturate(1562%) hue-rotate(212deg) brightness(97%) contrast(93%)' }}
+                        />
+                      )}
                     </div>
                     
                     <p className="mt-2 text-xs opacity-50 flex items-center justify-center gap-1" style={{ color: customization.fgColor }}>
@@ -1576,10 +1617,11 @@ const QRCodePage = () => {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="text" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="text">Texto</TabsTrigger>
                     <TabsTrigger value="colors">Cores</TabsTrigger>
                     <TabsTrigger value="size">Tamanho</TabsTrigger>
+                    <TabsTrigger value="logo">Logo</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="text" className="space-y-4 mt-4">
@@ -1717,6 +1759,100 @@ const QRCodePage = () => {
                           className="mt-2"
                         />
                       </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="logo" className="mt-4">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Logo personalizada</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Faça upload de uma imagem para aparecer abaixo dos ícones de entrega
+                        </p>
+                      </div>
+                      
+                      {customization.customLogoUrl ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                            <img 
+                              src={customization.customLogoUrl} 
+                              alt="Logo personalizada" 
+                              className="h-12 w-auto object-contain"
+                            />
+                            <span className="flex-1 text-sm text-muted-foreground">Logo carregada</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setCustomization({ ...customization, customLogoUrl: "" })}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Tamanho da logo</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[
+                                { name: "Pequena", value: 30 },
+                                { name: "Média", value: 50 },
+                                { name: "Grande", value: 70 },
+                              ].map((preset) => (
+                                <button
+                                  key={preset.name}
+                                  onClick={() => setCustomization({ ...customization, customLogoSize: preset.value })}
+                                  className={`p-2 rounded-lg border-2 transition-all text-center ${
+                                    customization.customLogoSize === preset.value 
+                                      ? 'border-primary bg-primary/10' 
+                                      : 'border-border hover:border-primary/50'
+                                  }`}
+                                >
+                                  <div className="text-sm font-medium">{preset.name}</div>
+                                  <div className="text-xs text-muted-foreground">{preset.value}px</div>
+                                </button>
+                              ))}
+                            </div>
+                            
+                            <div className="pt-2">
+                              <Label htmlFor="customLogoSize">Tamanho personalizado (px)</Label>
+                              <Input
+                                id="customLogoSize"
+                                type="number"
+                                min={20}
+                                max={100}
+                                value={customization.customLogoSize}
+                                onChange={(e) => setCustomization({ ...customization, customLogoSize: Number(e.target.value) })}
+                                className="mt-2"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <input
+                            type="file"
+                            ref={logoFileInputRef}
+                            onChange={handleLogoFileUpload}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            variant="outline"
+                            className="w-full h-24 border-dashed"
+                            onClick={() => logoFileInputRef.current?.click()}
+                          >
+                            <div className="flex flex-col items-center gap-2">
+                              <Upload className="w-6 h-6 text-muted-foreground" />
+                              <span className="text-sm">Clique para fazer upload</span>
+                              <span className="text-xs text-muted-foreground">PNG, JPG ou SVG</span>
+                            </div>
+                          </Button>
+                          
+                          <p className="text-xs text-muted-foreground text-center">
+                            Use a logo padrão DoorVii ou faça upload de sua própria logo
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
                 </Tabs>
