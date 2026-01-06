@@ -37,10 +37,10 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
     }}>
         {/* Attention Banner */}
         <div className="py-2 px-3" style={{ backgroundColor: customization.primaryColor, filter: 'brightness(0.7)' }}>
-          <h2 className="font-bold text-sm uppercase tracking-wider leading-tight text-center text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+          <h2 className="font-bold text-sm uppercase tracking-wider leading-tight text-center text-white" style={{ textShadow: '0 0 10px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.5)' }}>
             {customization.headerText}
           </h2>
-          <p className="text-white/90 text-xs uppercase tracking-wide mt-0.5" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.4)' }}>
+          <p className="text-white text-xs uppercase tracking-wide mt-0.5" style={{ textShadow: '0 0 8px rgba(255,255,255,0.4), 1px 1px 3px rgba(0,0,0,0.4)' }}>
             ENTRAR EM CONTATO
           </p>
         </div>
