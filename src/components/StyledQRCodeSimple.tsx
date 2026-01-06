@@ -34,10 +34,14 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
 }, ref) => {
   return (
     <div ref={ref} className={`flex flex-col items-center ${className}`}>
-      {/* Main Card */}
+      {/* Main Card - Fixed size 7cm x 11cm for printing */}
       <div 
-        className="rounded-2xl overflow-hidden text-center w-full max-w-sm shadow-lg"
-        style={{ backgroundColor: customization.primaryColor }}
+        className="rounded-2xl overflow-hidden text-center shadow-lg"
+        style={{ 
+          backgroundColor: customization.primaryColor,
+          width: '7cm',
+          height: '11cm',
+        }}
       >
         {/* Attention Banner */}
         <div className="bg-[#0d1b4a] py-3 px-4">
