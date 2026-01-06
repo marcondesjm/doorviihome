@@ -436,12 +436,12 @@ const QRCodePage = () => {
           };
           
           logoImg.onload = () => {
-            const centerLogoSize = 40 * scale;
+            const centerLogoSize = 48 * scale;
             const centerX = cardWidth / 2 - centerLogoSize / 2;
             const centerY = qrY + qrSize / 2 - centerLogoSize / 2;
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.roundRect(centerX - 4 * scale, centerY - 4 * scale, centerLogoSize + 8 * scale, centerLogoSize + 8 * scale, 4 * scale);
+            ctx.roundRect(centerX - 4 * scale, centerY - 4 * scale, centerLogoSize + 8 * scale, centerLogoSize + 8 * scale, 6 * scale);
             ctx.fill();
             ctx.drawImage(logoImg, centerX, centerY, centerLogoSize, centerLogoSize);
             finishDownload();
@@ -829,12 +829,12 @@ const QRCodePage = () => {
         };
         
         logoImg.onload = () => {
-          const centerLogoSize = 40 * scale;
+          const centerLogoSize = 48 * scale;
           const centerX = cardWidth / 2 - centerLogoSize / 2;
           const centerY = qrY + qrSize / 2 - centerLogoSize / 2;
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.roundRect(centerX - 4 * scale, centerY - 4 * scale, centerLogoSize + 8 * scale, centerLogoSize + 8 * scale, 4 * scale);
+          ctx.roundRect(centerX - 4 * scale, centerY - 4 * scale, centerLogoSize + 8 * scale, centerLogoSize + 8 * scale, 6 * scale);
           ctx.fill();
           ctx.drawImage(logoImg, centerX, centerY, centerLogoSize, centerLogoSize);
           finishPDF();
