@@ -61,7 +61,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
 
           {/* Footer Text */}
           <div className="w-full">
-            <p className="text-white font-bold text-sm tracking-wide drop-shadow-md leading-tight">
+            <p className="text-white font-bold text-sm tracking-wide leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
               {customization.footerText}
             </p>
             <div className="w-full h-0.5 bg-white/80 mt-2"></div>
