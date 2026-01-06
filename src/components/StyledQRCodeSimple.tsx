@@ -9,6 +9,8 @@ export interface QRSimpleCustomization {
   websiteUrl: string;
   primaryColor: string;
   qrSize: number;
+  customLogoUrl: string;
+  customLogoSize: number;
 }
 export const defaultSimpleCustomization: QRSimpleCustomization = {
   headerText: "ESCANEIE PARA ME LIGAR",
@@ -16,7 +18,9 @@ export const defaultSimpleCustomization: QRSimpleCustomization = {
   brandText: "DoorVi",
   websiteUrl: "www.doorvii.com.br",
   primaryColor: "#2563eb",
-  qrSize: 200
+  qrSize: 200,
+  customLogoUrl: "",
+  customLogoSize: 50,
 };
 interface StyledQRCodeSimpleProps {
   url: string;
@@ -73,7 +77,12 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
         {/* Brand Logo with white background */}
         <div className="flex items-center justify-center px-4 pb-2">
           <div className="bg-white rounded-lg px-4 py-2 shadow-md">
-            <img src={doorviiBrandLogo} alt="DoorVii" className="h-8 object-contain" />
+            <img 
+              src={customization.customLogoUrl || doorviiBrandLogo} 
+              alt="DoorVii" 
+              style={{ height: customization.customLogoUrl ? `${customization.customLogoSize}px` : '32px' }}
+              className="object-contain" 
+            />
           </div>
         </div>
 
