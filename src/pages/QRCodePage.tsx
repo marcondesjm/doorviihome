@@ -308,7 +308,7 @@ const QRCodePage = () => {
           
           // Layout calculations - properly distributed within card
           const padding = 16 * scale;
-          const headerY = 40 * scale;
+          const headerY = 48 * scale;
           const qrContainerSize = qrSize + 24 * scale;
           const qrContainerX = (cardWidth - qrContainerSize) / 2;
           
@@ -691,7 +691,7 @@ const QRCodePage = () => {
         ctx.fill();
         
         // Layout calculations - distribute elements evenly
-        const headerY = 40 * scale;
+        const headerY = 48 * scale;
         const qrContainerSize = qrSize + 24 * scale;
         const qrContainerX = (cardWidth - qrContainerSize) / 2;
         
