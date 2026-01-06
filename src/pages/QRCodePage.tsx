@@ -337,30 +337,30 @@ const QRCodePage = () => {
           const logoImg = new Image();
           logoImg.crossOrigin = 'anonymous';
           
-          const finishDownload = () => {
-            // Draw footer text
+        const finishDownload = () => {
+            // Draw footer text (CHAMADA DE VÍDEO GRATUITA)
             ctx.fillStyle = '#ffffff';
             ctx.font = `bold ${14 * scale}px system-ui`;
             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
             ctx.shadowBlur = 4 * scale;
             ctx.shadowOffsetX = 2 * scale;
             ctx.shadowOffsetY = 2 * scale;
-            const footerY = qrContainerY + qrContainerSize + 30 * scale;
+            const footerY = qrContainerY + qrContainerSize + 25 * scale;
             ctx.fillText(simpleCustomization.footerText, cardWidth / 2, footerY);
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
             
             // Draw brand background with logo
-            const brandBgWidth = 140 * scale;
-            const brandBgHeight = 32 * scale;
-            const brandY = footerY + 20 * scale;
+            const brandBgWidth = 120 * scale;
+            const brandBgHeight = 28 * scale;
+            const brandY = footerY + 12 * scale;
             
             // Shadow for brand box
             ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-            ctx.shadowBlur = 8 * scale;
+            ctx.shadowBlur = 6 * scale;
             ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 4 * scale;
+            ctx.shadowOffsetY = 3 * scale;
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.roundRect((cardWidth - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8 * scale);
@@ -372,16 +372,16 @@ const QRCodePage = () => {
             const brandLogoImg = new Image();
             brandLogoImg.crossOrigin = 'anonymous';
             brandLogoImg.onload = () => {
-              const logoHeight = 24 * scale;
+              const logoHeight = 20 * scale;
               const logoWidth = (brandLogoImg.width / brandLogoImg.height) * logoHeight;
               ctx.drawImage(brandLogoImg, (cardWidth - logoWidth) / 2, brandY + 4 * scale, logoWidth, logoHeight);
               
-              // Draw website URL
+              // Draw website URL at the bottom
               ctx.fillStyle = '#ffffff';
-              ctx.font = `${13 * scale}px system-ui`;
+              ctx.font = `bold ${11 * scale}px system-ui`;
               ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-              ctx.shadowBlur = 3 * scale;
-              const urlY = brandY + brandBgHeight + 25 * scale;
+              ctx.shadowBlur = 2 * scale;
+              const urlY = cardHeight - 12 * scale;
               ctx.fillText(simpleCustomization.websiteUrl, cardWidth / 2, urlY);
               ctx.shadowBlur = 0;
               
@@ -398,12 +398,12 @@ const QRCodePage = () => {
             };
             brandLogoImg.onerror = () => {
               ctx.fillStyle = simpleCustomization.primaryColor;
-              ctx.font = `bold ${16 * scale}px system-ui`;
-              ctx.fillText('DoorVii', cardWidth / 2, brandY + 22 * scale);
+              ctx.font = `bold ${14 * scale}px system-ui`;
+              ctx.fillText('DoorVii', cardWidth / 2, brandY + 18 * scale);
               
               ctx.fillStyle = '#ffffff';
-              ctx.font = `${13 * scale}px system-ui`;
-              const urlY = brandY + brandBgHeight + 25 * scale;
+              ctx.font = `bold ${11 * scale}px system-ui`;
+              const urlY = cardHeight - 12 * scale;
               ctx.fillText(simpleCustomization.websiteUrl, cardWidth / 2, urlY);
               
               const link = document.createElement('a');
@@ -706,29 +706,29 @@ const QRCodePage = () => {
         logoImg.crossOrigin = 'anonymous';
         
         const finishPDF = () => {
-          // Draw footer text
+          // Draw footer text (CHAMADA DE VÍDEO GRATUITA)
           ctx.fillStyle = '#ffffff';
           ctx.font = `bold ${14 * scale}px system-ui`;
           ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
           ctx.shadowBlur = 4 * scale;
           ctx.shadowOffsetX = 2 * scale;
           ctx.shadowOffsetY = 2 * scale;
-          const footerY = qrContainerY + qrContainerSize + 30 * scale;
+          const footerY = qrContainerY + qrContainerSize + 25 * scale;
           ctx.fillText(simpleCustomization.footerText, cardWidth / 2, footerY);
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
           
           // Draw brand background with logo
-          const brandBgWidth = 140 * scale;
-          const brandBgHeight = 32 * scale;
-          const brandY = footerY + 20 * scale;
+          const brandBgWidth = 120 * scale;
+          const brandBgHeight = 28 * scale;
+          const brandY = footerY + 12 * scale;
           
           // Shadow for brand box
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 8 * scale;
+          ctx.shadowBlur = 6 * scale;
           ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 4 * scale;
+          ctx.shadowOffsetY = 3 * scale;
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
           ctx.roundRect((cardWidth - brandBgWidth) / 2, brandY, brandBgWidth, brandBgHeight, 8 * scale);
@@ -740,16 +740,16 @@ const QRCodePage = () => {
           const brandLogoImg = new Image();
           brandLogoImg.crossOrigin = 'anonymous';
           brandLogoImg.onload = () => {
-            const logoHeight = 24 * scale;
+            const logoHeight = 20 * scale;
             const logoWidth = (brandLogoImg.width / brandLogoImg.height) * logoHeight;
             ctx.drawImage(brandLogoImg, (cardWidth - logoWidth) / 2, brandY + 4 * scale, logoWidth, logoHeight);
             
-            // Draw website URL
+            // Draw website URL at the bottom
             ctx.fillStyle = '#ffffff';
-            ctx.font = `${13 * scale}px system-ui`;
+            ctx.font = `bold ${11 * scale}px system-ui`;
             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 3 * scale;
-            const urlY = brandY + brandBgHeight + 25 * scale;
+            ctx.shadowBlur = 2 * scale;
+            const urlY = cardHeight - 12 * scale;
             ctx.fillText(simpleCustomization.websiteUrl, cardWidth / 2, urlY);
             ctx.shadowBlur = 0;
             
@@ -771,12 +771,12 @@ const QRCodePage = () => {
           };
           brandLogoImg.onerror = () => {
             ctx.fillStyle = simpleCustomization.primaryColor;
-            ctx.font = `bold ${16 * scale}px system-ui`;
-            ctx.fillText('DoorVii', cardWidth / 2, brandY + 22 * scale);
+            ctx.font = `bold ${14 * scale}px system-ui`;
+            ctx.fillText('DoorVii', cardWidth / 2, brandY + 18 * scale);
             
             ctx.fillStyle = '#ffffff';
-            ctx.font = `${13 * scale}px system-ui`;
-            const urlY = brandY + brandBgHeight + 25 * scale;
+            ctx.font = `bold ${11 * scale}px system-ui`;
+            const urlY = cardHeight - 12 * scale;
             ctx.fillText(simpleCustomization.websiteUrl, cardWidth / 2, urlY);
             
             const pdf = new jsPDF({
