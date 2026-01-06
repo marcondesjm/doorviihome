@@ -491,8 +491,9 @@ const QRCodePage = () => {
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
         const deliveryHeight = deliveryIcons.length > 0 ? 60 + (iconRows * 75) : 0;
+        const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
         canvas.width = Math.max(qrSize + padding * 2, 450);
-        canvas.height = qrSize + 340 + deliveryHeight;
+        canvas.height = qrSize + 340 + deliveryHeight + logoHeight + 50;
         
         img.onload = async () => {
           if (!ctx) return;
@@ -856,8 +857,9 @@ const QRCodePage = () => {
         const iconsPerRow = 4;
         const iconRows = deliveryIcons.length > 0 ? Math.ceil(deliveryIcons.length / iconsPerRow) : 0;
         const deliveryHeight = deliveryIcons.length > 0 ? 120 + (iconRows * 75) : 0;
+        const logoHeight = customization.customLogoUrl ? customization.customLogoSize : 50;
         canvas.width = Math.max(qrSize + padding * 2, 450);
-        canvas.height = qrSize + 340 + deliveryHeight;
+        canvas.height = qrSize + 340 + deliveryHeight + logoHeight + 50;
         
         img.onload = async () => {
           if (!ctx) return;
