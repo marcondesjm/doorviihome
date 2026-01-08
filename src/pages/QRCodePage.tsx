@@ -126,15 +126,35 @@ const QRCodePage = () => {
     }
   }, [selectedPropertyId, accessCodes]);
   
-  const [customization, setCustomization] = useState<QRCustomization>({
-    title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
-    subtitle: selectedProperty?.name || "Minha Propriedade",
-    fgColor: "#ffffff",
-    bgColor: "#2563eb",
-    logoText: "🔔",
-    size: 200,
-    customLogoUrl: "",
-    customLogoSize: 50,
+  // Load saved customization from localStorage
+  const [customization, setCustomization] = useState<QRCustomization>(() => {
+    const saved = localStorage.getItem('qrCodeCustomization');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return {
+          title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
+          subtitle: selectedProperty?.name || "Minha Propriedade",
+          fgColor: "#ffffff",
+          bgColor: "#2563eb",
+          logoText: "🔔",
+          size: 200,
+          customLogoUrl: "",
+          customLogoSize: 50,
+        };
+      }
+    }
+    return {
+      title: "ESCANEIE O QR CODE PARA ENTRAR EM CONTATO",
+      subtitle: selectedProperty?.name || "Minha Propriedade",
+      fgColor: "#ffffff",
+      bgColor: "#2563eb",
+      logoText: "🔔",
+      size: 200,
+      customLogoUrl: "",
+      customLogoSize: 50,
+    };
   });
 
   const [newIconName, setNewIconName] = useState("");
@@ -143,12 +163,48 @@ const QRCodePage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   
-  // Simple model customization
-  const [simpleCustomization, setSimpleCustomization] = useState<QRSimpleCustomization>({
-    ...defaultSimpleCustomization,
-    websiteUrl: window.location.origin.replace('https://', '').replace('http://', ''),
+  // Load saved simple customization from localStorage
+  const [simpleCustomization, setSimpleCustomization] = useState<QRSimpleCustomization>(() => {
+    const saved = localStorage.getItem('qrCodeSimpleCustomization');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return {
+          ...defaultSimpleCustomization,
+          websiteUrl: window.location.origin.replace('https://', '').replace('http://', ''),
+        };
+      }
+    }
+    return {
+      ...defaultSimpleCustomization,
+      websiteUrl: window.location.origin.replace('https://', '').replace('http://', ''),
+    };
   });
   const simpleLogoFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load saved selected model from localStorage
+  useEffect(() => {
+    const savedModel = localStorage.getItem('qrCodeSelectedModel');
+    if (savedModel === 'classic' || savedModel === 'simple') {
+      setSelectedModel(savedModel);
+    }
+  }, []);
+
+  // Save customization to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('qrCodeCustomization', JSON.stringify(customization));
+  }, [customization]);
+
+  // Save simple customization to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('qrCodeSimpleCustomization', JSON.stringify(simpleCustomization));
+  }, [simpleCustomization]);
+
+  // Save selected model to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('qrCodeSelectedModel', selectedModel);
+  }, [selectedModel]);
   
   const handleSimpleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
