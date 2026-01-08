@@ -40,8 +40,8 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
       height: '11cm'
     }}>
         {/* Header Text */}
-        <div className="pt-8 pb-3 px-6 flex items-center justify-center">
-          <h2 className="font-bold text-base uppercase tracking-wider leading-tight text-center text-white" style={{ textShadow: '0 0 10px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.5)' }}>
+        <div className="pt-8 pb-3 px-4 flex items-center justify-center">
+          <h2 className="font-bold text-lg uppercase tracking-wider leading-tight text-center text-white whitespace-nowrap" style={{ textShadow: '0 0 10px rgba(255,255,255,0.5), 2px 2px 4px rgba(0,0,0,0.5)' }}>
             {customization.headerText}
           </h2>
         </div>
