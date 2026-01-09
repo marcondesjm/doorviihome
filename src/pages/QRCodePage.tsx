@@ -423,18 +423,18 @@ const QRCodePage = () => {
           const qrContainerSize = qrSize + 24 * scale;
           const qrContainerX = (cardWidth - qrContainerSize) / 2;
           
-          // Center QR in the available space
+          // Center QR in the available space - adjusted for larger footer
           const topSection = 50 * scale; // Header area
-          const bottomSection = 100 * scale; // Footer + brand + url area
+          const bottomSection = 120 * scale; // Footer + brand + url area (increased)
           const availableMiddle = cardHeight - topSection - bottomSection;
           const qrContainerY = topSection + (availableMiddle - qrContainerSize) / 2;
           
-          // Elements below QR - properly spaced
-          const footerTextY = qrContainerY + qrContainerSize + 16 * scale;
+          // Elements below QR - properly spaced within card bounds
+          const footerTextY = qrContainerY + qrContainerSize + 20 * scale;
           const brandBgWidth = 110 * scale;
           const brandBgHeight = 26 * scale;
-          const brandY = footerTextY + 16 * scale;
-          const urlY = brandY + brandBgHeight + 16 * scale;
+          const brandY = footerTextY + 20 * scale;
+          const urlY = brandY + brandBgHeight + 14 * scale;
           
           // Draw header text
           ctx.fillStyle = '#ffffff';
@@ -473,10 +473,13 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           
           const finishDownload = () => {
-            // Draw footer text (CHAMADA DE VÍDEO GRATUITA)
+            // Draw footer text (CHAMADA DE VÍDEO GRATUITA) - larger and bolder
             ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${12 * scale}px system-ui`;
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.font = `900 ${14 * scale}px system-ui`;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+            ctx.shadowBlur = 8 * scale;
+            ctx.fillText(simpleCustomization.footerText, cardWidth / 2, footerTextY);
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
             ctx.shadowBlur = 4 * scale;
             ctx.shadowOffsetX = 2 * scale;
             ctx.shadowOffsetY = 2 * scale;
@@ -808,14 +811,14 @@ const QRCodePage = () => {
           const qrContainerSize = qrSize + 24 * scale;
           const qrContainerX = (cardWidth - qrContainerSize) / 2;
           const topSection = 50 * scale;
-          const bottomSection = 100 * scale;
+          const bottomSection = 120 * scale; // Increased for larger footer
           const availableMiddle = cardHeight - topSection - bottomSection;
           const qrContainerY = topSection + (availableMiddle - qrContainerSize) / 2;
-          const footerTextY = qrContainerY + qrContainerSize + 16 * scale;
+          const footerTextY = qrContainerY + qrContainerSize + 20 * scale;
           const brandBgWidth = 110 * scale;
           const brandBgHeight = 26 * scale;
-          const brandY = footerTextY + 16 * scale;
-          const urlY = brandY + brandBgHeight + 16 * scale;
+          const brandY = footerTextY + 20 * scale;
+          const urlY = brandY + brandBgHeight + 14 * scale;
           
           ctx.fillStyle = '#ffffff';
           ctx.font = `bold ${14 * scale}px system-ui`;
@@ -849,9 +852,13 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           
           const finishPDF = () => {
+            // Draw footer text - larger and bolder
             ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${12 * scale}px system-ui`;
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.font = `900 ${14 * scale}px system-ui`;
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+            ctx.shadowBlur = 8 * scale;
+            ctx.fillText(simpleCustomization.footerText, cardWidth / 2, footerTextY);
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
             ctx.shadowBlur = 4 * scale;
             ctx.shadowOffsetX = 2 * scale;
             ctx.shadowOffsetY = 2 * scale;
@@ -1207,10 +1214,11 @@ const QRCodePage = () => {
             }
             .footer-text {
               color: white;
-              font-size: 18px;
-              font-weight: bold;
+              font-size: 22px;
+              font-weight: 900;
               margin-bottom: 16px;
               letter-spacing: 1px;
+              text-shadow: 0 0 15px rgba(255,255,255,0.6), 2px 2px 6px rgba(0,0,0,0.6);
             }
             .brand-container {
               background: white;
