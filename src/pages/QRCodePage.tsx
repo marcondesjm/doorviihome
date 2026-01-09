@@ -453,13 +453,13 @@ const QRCodePage = () => {
             return size;
           };
 
-          // Draw header text (fit inside card)
+          // Draw header text (fit inside card) - text-xl = 20px base
           ctx.fillStyle = "#ffffff";
           const headerFontSize = fitSingleLineFont(
             simpleCustomization.headerText,
             900,
-            16 * scale,
-            10 * scale
+            20 * scale,
+            12 * scale
           );
           ctx.font = `900 ${headerFontSize}px system-ui`;
           ctx.textAlign = "center";
@@ -496,12 +496,12 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           
           const finishDownload = () => {
-            // Draw footer text (fit inside card)
+            // Draw footer text (fit inside card) - text-lg = 18px base
             const footerFontSize = fitSingleLineFont(
               simpleCustomization.footerText,
               900,
-              14 * scale,
-              9 * scale
+              18 * scale,
+              11 * scale
             );
             ctx.fillStyle = "#ffffff";
             ctx.font = `900 ${footerFontSize}px system-ui`;
@@ -870,8 +870,8 @@ const QRCodePage = () => {
           const headerFontSize = fitSingleLineFont(
             simpleCustomization.headerText,
             900,
-            16 * scale,
-            10 * scale
+            20 * scale,
+            12 * scale
           );
           ctx.font = `900 ${headerFontSize}px system-ui`;
           ctx.textAlign = "center";
@@ -904,12 +904,12 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           
           const finishPDF = () => {
-            // Draw footer text (fit inside card)
+            // Draw footer text (fit inside card) - text-lg = 18px base
             const footerFontSize = fitSingleLineFont(
               simpleCustomization.footerText,
               900,
-              14 * scale,
-              9 * scale
+              18 * scale,
+              11 * scale
             );
             ctx.fillStyle = "#ffffff";
             ctx.font = `900 ${footerFontSize}px system-ui`;
