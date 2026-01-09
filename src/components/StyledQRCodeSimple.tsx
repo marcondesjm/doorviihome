@@ -41,7 +41,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
     }}>
         {/* Header Text */}
         <div className="pt-6 pb-3 px-3 flex items-center justify-center">
-          <h2 className="font-extrabold text-xl uppercase tracking-wide leading-tight text-center text-white whitespace-nowrap" style={{ textShadow: '0 0 15px rgba(255,255,255,0.6), 2px 2px 6px rgba(0,0,0,0.6)' }}>
+          <h2 className="font-extrabold text-xl uppercase tracking-wide leading-tight text-center text-white break-words" style={{ textShadow: '0 0 15px rgba(255,255,255,0.6), 2px 2px 6px rgba(0,0,0,0.6)' }}>
             {customization.headerText}
           </h2>
         </div>
@@ -69,7 +69,7 @@ export const StyledQRCodeSimple = forwardRef<HTMLDivElement, StyledQRCodeSimpleP
 
         {/* Footer Text */}
         <div className="px-4 pb-2">
-          <p className="text-white font-extrabold text-lg uppercase tracking-wide leading-tight whitespace-nowrap" style={{ textShadow: '0 0 15px rgba(255,255,255,0.6), 2px 2px 6px rgba(0,0,0,0.6)' }}>
+          <p className="text-white font-extrabold text-lg uppercase tracking-wide leading-tight text-center break-words" style={{ textShadow: '0 0 15px rgba(255,255,255,0.6), 2px 2px 6px rgba(0,0,0,0.6)' }}>
             {customization.footerText}
           </p>
         </div>
