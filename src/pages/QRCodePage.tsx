@@ -436,11 +436,34 @@ const QRCodePage = () => {
           const brandY = footerTextY + 20 * scale;
           const urlY = brandY + brandBgHeight + 14 * scale;
           
-          // Draw header text
-          ctx.fillStyle = '#ffffff';
-          ctx.font = `bold ${14 * scale}px system-ui`;
-          ctx.textAlign = 'center';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          const maxTextWidth = cardWidth - padding * 2;
+
+          const fitSingleLineFont = (
+            text: string,
+            weight: number,
+            startPx: number,
+            minPx: number
+          ) => {
+            let size = startPx;
+            while (size > minPx) {
+              ctx.font = `${weight} ${size}px system-ui`;
+              if (ctx.measureText(text).width <= maxTextWidth) break;
+              size -= 1;
+            }
+            return size;
+          };
+
+          // Draw header text (fit inside card)
+          ctx.fillStyle = "#ffffff";
+          const headerFontSize = fitSingleLineFont(
+            simpleCustomization.headerText,
+            900,
+            16 * scale,
+            10 * scale
+          );
+          ctx.font = `900 ${headerFontSize}px system-ui`;
+          ctx.textAlign = "center";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
           ctx.shadowBlur = 4 * scale;
           ctx.shadowOffsetX = 2 * scale;
           ctx.shadowOffsetY = 2 * scale;
@@ -473,13 +496,19 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           
           const finishDownload = () => {
-            // Draw footer text (CHAMADA DE VÍDEO GRATUITA) - larger and bolder
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${14 * scale}px system-ui`;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+            // Draw footer text (fit inside card)
+            const footerFontSize = fitSingleLineFont(
+              simpleCustomization.footerText,
+              900,
+              14 * scale,
+              9 * scale
+            );
+            ctx.fillStyle = "#ffffff";
+            ctx.font = `900 ${footerFontSize}px system-ui`;
+            ctx.shadowColor = "rgba(255, 255, 255, 0.6)";
             ctx.shadowBlur = 8 * scale;
             ctx.fillText(simpleCustomization.footerText, cardWidth / 2, footerTextY);
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
             ctx.shadowBlur = 4 * scale;
             ctx.shadowOffsetX = 2 * scale;
             ctx.shadowOffsetY = 2 * scale;
@@ -820,10 +849,33 @@ const QRCodePage = () => {
           const brandY = footerTextY + 20 * scale;
           const urlY = brandY + brandBgHeight + 14 * scale;
           
-          ctx.fillStyle = '#ffffff';
-          ctx.font = `bold ${14 * scale}px system-ui`;
-          ctx.textAlign = 'center';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          const maxTextWidth = cardWidth - 16 * scale * 2;
+
+          const fitSingleLineFont = (
+            text: string,
+            weight: number,
+            startPx: number,
+            minPx: number
+          ) => {
+            let size = startPx;
+            while (size > minPx) {
+              ctx.font = `${weight} ${size}px system-ui`;
+              if (ctx.measureText(text).width <= maxTextWidth) break;
+              size -= 1;
+            }
+            return size;
+          };
+
+          ctx.fillStyle = "#ffffff";
+          const headerFontSize = fitSingleLineFont(
+            simpleCustomization.headerText,
+            900,
+            16 * scale,
+            10 * scale
+          );
+          ctx.font = `900 ${headerFontSize}px system-ui`;
+          ctx.textAlign = "center";
+          ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
           ctx.shadowBlur = 4 * scale;
           ctx.shadowOffsetX = 2 * scale;
           ctx.shadowOffsetY = 2 * scale;
@@ -852,13 +904,19 @@ const QRCodePage = () => {
           logoImg.crossOrigin = 'anonymous';
           
           const finishPDF = () => {
-            // Draw footer text - larger and bolder
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${14 * scale}px system-ui`;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+            // Draw footer text (fit inside card)
+            const footerFontSize = fitSingleLineFont(
+              simpleCustomization.footerText,
+              900,
+              14 * scale,
+              9 * scale
+            );
+            ctx.fillStyle = "#ffffff";
+            ctx.font = `900 ${footerFontSize}px system-ui`;
+            ctx.shadowColor = "rgba(255, 255, 255, 0.6)";
             ctx.shadowBlur = 8 * scale;
             ctx.fillText(simpleCustomization.footerText, cardWidth / 2, footerTextY);
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
             ctx.shadowBlur = 4 * scale;
             ctx.shadowOffsetX = 2 * scale;
             ctx.shadowOffsetY = 2 * scale;
@@ -1184,6 +1242,9 @@ const QRCodePage = () => {
               font-weight: bold;
               margin-bottom: 24px;
               letter-spacing: 1px;
+              padding: 0 12px;
+              line-height: 1.15;
+              word-break: break-word;
             }
             .qr-container { 
               background: #f3f4f6; 
@@ -1219,6 +1280,9 @@ const QRCodePage = () => {
               margin-bottom: 16px;
               letter-spacing: 1px;
               text-shadow: 0 0 15px rgba(255,255,255,0.6), 2px 2px 6px rgba(0,0,0,0.6);
+              padding: 0 12px;
+              line-height: 1.15;
+              word-break: break-word;
             }
             .brand-container {
               background: white;
