@@ -188,15 +188,15 @@ const Home = () => {
             className="text-4xl md:text-6xl font-bold text-foreground leading-tight"
             variants={itemVariants}
           >
-            Controle sua casa de
+            Controle sua casa, carro e moto de
             <span className="text-primary"> qualquer lugar</span>
           </motion.h1>
           <motion.p 
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
             variants={itemVariants}
           >
-            DoorVii Home transforma sua campainha em uma central de segurança inteligente. 
-            Atenda visitantes, gerencie acessos e proteja sua família com tecnologia de ponta.
+            DoorVII transforma sua campainha e seus veículos em uma central de segurança inteligente. 
+            Atenda visitantes, gerencie acessos e proteja sua família e seus bens com tecnologia de ponta.
           </motion.p>
           <motion.div 
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
