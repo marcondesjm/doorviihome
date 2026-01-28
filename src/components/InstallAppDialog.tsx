@@ -118,7 +118,7 @@ export function InstallAppDialog() {
               <Smartphone className="w-8 h-8 text-primary" />
             </motion.div>
           </motion.div>
-          <DialogTitle className="text-xl">Instalar DoorVii Home</DialogTitle>
+          <DialogTitle className="text-xl">Instalar DoorVII</DialogTitle>
           <DialogDescription className="text-base mt-2">
             Instale o app no seu celular para acesso rápido e receber notificações!
           </DialogDescription>

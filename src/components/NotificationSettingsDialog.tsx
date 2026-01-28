@@ -234,7 +234,7 @@ export function NotificationSettingsDialog({
                       <p>No Android:</p>
                       <ol className="list-decimal list-inside space-y-1">
                         <li>Abra Configurações do celular</li>
-                        <li>Vá em Apps → {isStandalone ? 'DoorVii Home' : 'Navegador'}</li>
+                        <li>Vá em Apps → {isStandalone ? 'DoorVII' : 'Navegador'}</li>
                         <li>Toque em Notificações</li>
                         <li>Ative "Permitir notificações"</li>
                       </ol>
@@ -244,7 +244,7 @@ export function NotificationSettingsDialog({
                       <p>No iPhone:</p>
                       <ol className="list-decimal list-inside space-y-1">
                         <li>Abra Ajustes do iPhone</li>
-                        <li>Role até {isStandalone ? 'DoorVii Home' : 'Safari'}</li>
+                        <li>Role até {isStandalone ? 'DoorVII' : 'Safari'}</li>
                         <li>Toque em Notificações</li>
                         <li>Ative "Permitir Notificações"</li>
                       </ol>

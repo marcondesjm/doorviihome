@@ -44,7 +44,7 @@ export const AboutCreatorDialog = ({ open, onOpenChange }: AboutCreatorDialogPro
                   Tecnólogo em Análise e Desenvolvimento de Sistemas desde 2017
                 </p>
                 <p className="text-sm text-primary font-medium mt-2">
-                  CEO da DoorVii Home
+                  CEO da DoorVII
                 </p>
                 <a 
                   href="https://www.instagram.com/doorviiHome" 

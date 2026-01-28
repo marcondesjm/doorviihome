@@ -117,8 +117,8 @@ export const Header = () => {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'DoorVii Home - Portaria Inteligente',
-        text: 'Confira o DoorVii Home, o melhor app de portaria inteligente!',
+        title: 'DoorVII - Portaria Inteligente',
+        text: 'Confira o DoorVII, o melhor app de portaria inteligente!',
         url: window.location.origin,
       });
     } else {
@@ -133,12 +133,12 @@ export const Header = () => {
   const handleRefer = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Conheça o DoorVii Home!',
-        text: 'Estou usando o DoorVii Home para gerenciar minha portaria. Experimente você também!',
+        title: 'Conheça o DoorVII!',
+        text: 'Estou usando o DoorVII para gerenciar minha portaria. Experimente você também!',
         url: window.location.origin,
       });
     } else {
-      navigator.clipboard.writeText(`Estou usando o DoorVii Home para gerenciar minha portaria. Experimente você também! ${window.location.origin}`);
+      navigator.clipboard.writeText(`Estou usando o DoorVII para gerenciar minha portaria. Experimente você também! ${window.location.origin}`);
       toast({
         title: "Link copiado!",
         description: "O convite foi copiado para a área de transferência.",
@@ -258,7 +258,7 @@ export const Header = () => {
               </svg>
             </div>
             <span className="text-xl font-bold">
-              Door<span className="text-primary">Vii</span> Home
+              Door<span className="text-primary">VII</span>
             </span>
           </div>
 
@@ -333,7 +333,7 @@ export const Header = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleRefer}>
                   <Gift className="w-4 h-4 mr-3" />
-                  Indique o DoorVii Home aos amigos
+                  Indique o DoorVII aos amigos
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowNotificationSettings(true)}>

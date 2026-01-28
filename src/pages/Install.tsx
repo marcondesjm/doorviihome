@@ -78,7 +78,7 @@ const Install = () => {
               <h1 className="text-2xl font-bold">App Instalado!</h1>
             </div>
             <p className="text-muted-foreground mb-8">
-              O DoorVii Home já está instalado no seu dispositivo. Você pode acessá-lo pela tela inicial.
+              O DoorVII já está instalado no seu dispositivo. Você pode acessá-lo pela tela inicial.
             </p>
             <Button onClick={() => navigate("/dashboard")} size="lg" className="w-full">
               Ir para o Dashboard
@@ -86,7 +86,7 @@ const Install = () => {
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-bold mb-2">Instalar DoorVii Home</h1>
+            <h1 className="text-2xl font-bold mb-2">Instalar DoorVII</h1>
             <p className="text-muted-foreground mb-8">
               Instale o app no seu celular para receber notificações e atender visitantes mais rápido.
             </p>
