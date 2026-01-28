@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "DoorVii Home - Portaria Inteligente",
-        short_name: "DoorVii",
+        name: "DoorVII - Portaria Inteligente",
+        short_name: "DoorVII",
         description: "Sua portaria na palma da mão. Atenda visitantes de qualquer lugar com videochamadas instantâneas.",
         theme_color: "#14b8a6",
         background_color: "#0f172a",

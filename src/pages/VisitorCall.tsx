@@ -1020,7 +1020,7 @@ const VisitorCall = () => {
             )}
 
             <p className="text-xs text-muted-foreground mt-6">
-              Powered by DoorVii Home
+              Powered by DoorVII
             </p>
           </div>
         </motion.div>
@@ -1251,7 +1251,7 @@ const VisitorCall = () => {
             )}
 
             <p className="text-xs text-muted-foreground mt-6">
-              Powered by DoorVii Home
+              Powered by DoorVII
             </p>
           </div>
         </motion.div>

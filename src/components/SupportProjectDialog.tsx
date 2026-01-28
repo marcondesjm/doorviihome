@@ -39,7 +39,7 @@ export const SupportProjectDialog = ({ open, onOpenChange }: SupportProjectDialo
           <AlertDialogDescription asChild>
             <div className="space-y-4 text-left">
               <p className="text-muted-foreground">
-                Ajude-nos a continuar desenvolvendo o DoorVii Home com sua contribuição.
+                Ajude-nos a continuar desenvolvendo o DoorVII com sua contribuição.
               </p>
               
               <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">

@@ -112,7 +112,7 @@ const PlanCheckoutDialog = ({
       return;
     }
 
-    const message = `🔔 *NOVO CADASTRO - DOORVII HOME*
+    const message = `🔔 *NOVO CADASTRO - DOORVII*
 
 📋 *Plano Escolhido:* ${planName}
 💰 *Valor:* R$ ${planPrice.toFixed(2)}/mês
