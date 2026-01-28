@@ -631,7 +631,7 @@ const Home = () => {
             <span className="font-semibold text-foreground">DoorVii Home</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 DoorVii Home. Todos os direitos reservados.
+            © {new Date().getFullYear()} DoorVii Home. Todos os direitos reservados.
           </p>
         </div>
       </motion.footer>
